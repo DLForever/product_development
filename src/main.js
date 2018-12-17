@@ -3,13 +3,15 @@ import App from './App';
 import router from './router';
 import axios from 'axios';
 import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';    // 默认主题
-// import '../static/css/theme-green/index.css';       // 浅绿色主题
+// import 'element-ui/lib/theme-chalk/index.css';    // 默认主题
+import '../static/css/theme-green/index.css';       // 浅绿色主题
 import '../static/css/icon.css';
 import "babel-polyfill";
+import judge from '../static/js/judge_number.js'
 
 Vue.use(ElementUI, { size: 'small' });
 Vue.prototype.$axios = axios;
+Vue.use(judge)
 
 //使用钩子函数对路由进行权限跳转
 router.beforeEach((to, from, next) => {
@@ -30,6 +32,22 @@ router.beforeEach((to, from, next) => {
         }
     }
 })
+
+// var defaultHost = window.location.protocol + "//" + window.location.hostname
+var defaultHost = 'http://47.74.177.128'
+axios.defaults.baseURL = defaultHost
+
+axios.interceptors.response.use(
+    response => {
+        if (response.data.code != 200) {
+            ElementUI.Message.error(response.data.message)
+        }
+        return response
+    },
+    error => {
+        ElementUI.Message.error('服务器更新中')
+    }
+    )
 
 new Vue({
     router,

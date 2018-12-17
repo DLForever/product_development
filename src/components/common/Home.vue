@@ -46,3 +46,18 @@
         }
     }
 </script>
+<style>
+    .move-enter{
+        opacity: 0;
+    }
+    .move-enter-active{
+        transition: opacity .5s;
+    }
+    .move-leave{
+        opacity: 1
+    }
+    .move-leave-active{
+        opacity: 0;
+        transition: opacity .5s
+    }
+</style>

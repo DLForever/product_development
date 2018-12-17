@@ -25,9 +25,109 @@ export default new Router({
                     meta: { title: '自定义图标' }
                 },
                 {
-                    path: '/table',
-                    component: resolve => require(['../components/page/BaseTable.vue'], resolve),
-                    meta: { title: '基础表格' }
+                    path: '/addProduct',
+                    component: resolve => require(['../components/page/AddProduct.vue'], resolve),
+                    meta: { title: '添加产品' }
+                },
+                {
+                    path: '/productmanage',
+                    component: resolve => require(['../components/page/ProductManage.vue'], resolve),
+                    meta: { title: '产品管理' }
+                },
+                {
+                    path: '/productmanageeBay',
+                    component: resolve => require(['../components/page/ProductManageEBAY.vue'], resolve),
+                    meta: { title: 'eBay产品' }
+                },
+                {
+                    path: '/productmanagewish',
+                    component: resolve => require(['../components/page/ProductManageWISH.vue'], resolve),
+                    meta: { title: 'wish产品' }
+                },
+                {
+                    path: '/checkproductmanage',
+                    component: resolve => require(['../components/page/CheckProductManage.vue'], resolve),
+                    meta: { title: '审核新建产品' }
+                },
+                {
+                    path: '/applyproductmanage',
+                    component: resolve => require(['../components/page/ApplyProductManage.vue'], resolve),
+                    meta: { title: '审核申请查看' }
+                },
+                {
+                    path: '/addSamples',
+                    component: resolve => require(['../components/page/AddSamples.vue'], resolve),
+                    meta: { title: '添加样品' }
+                },
+                {
+                    path: '/samplesManage',
+                    component: resolve => require(['../components/page/SamplesManage.vue'], resolve),
+                    meta: { title: '样品管理' }
+                },
+                {
+                    path: '/samplesinManage',
+                    component: resolve => require(['../components/page/SamplesInManage.vue'], resolve),
+                    meta: { title: '入库管理' }
+                },
+                {
+                    path: '/returnsamplesManage',
+                    component: resolve => require(['../components/page/ReturnSamplesManage.vue'], resolve),
+                    meta: { title: '归还样品' }
+                },
+                {
+                    path: '/sampleoutsManage',
+                    component: resolve => require(['../components/page/SampleOutsManage.vue'], resolve),
+                    meta: { title: '审核借样' }
+                },
+                {
+                    path: '/applysampleoutsManage',
+                    component: resolve => require(['../components/page/ApplySampleoutsManage.vue'], resolve),
+                    meta: { title: '申请借样' }
+                },
+                {
+                    path: '/addClassify',
+                    component: resolve => require(['../components/page/AddClassify.vue'], resolve),
+                    meta: { title: '添加分类' }
+                },
+                {
+                    path: '/classifylistManage',
+                    component: resolve => require(['../components/page/ClassifyListManage.vue'], resolve),
+                    meta: { title: '分类列表' }
+                },
+                {
+                    path: '/classifyManage',
+                    component: resolve => require(['../components/page/ClassifyManage.vue'], resolve),
+                    meta: { title: '分类管理' }
+                },
+                {
+                    path: '/addSuppliers',
+                    component: resolve => require(['../components/page/AddSuppliers.vue'], resolve),
+                    meta: { title: '添加供应商' }
+                },
+                {
+                    path: '/suppliersManage',
+                    component: resolve => require(['../components/page/SuppliersManage.vue'], resolve),
+                    meta: { title: '供应商管理' }
+                },
+                {
+                    path: '/addusers',
+                    component: resolve => require(['../components/page/AddUsers.vue'], resolve),
+                    meta: { title: '创建用户' }
+                },
+                {
+                    path: '/usersmanage',
+                    component: resolve => require(['../components/page/UsersManage.vue'], resolve),
+                    meta: { title: '用户管理' }
+                },
+                {
+                    path: '/addroles',
+                    component: resolve => require(['../components/page/AddRoles.vue'], resolve),
+                    meta: { title: '创建角色' }
+                },
+                {
+                    path: '/rolesmanage',
+                    component: resolve => require(['../components/page/RolesManage.vue'], resolve),
+                    meta: { title: '角色管理' }
                 },
                 {
                     path: '/tabs',
@@ -40,34 +140,10 @@ export default new Router({
                     meta: { title: '基本表单' }
                 },
                 {
-                    // 富文本编辑器组件
-                    path: '/editor',
-                    component: resolve => require(['../components/page/VueEditor.vue'], resolve),
-                    meta: { title: '富文本编辑器' }
-                },
-                {
-                    // markdown组件
-                    path: '/markdown',
-                    component: resolve => require(['../components/page/Markdown.vue'], resolve),
-                    meta: { title: 'markdown编辑器' }    
-                },
-                {
                     // 图片上传组件
                     path: '/upload',
                     component: resolve => require(['../components/page/Upload.vue'], resolve),
                     meta: { title: '文件上传' }   
-                },
-                {
-                    // vue-schart组件
-                    path: '/charts',
-                    component: resolve => require(['../components/page/BaseCharts.vue'], resolve),
-                    meta: { title: 'schart图表' }
-                },
-                {
-                    // 拖拽列表组件
-                    path: '/drag',
-                    component: resolve => require(['../components/page/DragList.vue'], resolve),
-                    meta: { title: '拖拽列表' }
                 },
                 {
                     // 权限页面

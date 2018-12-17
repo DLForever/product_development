@@ -1,7 +1,6 @@
 <template>
     <div class="sidebar">
-        <el-menu class="sidebar-el-menu" :default-active="onRoutes" :collapse="collapse" background-color="#324157"
-            text-color="#bfcbd9" active-text-color="#20a0ff" unique-opened router>
+        <el-menu class="sidebar-el-menu" :default-active="onRoutes" :collapse="collapse" unique-opened router>
             <template v-for="item in items">
                 <template v-if="item.subs">
                     <el-submenu :index="item.index" :key="item.index">
@@ -41,77 +40,162 @@
                     {
                         icon: 'el-icon-lx-home',
                         index: 'dashboard',
-                        title: '系统首页'
+                        title: '首页'
                     },
                     {
                         icon: 'el-icon-lx-cascades',
-                        index: 'table',
-                        title: '基础表格'
-                    },
-                    {
-                        icon: 'el-icon-lx-copy',
-                        index: 'tabs',
-                        title: 'tab选项卡'
-                    },
-                    {
-                        icon: 'el-icon-lx-calendar',
                         index: '3',
-                        title: '表单相关',
-                        subs: [
-                            {
-                                index: 'form',
-                                title: '基本表单'
-                            },
-                            {
-                                index: '3-2',
-                                title: '三级菜单',
-                                subs: [
-                                    {
-                                        index: 'editor',
-                                        title: '富文本编辑器'
-                                    },
-                                    {
-                                        index: 'markdown',
-                                        title: 'markdown编辑器'
-                                    },
-                                ]
-                            },
-                            {
-                                index: 'upload',
-                                title: '文件上传'
-                            }
+                        title: '分类管理',
+                        subs: [{
+                            index: 'addClassify',
+                            title: '新建分类'
+                        },
+                        {
+                            index: 'classifylistManage',
+                            title: '分类列表'
+                        },
+                        {
+                            index: 'classifyManage',
+                            title: '分类管理'
+                        }
                         ]
                     },
                     {
-                        icon: 'el-icon-lx-emoji',
-                        index: 'icon',
-                        title: '自定义图标'
-                    },
-                    {
-                        icon: 'el-icon-lx-favor',
-                        index: 'charts',
-                        title: 'schart图表'
-                    },
-                    {
-                        icon: 'el-icon-rank',
-                        index: 'drag',
-                        title: '拖拽列表'
-                    },
-                    {
-                        icon: 'el-icon-lx-warn',
-                        index: '6',
-                        title: '错误处理',
-                        subs: [
-                            {
-                                index: 'permission',
-                                title: '权限测试'
-                            },
-                            {
-                                index: '404',
-                                title: '404页面'
-                            }
+                        icon: 'el-icon-lx-cascades',
+                        index: '5',
+                        title: '供应商管理',
+                        subs: [{
+                            index: 'addSuppliers',
+                            title: '新建供应商'
+                        },
+                        {
+                            index: 'suppliersManage',
+                            title: '供应商管理'
+                        }
                         ]
-                    }
+                    },
+                    {
+                        icon: 'el-icon-date',
+                        index: '1',
+                        title: '产品管理',
+                        subs: [{
+                            index: 'addProduct',
+                            title: '新建产品'
+                        },
+                        {
+                            index: '6',
+                            title: '产品管理',
+                            subs:[{
+                                index: 'productmanage',
+                                title: '所有产品'
+                            },{
+                                index: 'productmanageeBay',
+                                title: 'eBay产品'
+                            },{
+                                index: 'productmanagewish',
+                                title: 'wish产品'
+                            }]
+                        },
+                        {
+                            index: 'checkproductmanage',
+                            title: '审核新建产品'
+                        },
+                        {
+                            index: 'applyproductmanage',
+                            title: '审核申请查看'
+                        },
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-news',
+                        index: '2',
+                        title: '样品管理',
+                        subs: [{
+                            index: 'addSamples',
+                            title: '新建样品'
+                        },
+                        {
+                            index: 'samplesManage',
+                            title: '样品管理'
+                        },
+                        {
+                            index: 'samplesinManage',
+                            title: '入库管理'
+                        },
+                        {
+                            index: 'applysampleoutsManage',
+                            title: '申请借样'
+                        },
+                        {
+                            index: 'sampleoutsManage',
+                            title: '审核借样'
+                        },
+                        {
+                            index: 'returnsamplesManage',
+                            title: '归还样品'
+                        },
+                        ]
+                    },
+                    // {
+                    //     icon: 'el-icon-lx-cascades',
+                    //     index: 'table',
+                    //     title: '基础表格'
+                    // },
+                    {
+                        icon: 'el-icon-lx-group',
+                        index: '4',
+                        title: '用户管理',
+                        subs: [{
+                            index: 'addusers',
+                            title: '创建用户'
+                        },
+                        {
+                            index: 'addroles',
+                            title: '创建角色'
+                        },
+                        {
+                            index: 'usersmanage',
+                            title: '用户管理'
+                        },{
+                            index: 'rolesmanage',
+                            title: '角色管理'
+                        }]
+                    },
+                    // {
+                    //     icon: 'el-icon-lx-calendar',
+                    //     index: '3',
+                    //     title: '表单相关',
+                    //     subs: [
+                    //         {
+                    //             index: 'form',
+                    //             title: '基本表单'
+                    //         },
+                    //         {
+                    //             index: 'upload',
+                    //             title: '文件上传'
+                    //         }
+                    //     ]
+                    // },
+                    // {
+                    //     icon: 'el-icon-lx-emoji',
+                    //     index: 'icon',
+                    //     title: '自定义图标'
+                    // },
+                    // {
+                    //     icon: 'el-icon-lx-warn',
+                    //     index: '6',
+                    //     title: '错误处理',
+                    //     subs: [
+                    //         {
+                    //             index: 'permission',
+                    //             title: '权限测试'
+                    //         },
+                    //         {
+                    //             index: '404',
+                    //             title: '404页面'
+                    //         }
+                    //     ]
+                    // }
                 ]
             }
         },
