@@ -34,7 +34,7 @@
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column prop="sku" label="SKU" width="120" show-overflow-tooltip>
+                <el-table-column fixed prop="sku" label="SKU" width="120" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column label="图片" show-overflow-tooltip>
                     <template slot-scope="scope">
@@ -86,7 +86,7 @@
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="操作" width="100">
+                <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">
                         <el-dropdown>
                             <el-button type="primary">
@@ -138,9 +138,6 @@
                         <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
                     </el-select>
-                </el-form-item>
-                <el-form-item label="sku">
-                    <el-input v-model="form.sku"></el-input>
                 </el-form-item>
                 <el-form-item label="采购价">
                     <el-input v-model="form.price"></el-input>
@@ -197,13 +194,13 @@
                     <el-input v-model="form.desc"></el-input>
                 </el-form-item>
                 <el-form-item label="产品描述URL">
-                    <el-input v-model="form.desc_url"></el-input>
+                    <el-input v-model="form.desc_url" placeholder="需加入https://或http://前缀"></el-input>
                 </el-form-item>
                 <el-form-item label="来源URL">
-                    <el-input v-model="form.origin_url"></el-input>
+                    <el-input v-model="form.origin_url" placeholder="需加入https://或http://前缀"></el-input>
                 </el-form-item>
                 <el-form-item label="图片URL">
-                    <el-input v-model="form.picture_url"></el-input>
+                    <el-input v-model="form.picture_url" placeholder="需加入https://或http://前缀"></el-input>
                 </el-form-item>
                  <el-form-item label="备注">
                     <el-input v-model="form.remark"></el-input>
@@ -333,12 +330,12 @@
         </span>
         </el-dialog>
         <!-- 导出产品提示 -->
-        <el-dialog title="导出产品" :visible.sync="exportVisible" width="35%">
+        <el-dialog title="导出产品" :visible.sync="exportVisible" width="35%" @close="closeExport">
             <el-form label-width="100px">
                 <el-form-item label="导出平台" required>
-                    <a :href="$axios.defaults.baseURL + '/products/export_url?ids[]=' + exportIds + '&platform=eBay'+ '&token=' + export_token">导出到eBay</a>
+                    <a :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=eBay'+ '&token=' + export_token">导出到eBay</a>
                     &nbsp&nbsp&nbsp&nbsp
-                    <a :href="$axios.defaults.baseURL + '/products/export_url?ids[]=' + exportIds + '&platform=Amazon'+ '&token=' + export_token">导出到Amazon</a>
+                    <a :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Amazon'+ '&token=' + export_token">导出到Amazon</a>
                 </el-form-item>
             </el-form>
         </span>
@@ -347,11 +344,11 @@
         <!-- 详情提示 -->
         <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
             <el-table :data="products_details" border style="width: 100%">
+                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
                 </el-table-column>
@@ -375,39 +372,41 @@
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
             </el-table>
-            <br><br>
-            <el-button type="primary" @click="confirmDelteChangePro">删除变体</el-button>
-            <br><br>
-            <el-table :data="products_change_details" border style="width: 100%" @selection-change="handleSelectionChange2">
-                <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="price" label="采购价">
-                </el-table-column>
-                <el-table-column prop="size" label="尺寸(长*宽*高)" width="100">
-                </el-table-column>
-                <el-table-column prop="weight" label="重量">
-                </el-table-column>
-                <el-table-column prop="package_size" label="包装尺寸(长*宽*高)" width="130">
-                </el-table-column>
-                <el-table-column prop="package_weight" label="包装重量">
-                </el-table-column>
-                <el-table-column prop="desc" label="描述" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
-                </el-table-column>
-                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
-                </el-table-column>
-                <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
-            </el-table>
+            <div v-if="products_change_details.length != 0">
+                <br><br>
+                <el-button type="primary" @click="confirmDelteChangePro">删除变体</el-button>
+                <br><br>
+                <el-table :data="products_change_details" border style="width: 100%" @selection-change="handleSelectionChange2">
+                    <el-table-column type="selection" width="55"></el-table-column>
+                    <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="price" label="采购价">
+                    </el-table-column>
+                    <el-table-column prop="size" label="尺寸(长*宽*高)" width="100">
+                    </el-table-column>
+                    <el-table-column prop="weight" label="重量">
+                    </el-table-column>
+                    <el-table-column prop="package_size" label="包装尺寸(长*宽*高)" width="130">
+                    </el-table-column>
+                    <el-table-column prop="package_weight" label="包装重量">
+                    </el-table-column>
+                    <el-table-column prop="desc" label="描述" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
+                    </el-table-column>
+                    <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
+                    </el-table-column>
+                    <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
+                </el-table>
+            </div>
         </el-dialog>
         <!-- 删除变体提示 -->
         <el-dialog title="删除变体" :visible.sync="confirmDelChangePro" width="35%">
@@ -722,7 +721,6 @@
                     id: item.id,
                     name: item.name,
                     title: item.title,
-                    sku: item.sku,
                     price: item.price,
                     length: item.length,
                     width: item.width,
@@ -788,7 +786,6 @@
                 formData.append('product[supplier_id]', this.form.supplier_id)
                 formData.append('product[desc]', this.form.desc)
                 formData.append('product[desc_url]', this.form.desc_url)
-                formData.append('product[sku]', this.form.sku)
                 formData.append('product[package_length]', this.form.package_length)
                 formData.append('product[package_width]', this.form.package_width)
                 formData.append('product[package_height]', this.form.package_height)
@@ -1157,12 +1154,18 @@
                         this.$message.success('删除成功')
                         this.confirmDelChangePro = false
                         this.detailVisible = false
+                        this.multipleSelection2 = []
                         this.getData()
                     }
                 }).catch((res) => {
 
                 })
-            }
+            },
+            closeExport() {
+                this.exportVisible = false
+                this.exportIds = []
+                this.$refs.multipleTable.clearSelection()
+            },
         },
         components: {
             "infinite-loading": VueInfiniteLoading

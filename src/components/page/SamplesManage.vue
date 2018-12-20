@@ -88,6 +88,9 @@
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
+                                    <el-button @click="showProduct(scope.$index, scope.row)" type="text">&nbsp样品图片</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
                                     <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp情</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
@@ -131,9 +134,6 @@
                         <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
                     </el-select>
-                </el-form-item>
-                <el-form-item label="sku">
-                    <el-input v-model="form.sku"></el-input>
                 </el-form-item>
                 <el-form-item label="采购价">
                     <el-input v-model="form.price"></el-input>
@@ -190,13 +190,13 @@
                     <el-input v-model="form.desc"></el-input>
                 </el-form-item>
                 <el-form-item label="产品描述URL">
-                    <el-input v-model="form.desc_url"></el-input>
+                    <el-input v-model="form.desc_url" placeholder="需加入https://或http://前缀"></el-input>
                 </el-form-item>
                 <el-form-item label="来源URL">
-                    <el-input v-model="form.origin_url"></el-input>
+                    <el-input v-model="form.origin_url" placeholder="需加入https://或http://前缀"></el-input>
                 </el-form-item>
                 <el-form-item label="图片URL">
-                    <el-input v-model="form.picture_url"></el-input>
+                    <el-input v-model="form.picture_url" placeholder="需加入https://或http://前缀"></el-input>
                 </el-form-item>
                  <el-form-item label="备注">
                     <el-input v-model="form.remark"></el-input>
@@ -273,10 +273,6 @@
                 </el-table-column>
                 <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="number" label="产品编码" width="110" show-overflow-tooltip>
-                </el-table-column>
                 <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
@@ -299,6 +295,48 @@
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
             </el-table>
+        </el-dialog>
+        <!-- 查看产品图片 -->
+        <el-dialog title="产品图片" :visible.sync="productVisible" width="20%">
+            <el-table :data="picturesProductList" border style="width: 100%">
+                <el-table-column prop="sum" label="产品图片">
+                    <template slot-scope="scope">
+                        <!-- <span>{{scope.row.url}}</span> -->
+                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
+                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
+                        <!-- <span v-else>无</span> -->
+                    </template>
+                    <!-- <template slot-scope="scope">
+                        <img class="img_fnsku" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url" />                  
+                    </template> -->
+                </el-table-column>
+                <el-table-column label="操作" width="100">
+                    <template slot-scope="scope">
+                        <el-button type="danger" @click="handleDeletePro(scope.$index, scope.row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            
+            <!-- <el-carousel :interval="4000" type="card" height="200px" v-if="img_product">
+                <el-carousel-item v-for="item in form.pictures">
+                    <img :src="$axios.defaults.baseURL+item.url.url" />
+                </el-carousel-item>
+            </el-carousel>
+            <div v-if="pdf_product" v-for="item in form.pictures">
+                <a target="_blank" :href="$axios.defaults.baseURL + ':3000' +item.url.url">{{'查看' + item.id + '.pdf'}}</a>
+            </div> -->
+            <!-- <span slot="footer" class="dialog-footer"> -->
+            <!--<el-button @click="showImg = false">取 消</el-button>-->
+            <!-- <el-button type="primary" @click="productVisible = false">确 定</el-button> -->
+        </span>
+        </el-dialog>
+        <!-- 删除产品图片提示 -->
+        <el-dialog title="删除产品图片" :visible.sync="confirmDelProVis" width="35%">
+            <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
+            <span slot="footer" class="dialog-footer">
+            <el-button @click="confirmDelProVis = false">取 消</el-button>
+            <el-button type="danger" @click="deleteProductImg">确 定</el-button>
+        </span>
         </el-dialog>
     </div>
 </template>
@@ -606,7 +644,6 @@
                     id: item.id,
                     name: item.name,
                     title: item.title,
-                    sku: item.sku,
                     price: item.price,
                     length: item.length,
                     width: item.width,
@@ -669,7 +706,6 @@
                 formData.append('sample[supplier_id]', this.form.supplier_id)
                 formData.append('sample[desc]', this.form.desc)
                 formData.append('sample[desc_url]', this.form.desc_url)
-                formData.append('sample[sku]', this.form.sku)
                 formData.append('sample[package_length]', this.form.package_length)
                 formData.append('sample[package_width]', this.form.package_width)
                 formData.append('sample[package_height]', this.form.package_height)
@@ -697,6 +733,7 @@
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         // this.options = []
+                        this.fileList = []
                         this.category_id = []
                         this.getData()
                         this.editVisible = false
@@ -896,6 +933,41 @@
                         console.log('失败')
                     })
                 }
+            },
+            showProduct(index, row) {
+                this.picturesProductList = []
+                this.product_id = row.id
+                const item = this.tableData[index]
+                item.pictures.forEach((data) => {
+                    if(data.remark == 'main') {
+                        this.picturesProductList.push(data)
+                    }
+                })
+                this.productVisible = true;
+            },
+            handleDeletePro(index, row) {
+                this.picture_id = row.id
+                this.idx = index;
+                this.confirmDelProVis = true;
+            },
+            deleteProductImg() {
+                let params = {
+                    img_id: this.picture_id
+                }
+                this.$axios.post('/samples/' + this.product_id+ '/delete_img', params, {
+                     headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then((res) => {
+                    if(res.data.code == 204) {
+                        this.picturesProductList.splice(this.idx, 1);
+                        this.getData()
+                        this.$message.success("删除成功")
+                        this.confirmDelProVis = false
+                    }
+                }).catch((res) => {
+
+                })
             },
         },
         components: {

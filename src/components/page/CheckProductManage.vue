@@ -23,11 +23,20 @@
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
+                <el-table-column fixed prop="sku" label="SKU" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column label="图片" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.pictures.length === 0">无</span>
+                        <img class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url"/>
+                        <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
-                </el-table-column>
                 <el-table-column prop="category_name" label="分类" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="platform" label="平台" width="100" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="price" label="申报价值">
                 </el-table-column>
@@ -56,7 +65,7 @@
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="操作" width="100">
+                <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">
                         <el-dropdown>
                             <el-button type="primary">
@@ -172,20 +181,18 @@
         <!-- 详情提示 -->
         <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
             <el-table :data="products_details" border style="width: 100%">
+                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="图片" show-overflow-tooltip>
+                <!-- <el-table-column label="图片" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <span v-if="scope.row.pictures.length === 0">无</span>
                         <img class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url"/>
                         <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="number" label="产品编码" width="110" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
                 </el-table-column>
@@ -209,6 +216,42 @@
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
             </el-table>
+            <div v-if="products_change_details.length != 0">
+                <br><br>
+                <!-- <el-button type="primary" @click="confirmDelteChangePro">删除变体</el-button> -->
+                变体:
+                <br/>
+                <el-table :data="products_change_details" border style="width: 100%">
+                    <!-- <el-table-column type="selection" width="55"></el-table-column> -->
+                    <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="price" label="采购价">
+                    </el-table-column>
+                    <el-table-column prop="size" label="尺寸(长*宽*高)" width="100">
+                    </el-table-column>
+                    <el-table-column prop="weight" label="重量">
+                    </el-table-column>
+                    <el-table-column prop="package_size" label="包装尺寸(长*宽*高)" width="130">
+                    </el-table-column>
+                    <el-table-column prop="package_weight" label="包装重量">
+                    </el-table-column>
+                    <el-table-column prop="desc" label="描述" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
+                    </el-table-column>
+                    <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
+                    </el-table-column>
+                    <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
+                </el-table>
+            </div>
         </el-dialog>
     </div>
 </template>
@@ -270,7 +313,8 @@
                 category_page: 1,
                 options: [],
                 query: undefined,
-                loading: false
+                loading: false,
+                products_change_details: []
             }
         },
         created() {
@@ -315,6 +359,15 @@
                         res.data.data.forEach((data) => {
                         data.size = data.length + '*' + data.width + '*' + data.height
                         data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                        if(data.wish && data.ebay){
+                            data.platform = 'wish+ebay'
+                        }else if(data.wish){
+                            data.platform = 'wish'
+                        }else if(data.ebay){
+                            data.platform = 'ebay'
+                        }else{
+                            data.platform = ''
+                        }
                     })
                     this.tableData = res.data.data
                     this.totals = res.data.count
@@ -338,6 +391,16 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                         data.size = data.length + '*' + data.width + '*' + data.height
+                        data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                        if(data.wish && data.ebay){
+                            data.platform = 'wish+ebay'
+                        }else if(data.wish){
+                            data.platform = 'wish'
+                        }else if(data.ebay){
+                            data.platform = 'ebay'
+                        }else{
+                            data.platform = ''
+                        }
                     })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -565,7 +628,19 @@
                 this.delVisible = false;
             },
             handleDetails(index, row) {
+                this.product_id = row.id
                 this.products_details = [row]
+                this.$axios.get('/products/wait_to_check?parent_product_id=' + row.id, {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.products_change_details = res.data.data
+                    }
+                }).catch((res) => {
+
+                })
                 this.detailVisible = true
             },
             onInfinite_user(obj) {

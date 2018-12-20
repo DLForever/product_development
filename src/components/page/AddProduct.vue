@@ -50,9 +50,6 @@
 							<el-form-item label="产品标题">
 								<el-input v-model.trim="form.title"></el-input>
 							</el-form-item>
-							<el-form-item label="sku">
-								<el-input v-model.trim="form.sku"></el-input>
-							</el-form-item>
 							<el-form-item label="采购价">
 								<el-input v-model.trim="form.price"></el-input>
 							</el-form-item>
@@ -108,13 +105,13 @@
 								<el-input v-model.trim="form.desc"></el-input>
 							</el-form-item>
 							<el-form-item label="产品描述URL">
-								<el-input v-model.trim="form.desc_url"></el-input>
+								<el-input v-model.trim="form.desc_url" placeholder="需加入https://或http://前缀"></el-input>
 							</el-form-item>
 							<el-form-item label="来源URL">
-								<el-input v-model.trim="form.origin_url"></el-input>
+								<el-input v-model.trim="form.origin_url" placeholder="需加入https://或http://前缀"></el-input>
 							</el-form-item>
 							<el-form-item label="图片URL">
-								<el-input v-model.trim="form.picture_url"></el-input>
+								<el-input v-model.trim="form.picture_url" placeholder="需加入https://或http://前缀"></el-input>
 							</el-form-item>
 							<el-form-item label="备注">
 								<el-input v-model.trim="form.remark"></el-input>
@@ -174,7 +171,6 @@
 					title: '',
 					desc: '',
 					desc_url: '',
-					sku: '',
 					price: '',
 					user: '',
 					length: '',
@@ -381,7 +377,6 @@
 						formData.append('product[category_id]', this.category_id[this.category_id.length - 1])
 						formData.append('product[desc]', this.form.desc)
 						formData.append('product[desc_url]', this.form.desc_url)
-						formData.append('product[sku]', this.form.sku)
 						formData.append('product[package_length]', this.form.package_length)
 						formData.append('product[package_width]', this.form.package_width)
 						formData.append('product[package_height]', this.form.package_height)

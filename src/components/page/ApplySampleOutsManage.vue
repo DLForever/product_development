@@ -120,10 +120,6 @@
                 </el-table-column>
                 <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="number" label="产品编码" width="110" show-overflow-tooltip>
-                </el-table-column>
                 <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
