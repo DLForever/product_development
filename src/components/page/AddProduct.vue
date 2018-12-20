@@ -57,48 +57,48 @@
 								<template slot-scope="scope">
 									<el-col :span="7">
 										<el-form-item>
-											<el-input v-model.trim="form.length" placeholder="长(英寸)"></el-input>
+											<el-input v-model.trim="form.length" placeholder="长(cm)"></el-input>
 										</el-form-item>
 									</el-col>
 									<el-col class="line" :span="1">-</el-col>
 									<el-col :span="7">
 										<el-form-item>
-											<el-input v-model.trim="form.width" placeholder="宽(英寸)"></el-input>
+											<el-input v-model.trim="form.width" placeholder="宽(cm)"></el-input>
 										</el-form-item>
 									</el-col>
 									<el-col class="line" :span="1">-</el-col>
 									<el-col :span="7">
 										<el-form-item>
-											<el-input v-model.trim="form.height" placeholder="高(英寸)"></el-input>
+											<el-input v-model.trim="form.height" placeholder="高(cm)"></el-input>
 										</el-form-item>
 									</el-col>
 								</template>
 							</el-form-item>
-							<el-form-item label="产品重量">
+							<el-form-item label="产品重量(g)">
 								<el-input v-model.trim="form.weight"></el-input>
 							</el-form-item>
 							<el-form-item label="包装尺寸">
 								<template slot-scope="scope">
 									<el-col :span="7">
 										<el-form-item>
-											<el-input v-model.trim="form.package_length" placeholder="长(英寸)"></el-input>
+											<el-input v-model.trim="form.package_length" placeholder="长(cm)"></el-input>
 										</el-form-item>
 									</el-col>
 									<el-col class="line" :span="1">-</el-col>
 									<el-col :span="7">
 										<el-form-item>
-											<el-input v-model.trim="form.package_width" placeholder="宽(英寸)"></el-input>
+											<el-input v-model.trim="form.package_width" placeholder="宽(cm)"></el-input>
 										</el-form-item>
 									</el-col>
 									<el-col class="line" :span="1">-</el-col>
 									<el-col :span="7">
 										<el-form-item>
-											<el-input v-model.trim="form.package_height" placeholder="高(英寸)"></el-input>
+											<el-input v-model.trim="form.package_height" placeholder="高(cm)"></el-input>
 										</el-form-item>
 									</el-col>
 								</template>
 							</el-form-item>
-							<el-form-item label="包装重量">
+							<el-form-item label="包装重量(g)">
 								<el-input v-model.trim="form.package_weight"></el-input>
 							</el-form-item>
 							<el-form-item label="产品描述">
@@ -276,9 +276,10 @@
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
-                    	for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
-                    		this.getCatetoryLoop(i+1)
-                    	}
+                    	this.getCatetoryLoop(1)
+                    	// for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
+                    	// 	this.getCatetoryLoop(i+1)
+                    	// }
                     }
                     console.log(this.options)
                 }).catch((res) => {
@@ -332,6 +333,16 @@
 				formData.append('file', content.file)
 			},
 			onSubmit(formName) {
+				let temp = 0
+				this.fileList.forEach((item) => {
+					if(!(item.raw.type.match(/image/))){
+						temp = 1
+					}
+				})
+				if(temp) {
+					this.$message.error('请上传正确的图片格式!')
+					return
+				}
 				if(this.category_id.length == 0 || this.form.name == '') {
 					this.$message.error('请填写必填信息')
 					return

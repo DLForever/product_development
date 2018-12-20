@@ -64,9 +64,10 @@
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
-                    	for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
-                            this.getCatetoryLoop(i+1)
-                        }
+                        this.getCatetoryLoop(1)
+                    	// for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
+                     //        this.getCatetoryLoop(i+1)
+                     //    }
                     }
                     console.log(res.data.data)
                     console.log(this.options)

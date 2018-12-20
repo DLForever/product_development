@@ -137,9 +137,10 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	// this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
-                    	for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
-                    		this.getCatetoryLoop(i+1)
-                    	}
+                    	this.getCatetoryLoop(1)
+                    	// for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
+                    	// 	this.getCatetoryLoop(i+1)
+                    	// }
                     	// this.total = res.data.count
                     }
                 }).catch((res) => {

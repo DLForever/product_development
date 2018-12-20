@@ -39,7 +39,7 @@
                 <el-table-column label="图片" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <span v-if="scope.row.pictures.length === 0">无</span>
-                        <img class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url"/>
+                        <img  v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
                         <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
                     </template>
                 </el-table-column>
@@ -148,48 +148,48 @@
                     <template slot-scope="scope">
                         <el-col :span="7">
                             <el-form-item prop="length">
-                                <el-input v-model.trim="form.length" placeholder="长(英寸)"></el-input>
+                                <el-input v-model.trim="form.length" placeholder="长(cm)"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col class="line" :span="1">-</el-col>
                         <el-col :span="7">
                             <el-form-item prop="width">
-                                <el-input v-model.trim="form.width" placeholder="宽(英寸)"></el-input>
+                                <el-input v-model.trim="form.width" placeholder="宽(cm)"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col class="line" :span="1">-</el-col>
                         <el-col :span="7">
                             <el-form-item prop="height">
-                                <el-input v-model.trim="form.height" placeholder="高(英寸)"></el-input>
+                                <el-input v-model.trim="form.height" placeholder="高(cm)"></el-input>
                             </el-form-item>
                         </el-col>
                     </template>
                 </el-form-item>
-                <el-form-item label="产品重量">
+                <el-form-item label="产品重量(g)">
                     <el-input v-model="form.weight"></el-input>
                 </el-form-item>
                 <el-form-item label="包装尺寸">
                     <template slot-scope="scope">
                         <el-col :span="7">
                             <el-form-item prop="length">
-                                <el-input v-model.trim="form.package_length" placeholder="长(英寸)"></el-input>
+                                <el-input v-model.trim="form.package_length" placeholder="长(cm)"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col class="line" :span="1">-</el-col>
                         <el-col :span="7">
                             <el-form-item prop="width">
-                                <el-input v-model.trim="form.package_width" placeholder="宽(英寸)"></el-input>
+                                <el-input v-model.trim="form.package_width" placeholder="宽(cm)"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col class="line" :span="1">-</el-col>
                         <el-col :span="7">
                             <el-form-item prop="height">
-                                <el-input v-model.trim="form.package_height" placeholder="高(英寸)"></el-input>
+                                <el-input v-model.trim="form.package_height" placeholder="高(cm)"></el-input>
                             </el-form-item>
                         </el-col>
                     </template>
                 </el-form-item>
-                <el-form-item label="包装重量">
+                <el-form-item label="包装重量(g)">
                     <el-input v-model="form.package_weight"></el-input>
                 </el-form-item>
                 <el-form-item label="产品描述">
@@ -335,9 +335,11 @@
         <el-dialog title="导出产品" :visible.sync="exportVisible" width="35%" @close="closeExport">
             <el-form label-width="100px">
                 <el-form-item label="导出平台" required>
-                    <a :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=eBay'+ '&token=' + export_token">导出到eBay</a>
+                    <a :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Ebay'+ '&token=' + export_token">导出到Ebay</a>
                     &nbsp&nbsp&nbsp&nbsp
                     <a :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Amazon'+ '&token=' + export_token">导出到Amazon</a>
+                    &nbsp&nbsp&nbsp&nbsp
+                    <a :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Wish'+ '&token=' + export_token">导出到Wish</a>
                 </el-form-item>
             </el-form>
         </span>
@@ -682,9 +684,10 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         // this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
-                        for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
-                            this.getCatetoryLoop(i+1)
-                        }
+                        this.getCatetoryLoop(1)
+                        // for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
+                        //     this.getCatetoryLoop(i+1)
+                        // }
                         // this.total = res.data.count
                     }
                 }).catch((res) => {
@@ -798,7 +801,16 @@
             },
             // 保存编辑
             saveEdit() {
-                console.log(this.category_id)
+                let temp = 0
+                this.fileList.forEach((item) => {
+                    if(!(item.raw.type.match(/image/))){
+                        temp = 1
+                    }
+                })
+                if(temp) {
+                    this.$message.error('请上传正确的图片格式!')
+                    return
+                }
                 this.submitDisabled = true
                 let params = {
                     remark: this.form.remark,
@@ -836,7 +848,7 @@
                 this.$axios.patch('/products/' + this.form.id, formData, config).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
-                        // this.fileList = []
+                        this.fileList = []
                         // this.fileList2 = []
                         // this.options = []
                         this.category_id = []
@@ -865,6 +877,7 @@
             },
             closeEdit() {
                 this.category_id = []
+                this.fileList = []
                 this.editVisible = false
             },
             changeFile(file) {

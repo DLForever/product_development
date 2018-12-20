@@ -46,10 +46,10 @@
                 </el-table-column> -->
             </el-table>
             </el-table>
-            <div class="pagination">
+            <!-- <div class="pagination">
                 <el-pagination v-if="paginationShow" @current-change="handleCurrentChange" @size-change="handleSizeChange" :page-size="pagesize" layout="prev, pager, next" :total="totals">
                 </el-pagination>
-            </div>
+            </div> -->
         </div>
 
         <!-- 删除提示框 -->
@@ -195,8 +195,6 @@
                         })
                         this.totals = res.data.count
                         this.paginationShow = true
-                        console.log('666')
-                        console.log(this.tableData)
                     }
                 }).catch((res) => {
                 	console.log('error')
