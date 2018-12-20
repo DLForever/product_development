@@ -24,10 +24,28 @@
 								</el-select>
 							</el-form-item>
 							<el-form-item label="平台">
-								<el-checkbox-group v-model="platform">
-									<el-checkbox label="wish" border></el-checkbox>
-									<el-checkbox label="eBay" border></el-checkbox>
-								</el-checkbox-group>
+								<!-- <el-checkbox-group v-model="form.platform"> -->
+								<el-checkbox label="wish" v-model="isWish" border></el-checkbox>
+								<el-checkbox label="eBay" v-model="iseBay" border></el-checkbox>
+								<!-- </el-checkbox-group> -->
+							</el-form-item>
+							<!-- <span>{{attrs}}</span> -->
+							<el-form-item label="属性">
+								<table class="table text-center">
+									<tbody v-for="(p,index) in attrs">
+										<td>
+											<el-input v-model.trim="p.group" placeholder="属性"></el-input>
+										</td>
+										<td>
+											<el-select v-model="p.vals" multiple filterable="" allow-create="" default-first-option placeholder="请输入属性值"></el-select>
+										</td>
+										<div v-if="index == 0">
+											<i class="el-icon-circle-plus" @click="orderAdd(index)" :disabled="false"></i>
+											<span>&nbsp</span>
+											<i class="el-icon-remove" @click="orderDel(index)"></i>
+										</div>
+									</tbody>
+								</table>
 							</el-form-item>
 							<el-form-item label="产品标题">
 								<el-input v-model.trim="form.title"></el-input>
@@ -166,11 +184,12 @@
 					package_length: '',
 					package_width: '',
 					package_height: '',
-					package_height: '',
+					package_weight: '',
 					origin_url: '',
 					picture_url: '',
 					remark: '',
-					supplier_id: ''
+					supplier_id: '',
+					platform: []
 				},
 				rules: {
 					sourceurl: [{
@@ -231,7 +250,17 @@
 				supplierOptions: [],
 				supplier_page: 1,
 				supplier_total: 0,
-				platform: []
+				platform: [],
+				attrs: [{
+					group: '',
+					vals: []
+				}],
+				attrsAdd: {
+					group: '',
+					vals: []
+				},
+				isWish: false,
+				iseBay: false
 			}
 		},
 		beforeRouteEnter: (to, from, next) => {
@@ -322,7 +351,7 @@
 				console.log(this.$refs[formName].validate())
 				this.$refs[formName].validate((valid) => {
 					if(valid) {
-						this.submitDisabled = true
+						// this.submitDisabled = true
 						// setTimeout(() => {
 						// 	this.submitDisabled = false
 						// }, 10000)
@@ -330,6 +359,23 @@
 						// 	this.$message.error('请上传产品图片')
 						// 	return false
 						// }
+						let attr_group = []
+						let attr_vals = []
+						this.attrs.forEach((data) => {
+							attr_group.push(data.group)
+							attr_vals.push(data.vals)
+						})
+						// let i = 0
+						attr_vals.forEach((data) => {
+							formData.append('product[attr_vals][]', String(data))
+						})
+						attr_group.forEach((data) => {
+							formData.append('product[attr_group][]', data)
+						})
+						// formData.append('product[attr_vals][]', ['黑色','白色'])
+						// formData.append('product[attr_group][]', '颜色')
+						// formData.append('product[attr_vals][]', ['1','2','3'])
+						// formData.append('product[attr_group][]', '尺寸')
 						formData.append('product[name]', this.form.name)
 						formData.append('product[title]', this.form.title)
 						formData.append('product[category_id]', this.category_id[this.category_id.length - 1])
@@ -349,6 +395,12 @@
 						formData.append('product[picture_url]', this.form.picture_url)
 						formData.append('product[supplier_id]', this.form.supplier_id)
 						formData.append('product[remark]', this.form.remark)
+						formData.append('product[wish]', this.isWish)
+						formData.append('product[ebay]', this.iseBay)
+						this.fileList.forEach((item) => {
+							formData.append('product[pictures][]', item.raw)
+						})
+						// console.log(this.fileList)
 						// formData.append('name', this.form.name)
 						// formData.append('title', this.form.title)
 						// formData.append('category_id', this.category_id.pop())
@@ -367,9 +419,6 @@
 						// formData.append('origin_url', this.form.origin_url)
 						// formData.append('picture_url', this.form.picture_url)
 						// formData.append('remark', this.form.remark)
-						// this.fileList.forEach((item) => {
-						// 	formData.append('product_pictures[]', item.raw)
-						// })
 						let config = {
 							headers: {
 								'Authorization': localStorage.getItem('token')
@@ -385,7 +434,6 @@
 								this.fileList = []
 								this.category_id = []
 								this.options = []
-								// this.fileList2 = []
 								this.$router.push('/productmanage')
 							}
 							this.submitDisabled = false
@@ -482,6 +530,20 @@
 					console.log(obj.complete())
 				}
 			},
+			orderAdd() {
+				this.attrs.push(this.attrsAdd)
+				this.attrsAdd= {
+					group: '',
+					vals: []
+				}
+			},
+			orderDel() {
+				if(this.attrs.length == 1) {
+					this.$message.error('至少保留一项哦！')
+					return
+				}
+				this.attrs.pop()
+			}
 		},
 		components: {
 			"infinite-loading": VueInfiniteLoading

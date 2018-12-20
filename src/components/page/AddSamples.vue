@@ -14,13 +14,13 @@
 							<el-form-item label="样品名称" prop="name">
 								<el-input v-model.trim="form.name"></el-input>
 							</el-form-item>
-							<el-form-item label="样品标题" prop="title">
-								<el-input v-model.trim="form.title"></el-input>
-							</el-form-item>
 							<el-form-item label="样品分类" required>
                         		<el-cascader :options="options" v-model="category_id" expand-trigger="hover" change-on-select></el-cascader>
                     		</el-form-item>
-                    		<el-form-item label="供应商" required>
+							<el-form-item label="样品标题">
+								<el-input v-model.trim="form.title"></el-input>
+							</el-form-item>
+                    		<el-form-item label="供应商">
 								<el-select v-model="form.supplier_id" placeholder="请选择">
 									<el-option v-for="item in supplierOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
 									<infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading"></infinite-loading>
@@ -95,12 +95,12 @@
 							<el-form-item label="备注">
 								<el-input v-model.trim="form.remark"></el-input>
 							</el-form-item>
-							<!-- <el-form-item label="产品图片">
+							<el-form-item label="样品图片">
 								<el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
 									<i class="el-icon-upload"></i>
 									<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
 								</el-upload>
-							</el-form-item> -->
+							</el-form-item>
 							<el-form-item>
 								<el-button type="primary" @click="onSubmit('form')" :disabled="submitDisabled">新建</el-button>
 							</el-form-item>
@@ -153,14 +153,14 @@
 					sku: '',
 					price: '',
 					user: '',
-					length: undefined,
-					width: undefined,
-					height: undefined,
-					weight: undefined,
-					package_length: undefined,
-					package_width: undefined,
-					package_height: undefined,
-					package_height: undefined,
+					length: '',
+					width: '',
+					height: '',
+					weight: '',
+					package_length: '',
+					package_width: '',
+					package_height: '',
+					package_weight: '',
 					origin_url: '',
 					picture_url: '',
 					remark: '',
@@ -299,7 +299,7 @@
 				formData.append('file', content.file)
 			},
 			onSubmit(formName) {
-				if(this.category_id.length == 0 || this.form.name == '' || this.form.title == '' || this.form.supplier_id == '') {
+				if(this.category_id.length == 0 || this.form.name == '') {
 					this.$message.error('请填写必填信息')
 					return
 				}
@@ -360,9 +360,9 @@
 						// formData.append('origin_url', this.form.origin_url)
 						// formData.append('picture_url', this.form.picture_url)
 						// formData.append('remark', this.form.remark)
-						// this.fileList.forEach((item) => {
-						// 	formData.append('product_pictures[]', item.raw)
-						// })
+						this.fileList.forEach((item) => {
+							formData.append('sample[pictures][]', item.raw)
+						})
 						let config = {
 							headers: {
 								'Authorization': localStorage.getItem('token')

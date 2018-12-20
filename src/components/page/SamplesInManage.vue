@@ -10,7 +10,7 @@
             <div class="handle-box">
                 <div class="fnsku_filter">
                     开发人员:
-                    <el-select v-model="user_id_filter" placeholder="选择用户" class="handle-select mr10">
+                    <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
                         <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
                     </el-select>
@@ -150,7 +150,9 @@
                 user_id_filter: '',
                 user_options: [],
                 user_total: 0,
-                user_page: 1
+                user_page: 1,
+                query: undefined,
+                loading: false
             }
         },
         created() {
@@ -382,10 +384,53 @@
             onInfinite_user(obj) {
                 if((this.user_page * 20) < this.user_total) {
                     this.user_page += 1
-                    this.getUsers(obj.loaded)
+                    // this.getUsers(obj.loaded)
+                    this.remoteMethod(this.query,obj.loaded)
                 } else {
                     obj.complete()
                     console.log(obj.complete())
+                }
+            },
+            selectVisble(visible) {
+                if(visible) {
+                    this.query = undefined
+                    this.remoteMethod("")
+                }
+            },
+            remoteMethod(query, callback = undefined) {
+                if(query != "" || this.query != "" || callback) {
+                    let reload = false
+                    if(this.query != query) {
+                        this.loading = true
+                        this.user_page = 1
+                        this.query = query
+                        reload = true
+                        if(this.$refs.infiniteLoading.isComplete) {
+                            this.$refs.infiniteLoading.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim(), {
+                        headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                let tempoptions = []
+                                this.user_options = tempoptions.concat(res.data.data)
+                            } else {
+                                this.user_options = this.user_options.concat(res.data.data)
+                            }
+                            this.user_total = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
                 }
             },
         },

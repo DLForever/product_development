@@ -11,14 +11,14 @@
                 <el-button type="primary" @click="handleCheck">审核</el-button>
                 <div class="fnsku_filter">
                     申请人员:
-                    <el-select v-model="user_id_filter" placeholder="选择用户" class="handle-select mr10">
+                    <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
                         <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
                     </el-select>
                     审核人员:
-                    <el-select v-model="user_check_id_filter" placeholder="选择用户" class="handle-select mr10">
-                        <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
+                    <el-select v-model="user_check_id_filter" filterable remote :loading="loading2" @visible-change="selectVisble2" :remote-method="remoteMethod2" placeholder="选择用户" class="handle-select mr10">
+                        <el-option v-for="item in user_options2" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_user2" ref="infiniteLoading2"></infinite-loading>
                     </el-select>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
@@ -89,13 +89,18 @@
         <!-- 详情提示 -->
         <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
             <el-table :data="products_details" border style="width: 100%">
+                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                </el-table-column>
+                <!-- <el-table-column label="图片" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.pictures.length === 0">无</span>
+                        <img class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url"/>
+                        <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
+                    </template>
+                </el-table-column> -->
                 <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="number" label="产品编码" width="110" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
                 </el-table-column>
@@ -169,9 +174,16 @@
                 products_details: [],
                 user_id_filter: '',
                 user_options: [],
+                user_options2: [],
                 user_check_id_filter: '',
                 user_page: 1,
-                user_total: 0
+                user_total: 0,
+                query: undefined,
+                loading: false,
+                user_page2: 1,
+                user_total2: 0,
+                query2: undefined,
+                loading2: false,
             }
         },
         created() {
@@ -409,7 +421,8 @@
             onInfinite_user(obj) {
                 if((this.user_page * 20) < this.user_total) {
                     this.user_page += 1
-                    this.getUsers(obj.loaded)
+                    // this.getUsers(obj.loaded)
+                    this.remoteMethod(this.query,obj.loaded)
                 } else {
                     obj.complete()
                     console.log(obj.complete())
@@ -425,6 +438,99 @@
                     }
                 }).catch((res) => {
                 })
+            },
+            selectVisble(visible) {
+                if(visible) {
+                    this.query = undefined
+                    this.remoteMethod("")
+                }
+            },
+            remoteMethod(query, callback = undefined) {
+                if(query != "" || this.query != "" || callback) {
+                    let reload = false
+                    if(this.query != query) {
+                        this.loading = true
+                        this.user_page = 1
+                        this.query = query
+                        reload = true
+                        if(this.$refs.infiniteLoading.isComplete) {
+                            this.$refs.infiniteLoading.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim(), {
+                        headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                let tempoptions = []
+                                this.user_options = tempoptions.concat(res.data.data)
+                            } else {
+                                this.user_options = this.user_options.concat(res.data.data)
+                            }
+                            this.user_total = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
+            },
+            onInfinite_user2(obj) {
+                if((this.user_page2 * 20) < this.user_total2) {
+                    this.user_page2 += 1
+                    // this.getUsers(obj.loaded)
+                    this.remoteMethod2(this.query2,obj.loaded)
+                } else {
+                    obj.complete()
+                }
+            },
+            selectVisble2(visible) {
+                if(visible) {
+                    this.query2 = undefined
+                    this.remoteMethod2("")
+                }
+            },
+            remoteMethod2(query, callback = undefined) {
+                if(query != "" || this.query2 != "" || callback) {
+                    let reload = false
+                    if(this.query2 != query) {
+                        this.loading2 = true
+                        this.user_page2 = 1
+                        this.query2 = query
+                        reload = true
+                        if(this.$refs.infiniteLoading2.isComplete) {
+                            this.$refs.infiniteLoading2.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/users/?page=" + this.user_page2 + '&name=' + query.trim(), {
+                        headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading2 = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                let tempoptions = []
+                                this.user_options2 = tempoptions.concat(res.data.data)
+                            } else {
+                                this.user_options2 = this.user_options2.concat(res.data.data)
+                            }
+                            this.user_total2 = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
             },
         },
         components: {
@@ -459,5 +565,10 @@
     .img_fnsku {
         width:6rem;
         height:6rem;
+    }
+
+    .img {
+        width:3rem;
+        height:3rem;
     }
 </style>
