@@ -14,14 +14,14 @@
                     日期:
                     <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
                     分类:
-                    <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" change-on-select class="handle-select mr10"></el-cascader>
+                    <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" change-on-select @change="getCatetory" class="handle-select mr10"></el-cascader>
                     开发人员:
                     <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
                         <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
                     </el-select>
                     供应商:
-                    <el-select v-model="supplier_id_filter" placeholder="选择供应商" class="handle-select mr10">
+                    <el-select v-model="supplier_id_filter" placeholder="选择供应商" @visible-change="supplierselectVisble" class="handle-select mr10">
                         <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
                     </el-select>
@@ -38,23 +38,24 @@
                 </el-table-column>
                 <el-table-column label="图片" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <span v-if="scope.row.pictures.length === 0">无</span>
+                        <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
                         <img  v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
-                        <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
+                        <img  v-else-if="scope.row.subject_pictures[0] != undefined && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url"/>
+                        <span v-else>无</span>
+                        <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
                 </el-table-column>
-                <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
+                <el-table-column label="主体(点击查看)">
+                    <template slot-scope="scope">
+                        <span style="cursor: pointer;" @click="showChangeProduct(scope.$index, scope.row)">{{scope.row.sku.substring(0, scope.row.sku.length-2)}}</span>
+                    </template>
                 </el-table-column>
-                <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
+                <el-table-column prop="name" label="产品名称" width="230" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
-                </el-table-column>
+                
                 <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="platform" label="平台" width="100" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="price" label="采购价">
-                </el-table-column>
+                
                 <!-- <el-table-column prop="user" label="开发人员" show-overflow-tooltip>
                 </el-table-column> -->
                 <!-- <el-table-column prop="size" label="尺寸(长*宽*高)" width="100">
@@ -65,8 +66,7 @@
                 </el-table-column>
                 <el-table-column prop="package_weight" label="包装重量" width="70">
                 </el-table-column> -->
-                <el-table-column prop="desc" label="描述" show-overflow-tooltip>
-                </el-table-column>
+                
                 <el-table-column prop="desc_url" label="描述URL" width="80">
                     <template slot-scope="scope">
                         <a v-if="scope.row.desc_url != null && scope.row.desc_url != '' && scope.row.desc_url != 'null'" :href="scope.row.desc_url" target="_blank">查看描述</a>
@@ -77,15 +77,11 @@
                         <a v-if="scope.row.origin_url != null && scope.row.origin_url != '' && scope.row.origin_url != 'null'" :href="scope.row.origin_url" target="_blank">查看来源</a>
                     </template>
                 </el-table-column>
-                <el-table-column prop="picture_url" label="图片URL" width="80">
+                <!-- <el-table-column prop="picture_url" label="图片URL" width="80">
                     <template slot-scope="scope">
                         <a v-if="scope.row.picture_url != null && scope.row.picture_url != '' && scope.row.picture_url != 'null'" :href="scope.row.picture_url" target="_blank">查看图片</a>
                     </template>
-                </el-table-column>
-                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable width="140">
-                </el-table-column>
-                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable width="140">
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
@@ -103,6 +99,12 @@
                                 </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp编&nbsp&nbsp辑</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleEditSuppliers(scope.$index, scope.row)" type="text">修改供应商</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleAddPictures(scope.$index, scope.row)" type="text">&nbsp添加图片</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleDelete(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp删&nbsp&nbsp除</el-button>
@@ -123,23 +125,25 @@
         <el-dialog title="编辑" :visible.sync="editVisible" width="50%" @close="closeEdit">
             <el-form ref="form" :model="form" label-width="100px">
                 <el-form-item label="产品名称">
-                    <el-input v-model="form.name"></el-input>
-                </el-form-item>
-                <el-form-item label="产品标题">
-                    <el-input v-model="form.title"></el-input>
+                    <!-- <el-input v-model="form.name"></el-input> -->
+                    <span>{{form.name}}</span>
                 </el-form-item>
                 <el-form-item label="产品分类">
-                    <el-cascader :options="options" v-model="category_id" expand-trigger="hover" change-on-select></el-cascader>
+                    <span>{{form.category_name}}</span>
+                    <!-- <el-cascader :options="options" v-model="category_id" expand-trigger="hover" change-on-select></el-cascader> -->
                 </el-form-item>
                 <el-form-item label="平台">
                     <el-checkbox label="wish" v-model="form.wish" border></el-checkbox>
                     <el-checkbox label="eBay" v-model="form.ebay" border></el-checkbox>
                 </el-form-item>
-                <el-form-item label="供应商">
-                    <el-select v-model="form.supplier_id" placeholder="请选择">
+                <!-- <el-form-item label="供应商">
+                    <el-select v-model="supplier_id" multiple placeholder="请选择">
                         <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
                     </el-select>
+                </el-form-item> -->
+                <el-form-item label="产品标题">
+                    <el-input v-model="form.title"></el-input>
                 </el-form-item>
                 <el-form-item label="采购价">
                     <el-input v-model="form.price"></el-input>
@@ -207,12 +211,12 @@
                  <el-form-item label="备注">
                     <el-input v-model="form.remark"></el-input>
                 </el-form-item>
-                <el-form-item label="产品图片">
+                <!-- <el-form-item label="产品图片">
                     <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
                         <i class="el-icon-upload"></i>
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     </el-upload>
-                </el-form-item>
+                </el-form-item> -->
                 <!-- <el-form-item label="外包装图片">
                     <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
                         <i class="el-icon-upload"></i>
@@ -335,11 +339,15 @@
         <el-dialog title="导出产品" :visible.sync="exportVisible" width="35%" @close="closeExport">
             <el-form label-width="100px">
                 <el-form-item label="导出平台" required>
-                    <a :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Ebay'+ '&token=' + export_token">导出到Ebay</a>
-                    &nbsp&nbsp&nbsp&nbsp
-                    <a :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Amazon'+ '&token=' + export_token">导出到Amazon</a>
-                    &nbsp&nbsp&nbsp&nbsp
-                    <a :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Wish'+ '&token=' + export_token">导出到Wish</a>
+                    <el-button type="primary">
+                        <a style="color:#fff;" :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Ebay'+ '&token=' + export_token">导出到Ebay</a>
+                    </el-button>
+                    <el-button type="primary">
+                        <a style="color:#fff;" :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Amazon'+ '&token=' + export_token">导出到Amazon</a>
+                    </el-button>
+                    <el-button type="primary">
+                        <a style="color:#fff;" :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Wish'+ '&token=' + export_token">导出到Wish</a>
+                    </el-button>
                 </el-form-item>
             </el-form>
         </span>
@@ -353,8 +361,6 @@
                 <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="number" label="产品编码" width="110" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
                 </el-table-column>
@@ -378,42 +384,6 @@
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
             </el-table>
-            <div v-if="products_change_details.length != 0">
-                <br><br>
-                <el-button type="primary" @click="confirmDelteChangePro">删除变体</el-button>
-                <br><br>
-                <el-table :data="products_change_details" border style="width: 100%" @selection-change="handleSelectionChange2">
-                    <el-table-column type="selection" width="55"></el-table-column>
-                    <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
-                    </el-table-column>
-                    <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
-                    </el-table-column>
-                    <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
-                    </el-table-column>
-                    <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
-                    </el-table-column>
-                    <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
-                    </el-table-column>
-                    <el-table-column prop="price" label="采购价">
-                    </el-table-column>
-                    <el-table-column prop="size" label="尺寸(长*宽*高)" width="100">
-                    </el-table-column>
-                    <el-table-column prop="weight" label="重量">
-                    </el-table-column>
-                    <el-table-column prop="package_size" label="包装尺寸(长*宽*高)" width="130">
-                    </el-table-column>
-                    <el-table-column prop="package_weight" label="包装重量">
-                    </el-table-column>
-                    <el-table-column prop="desc" label="描述" show-overflow-tooltip>
-                    </el-table-column>
-                    <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
-                    </el-table-column>
-                    <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
-                    </el-table-column>
-                    <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
-                </el-table>
-            </div>
-                
         </el-dialog>
         <!-- 删除变体提示 -->
         <el-dialog title="删除变体" :visible.sync="confirmDelChangePro" width="35%">
@@ -422,6 +392,76 @@
             <el-button @click="confirmDelChangePro = false">取 消</el-button>
             <el-button type="danger" @click="deleteChangeProduct">确 定</el-button>
         </span>
+        </el-dialog>
+
+        <!-- 变体详情提示 -->
+        <el-dialog title="详情" :visible.sync="change_detailsVisible" width="90%">
+            <!-- <div v-if="products_change_details.length != 0"> -->
+            <el-button type="primary">
+                <a style="color:#fff;" :href="$axios.defaults.baseURL + '/product_subjects/' + subject_id + '?token=' + export_token">导出图片</a>
+            </el-button>
+            <br><br>
+            <el-table :data="products_change_details" border style="width: 100%">
+                <!-- <el-table-column type="selection" width="55"></el-table-column> -->
+                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="price" label="采购价">
+                </el-table-column>
+                <el-table-column prop="size" label="尺寸(长*宽*高)" width="100">
+                </el-table-column>
+                <el-table-column prop="weight" label="重量">
+                </el-table-column>
+                <el-table-column prop="package_size" label="包装尺寸(长*宽*高)" width="130">
+                </el-table-column>
+                <el-table-column prop="package_weight" label="包装重量">
+                </el-table-column>
+                <el-table-column prop="desc" label="描述" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
+                </el-table-column>
+                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
+                </el-table-column>
+                <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
+            </el-table>
+            <!-- </div> -->
+        </el-dialog>
+        <!-- 添加图片 -->
+        <el-dialog title="添加图片" :visible.sync="addPictureVisible" width="35%">
+            <el-form label-width="100px">
+                <el-form-item label="添加图片">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="addPictureVisible = false">取 消</el-button>
+                <el-button type="danger" @click="submitAddPictures">确 定</el-button>
+            </span>
+        </el-dialog>
+        <!-- 修改供应商弹出框 -->
+        <el-dialog title="编辑" :visible.sync="editVisibleSuppliers" width="50%" @close="closeEditSuppliers">
+            <el-form ref="form" :model="form" label-width="100px">
+                <el-form-item label="供应商">
+                    <el-select v-model="supplier_ids" multiple placeholder="请选择">
+                        <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editVisibleSuppliers = false">取 消</el-button>
+                <el-button type="primary" @click="saveEditSuppliers" :disabled="submitDisabled">确 定</el-button>
+            </span>
         </el-dialog>
     </div>
 </template>
@@ -529,15 +569,28 @@
               query: undefined,
               loading: false,
               multipleSelection2: [],
-              confirmDelChangePro: false
+              confirmDelChangePro: false,
+              change_detailsVisible: false,
+              options_len1: [],
+              options_len2: [],
+              options_len3: [],
+              options_len4: [],
+              options3: [],
+              subject_id: '',
+              subject_name: '',
+              addPictureVisible: false,
+              supplier_id: [],
+              suppliers_temp: [],
+              editVisibleSuppliers: false,
+              supplier_ids: []
             }
         },
         created() {
             this.getData();
             // this.getUsers()
-            this.getSuppliers()
+            // this.getSuppliers()
             this.getCategories()
-            this.getSuppliersEdit()
+            // this.getSuppliersEdit()
         },
         watch: {
         	"$route": "getData"
@@ -575,6 +628,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
+                // this.$axios.get( '/products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku, {
                 this.$axios.get( '/products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
@@ -656,6 +710,7 @@
                     headers: {'Authorization': localStorage.getItem('token')}
                 }).then((res) => {
                     if(res.data.code==200) {
+
                         this.supplier_options = this.supplier_options.concat(res.data.data)
                         this.supplier_total = res.data.count
                     }
@@ -684,6 +739,7 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         // this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
+                        this.options3 = res.data.data
                         this.getCatetoryLoop(1)
                         // for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
                         //     this.getCatetoryLoop(i+1)
@@ -742,6 +798,23 @@
                 return row.tag === value;
             },
             handleEdit(index, row) {
+                // this.getSuppliersEdit()
+                // this.supplier_id = []
+                // this.$axios.get('/products/' + row.id, {
+                //     headers: {
+                //             'Authorization': localStorage.getItem('token')
+                //         },
+                // }).then((res) => {
+                //     if(res.data.code == 200) {
+                //         this.suppliers_temp = res.data.data.suppliers
+                //         res.data.data.suppliers.forEach((data2) => {
+                //             this.supplier_id.push(data2.id)
+                //             if(!this.supplier_options_edit.find((option) => option.id == data2.id)) {
+                //                 this.supplier_options_edit.push({id: data2.id, name: data2.name})
+                //             }
+                //         })
+                //     }
+                // })
                 this.idx = index;
                 const item = this.tableData[index];
                 this.form = {
@@ -762,14 +835,13 @@
                     origin_url: item.origin_url,
                     picture_url: item.picture_url,
                     remark: item.remark,
-                    supplier_id: item.supplier_id,
                     wish: item.wish,
-                    ebay: item.ebay
+                    ebay: item.ebay,
+                    category_name: item.category_name
                 }
-                this.category_id = this.category_id.concat(item.category_id)
-                // this.getCategories()
-                // this.getSuppliers()
-                this.categories_loop(item.category_id)
+
+                // this.category_id = this.category_id.concat(item.category_id)
+                // this.categories_loop(item.category_id)
                 this.editVisible = true;
             },
             categories_loop(c) {
@@ -818,8 +890,6 @@
                 let formData = new FormData()
                 formData.append('product[name]', this.form.name)
                 formData.append('product[title]', this.form.title)
-                formData.append('product[category_id]', this.category_id[this.category_id.length - 1])
-                formData.append('product[supplier_id]', this.form.supplier_id)
                 formData.append('product[desc]', this.form.desc)
                 formData.append('product[desc_url]', this.form.desc_url)
                 formData.append('product[package_length]', this.form.package_length)
@@ -834,11 +904,8 @@
                 formData.append('product[origin_url]', this.form.origin_url)
                 formData.append('product[picture_url]', this.form.picture_url)
                 formData.append('product[remark]', this.form.remark)
-                this.fileList.forEach((item) => {
-                    formData.append('product[pictures][]', item.raw)
-                })
-                // this.fileList2.forEach((item) => {
-                //     formData.append('package_pictures[]', item.raw)
+                // this.supplier_id.forEach((data) => {
+                //     formData.append('product[supplier_id][]', data)
                 // })
                 let config = {
                     headers: {
@@ -849,9 +916,6 @@
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.fileList = []
-                        // this.fileList2 = []
-                        // this.options = []
-                        this.category_id = []
                         this.getData()
                         this.editVisible = false
                     }
@@ -860,24 +924,16 @@
                     this.submitDisabled = false
                     console.log('err')
                 })
-                // this.$axios.patch('/admin/users/' + this.form.id, params, {
-                //     headers: {
-                //         'Authorization': localStorage.getItem('token_admin')
-                //     },
-                // }).then((res) => {
-                //     if(res.data.code == 200) {
-                //         this.$message.success('更新成功')
-                //         this.editVisible = false
-                //         this.getData()
-                //         this.remark = ''
-                //     }
-                // }).catch((res) => {
-                //     console.log('error')
-                // })
             },
             closeEdit() {
                 this.category_id = []
                 this.fileList = []
+                // this.supplier_options_edit = []
+                // this.supplier_page_edit = 1
+                // this.$refs.infiniteLoading3.stateChanger.reset()
+                // if(this.$refs.infiniteLoading3.isComplete) {
+                //     this.$refs.infiniteLoading3.stateChanger.reset()
+                // }
                 this.editVisible = false
             },
             changeFile(file) {
@@ -921,10 +977,13 @@
                 this.product_id = row.id
                 const item = this.tableData[index]
                 item.pictures.forEach((data) => {
-                    if(data.remark == 'main') {
-                        this.picturesProductList.push(data)
-                    }
+                    this.picturesProductList.push(data)
                 })
+                if(item.pictures.length == 0) {
+                    item.subject_pictures.forEach((data) => {
+                        this.picturesProductList.push(data)
+                    })
+                }
                 this.productVisible = true;
             },
             showPackage(index, row) {
@@ -1075,17 +1134,17 @@
             handleDetails(index, row) {
                 this.product_id = row.id
                 this.products_details = [row]
-                this.$axios.get('/products?parent_product_id=' + row.id, {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
-                    if(res.data.code == 200) {
-                        this.products_change_details = res.data.data
-                    }
-                }).catch((res) => {
+                // this.$axios.get('/products?product_subject_id=' + row.product_subject_id, {
+                //     headers: {
+                //         'Authorization': localStorage.getItem('token')
+                //     }
+                // }).then((res) => {
+                //     if(res.data.code == 200) {
+                //         this.products_change_details = res.data.data
+                //     }
+                // }).catch((res) => {
 
-                })
+                // })
                 this.detailVisible = true
             },
             onInfinite_suppliers(obj) {
@@ -1111,7 +1170,12 @@
                     headers: {'Authorization': localStorage.getItem('token')}
                 }).then((res) => {
                     if(res.data.code==200) {
-                        this.supplier_options_edit = this.supplier_options_edit.concat(res.data.data)
+                        res.data.data.forEach((data) => {
+                            if(!(this.suppliers_temp).find((option) => option.id == data.id)) {
+                                this.supplier_options_edit.push(data)
+                            }
+                        })
+                        // this.supplier_options_edit = this.supplier_options_edit.concat(res.data.data)
                         this.supplier_total_edit = res.data.count
                     }
                 }).catch((res) => {
@@ -1206,6 +1270,179 @@
                 this.exportVisible = false
                 this.exportIds = []
                 this.$refs.multipleTable.clearSelection()
+            },
+            showChangeProduct(index, row) {
+                this.export_token = localStorage.getItem('token')
+                this.subject_name = row.sku.substring(0, row.sku.length-2)
+                // this.subject_id = row.sku.substring(0, row.sku.length-2) + '_' + row.product_subject_id + '.zip'
+                this.subject_id = row.product_subject_id
+                this.$axios.get('/products?product_subject_id=' + row.product_subject_id, {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        res.data.data.forEach((data) => {
+                            data.size = data.length + '*' + data.width + '*' + data.height
+                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                            if(data.wish && data.ebay){
+                                data.platform = 'wish+ebay'
+                            }else if(data.wish){
+                                data.platform = 'wish'
+                            }else if(data.ebay){
+                                data.platform = 'ebay'
+                            }else{
+                                data.platform = ''
+                            }
+                        })
+                        this.products_change_details = res.data.data
+                        this.change_detailsVisible = true
+                    }
+                }).catch((res) => {
+
+                })
+            },
+            getCatetory() {
+                this.$axios.get( '/categories?parent_id=' + this.category_id_filter[this.category_id_filter.length -1] , {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.options = []
+                        let temp_options = []
+                        if(this.category_id_filter.length == 1) {
+                            this.options_len1 = this.options3
+                            this.options_len1 = this.options_len1.concat(res.data.data)
+                            temp_options = this.options_len1
+                        }else if(this.category_id_filter.length == 2) {
+                            this.options_len2 = this.options_len1
+                            this.options_len2 = this.options_len2.concat(res.data.data)
+                            temp_options = this.options_len2
+                        }else if(this.category_id_filter.length == 3) {
+                            this.options_len3 = this.options_len2
+                            this.options_len3 = this.options_len3.concat(res.data.data)
+                            temp_options = this.options_len3
+                        }else if(this.category_id_filter.length == 4) {
+                            this.options_len4 = this.options_len3
+                            this.options_len4 = this.options_len4.concat(res.data.data)
+                            temp_options = this.options_len4
+                        }
+                        this.options = this.options.concat(this.getCategoryTree(temp_options,0))
+                    }
+                }).catch((res) => {
+                    console.log('error')
+                })
+            },
+            handleAddPictures(index, row) {
+                this.fileList = []
+                this.product_id = row.id
+                this.addPictureVisible = true
+            },
+            submitAddPictures() {
+                if(this.fileList.length == 0) {
+                    this.$message.error('请添加图片')
+                    return
+                }
+                let temp = 0
+                this.fileList.forEach((item) => {
+                    if(!(item.raw.type.match(/image/))){
+                        temp = 1
+                    }
+                })
+                if(temp) {
+                    this.$message.error('请上传正确的图片格式!')
+                    return
+                }
+                let formData = new FormData()
+                let config = {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }
+                this.fileList.forEach((item) => {
+                    formData.append('pictures[]', item.raw)
+                })
+                this.$axios.post('/products/' + this.product_id + '/update_picture', formData, config
+                    ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('添加成功！')
+                        this.getData()
+                        this.addPictureVisible = false
+                    }
+                    this.submitDisabled = false
+                }).catch((res) => {
+                    this.submitDisabled = false
+                    console.log('err')
+                })
+            },
+            supplierselectVisble(visible) {
+                this.supplier_options = []
+                this.supplier_page = 1
+                this.$refs.infiniteLoading2.stateChanger.reset()
+                if(visible) {
+                    this.getSuppliers()
+                }
+            },
+            closeEditSuppliers() {
+                this.supplier_options_edit = []
+                this.supplier_page_edit = 1
+                this.$refs.infiniteLoading3.stateChanger.reset()
+                this.editVisibleSuppliers = false
+            },
+            handleEditSuppliers(index, row) {
+                this.getSuppliersEdit()
+                this.supplier_ids = []
+                this.$axios.get('/products/' + row.id, {
+                    headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.suppliers_temp = res.data.data.suppliers
+                        res.data.data.suppliers.forEach((data2) => {
+                            this.supplier_ids.push(data2.id)
+                            if(!this.supplier_options_edit.find((option) => option.id == data2.id)) {
+                                this.supplier_options_edit.unshift({id: data2.id, name: data2.name})
+                            }
+                        })
+                    }
+                })
+
+                // this.getSuppliersEdit()
+                // this.supplier_ids = []
+                // this.$axios.get('/product_subjects/' + row.id + '/get_suppliers', {
+                //     headers: {
+                //             'Authorization': localStorage.getItem('token')
+                //         },
+                // }).then((res) => {
+                //     if(res.data.code == 200) {
+                //         this.suppliers_temp = res.data.data
+                //         res.data.data.forEach((data2) => {
+                //             this.supplier_ids.push(data2.id)
+                //             if(!this.supplier_options_edit.find((option) => option.id == data2.id)) {
+                //                 this.supplier_options_edit.unshift({id: data2.id, name: data2.name})
+                //             }
+                //         })
+                //     }
+                // })
+                this.subject_id = row.id
+                this.editVisibleSuppliers = true
+            },
+            saveEditSuppliers() {
+                let formData = new FormData()
+                this.supplier_ids.forEach((data) => {
+                    formData.append('supplier_id[]', data)
+                })
+                this.$axios.post('/products/' + this.subject_id + '/update_supplier', formData, {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                }).then((res) => {
+                    if(res.data.code==200) {
+                        this.$message.success('更新成功')
+                        this.editVisibleSuppliers = false
+                    }
+                }).catch((res) => {
+
+                })
             },
         },
         components: {

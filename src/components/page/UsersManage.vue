@@ -423,8 +423,8 @@
                 }).then((res) => {
                     if(res.data.code == 200){
                         res.data.data.policies_list.forEach((data) => {
-                            this.policesSelect.push(data.code)
-                            this.policesSave.push(data.code)
+                            this.policesSelect.push(data.id)
+                            this.policesSave.push(data.id)
                         })
                         this.editPoliciesVisible = true
                         console.log(this.policesSelect)

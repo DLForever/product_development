@@ -8,14 +8,12 @@
         </div>
         <div class="container">
             <div class="handle-box">
-                <!-- <div class="fnsku_filter">
-                    开发人员:
-                    <el-input style="width:150px" placeholder="请输入开发人员" v-model.trim="search_shopname"></el-input>
-                    产品名称:
-                    <el-input style="width:150px" placeholder="请输入产品名称" v-model.trim="search_fnsku"></el-input>
+                <div class="fnsku_filter">
+                    分类名称:
+                    <el-input style="width:150px" placeholder="请输入分类名称" v-model.trim="category_name"></el-input>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
-                </div> -->
+                </div>
             </div>
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
@@ -46,10 +44,10 @@
                 </el-table-column> -->
             </el-table>
             </el-table>
-            <!-- <div class="pagination">
+            <div class="pagination">
                 <el-pagination v-if="paginationShow" @current-change="handleCurrentChange" @size-change="handleSizeChange" :page-size="pagesize" layout="prev, pager, next" :total="totals">
                 </el-pagination>
-            </div> -->
+            </div>
         </div>
 
         <!-- 删除提示框 -->
@@ -150,7 +148,8 @@
                 checkVisible: false,
                 detailVisible: false,
                 products_details: [],
-                category_relation: ''
+                category_relation: '',
+                category_name: ''
             }
         },
         created() {
@@ -182,7 +181,7 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
-                this.$axios.get( '/categories/?page='+this.cur_page, {
+                this.$axios.get( '/categories?page='+this.cur_page + '&name=' + this.category_name + '&list=true', {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -224,18 +223,20 @@
             filter_product() {
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/products?page='+this.cur_page + '&shopname=' + this.search_shopname + '&fnsku=' + this.search_fnsku, {
+                this.$axios.get( '/categories?page='+this.cur_page + '&name=' + this.category_name + '&list=true', {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
-                        res.data.data.forEach((data) => {
-                        data.size = data.length + '*' + data.width + '*' + data.height
-                    })
                         this.tableData = res.data.data
+                        this.tableData.forEach((data) => {
+                            this.categories_loop(data.id)
+                            data.relation = this.category_relation
+                            this.category_relation = ''
+                        })
                         this.totals = res.data.count
+                        this.paginationShow = true
                     }
-                    this.paginationShow = true
                 }).catch((res) => {
                     console.log('error')
                 })
@@ -243,8 +244,7 @@
             clear_filter() {
                 this.paginationShow = false
                 this.cur_page = 1
-                this.search_fnsku = ''
-                this.search_shopname = ''
+                this.category_name = ''
                 this.getData()
             },
             formatter_created_at(row, column) {

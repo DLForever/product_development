@@ -128,7 +128,8 @@
                 checkVisible: false,
                 check_remark: undefined,
                 return_remark: undefined,
-                returnVisible: false
+                returnVisible: false,
+                change_detailsVisible: false
             }
         },
         created() {

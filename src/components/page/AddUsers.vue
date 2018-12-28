@@ -232,8 +232,12 @@
 						formData.append('user[phone]', this.form.phone)
 						formData.append('user[remark]', this.form.remark)
 						formData.append('user[sex]', this.form.sex)
-						formData.append('role_ids[]', this.form.role_ids)
-						formData.append('policy_ids[]', this.form.policy_ids)
+						this.form.role_ids.forEach((data) => {
+							formData.append('role_ids[]', data)
+						})
+						this.form.policy_ids.forEach((data) => {
+							formData.append('policy_ids[]', data)
+						})
 						let config = {
 							headers: {
 								'Authorization': localStorage.getItem('token')

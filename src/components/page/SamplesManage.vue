@@ -12,7 +12,7 @@
                     日期:
                     <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
                      分类:
-                    <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" change-on-select class="handle-select mr10"></el-cascader>
+                    <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" @change="getCatetory" change-on-select class="handle-select mr10"></el-cascader>
                     开发人员:
                     <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
                         <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
@@ -127,7 +127,7 @@
                     <el-input v-model="form.title"></el-input>
                 </el-form-item>
                 <el-form-item label="样品分类">
-                    <el-cascader :options="options" v-model="category_id" expand-trigger="hover" change-on-select></el-cascader>
+                    <el-cascader :options="options" v-model="category_id" @change="getCatetory2" expand-trigger="hover" change-on-select></el-cascader>
                 </el-form-item>
                 <el-form-item label="供应商">
                     <el-select v-model="form.supplier_id" placeholder="请选择">
@@ -442,7 +442,15 @@
               supplier_total_edit: 0,
               categories_options: [],
               query: undefined,
-              loading: false
+              loading: false,
+              options_len1: [],
+              options_len2: [],
+              options_len3: [],
+              options_len4: [],
+              options3: [],
+              options4: [],
+              edit_category_options: [],
+              options5: []
             }
         },
         created() {
@@ -581,6 +589,8 @@
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
+                        this.options3 = res.data.data
+                        this.options5 = this.options3
                         this.getCatetoryLoop(1)
                         // this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
                         // for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
@@ -599,6 +609,7 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
+                        this.options4 = this.options
                         this.categories_options = this.categories_options.concat(res.data.data)
                         // this.total = res.data.count
                     }
@@ -661,6 +672,9 @@
                     remark: item.remark,
                     supplier_id: item.supplier_id
                 }
+                let temp = item.category_name.split('>')
+                this.options.unshift({value: row.category_id, label: temp[temp.length-1]})
+                // this.options5.unshift({value: row.category_id, label: temp[temp.length-1]})
                 this.category_id = this.category_id.concat(item.category_id)
                 // this.getCategories()
                 this.categories_loop(item.category_id)
@@ -755,6 +769,8 @@
                 })
             },
             closeEdit() {
+                // this.options5 = this.options3
+                // this.options = this.options4
                 this.category_id = []
                 this.fileList = []
                 this.editVisible = false
@@ -978,6 +994,70 @@
                     }
                 }).catch((res) => {
 
+                })
+            },
+            getCatetory() {
+                this.$axios.get( '/categories?parent_id=' + this.category_id_filter[this.category_id_filter.length -1] , {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.options = []
+                        let temp_options = []
+                        if(this.category_id_filter.length == 1) {
+                            this.options_len1 = this.options3
+                            this.options_len1 = this.options_len1.concat(res.data.data)
+                            temp_options = this.options_len1
+                        }else if(this.category_id_filter.length == 2) {
+                            this.options_len2 = this.options_len1
+                            this.options_len2 = this.options_len2.concat(res.data.data)
+                            temp_options = this.options_len2
+                        }else if(this.category_id_filter.length == 3) {
+                            this.options_len3 = this.options_len2
+                            this.options_len3 = this.options_len3.concat(res.data.data)
+                            temp_options = this.options_len3
+                        }else if(this.category_id_filter.length == 4) {
+                            this.options_len4 = this.options_len3
+                            this.options_len4 = this.options_len4.concat(res.data.data)
+                            temp_options = this.options_len4
+                        }
+                        this.options = this.options.concat(this.getCategoryTree(temp_options,0))
+                    }
+                }).catch((res) => {
+                    console.log('error')
+                })
+            },
+            getCatetory2() {
+                this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1] , {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.options = []
+                        let temp_options = []
+                        if(this.category_id.length == 1) {
+                            this.options_len1 = this.options3
+                            this.options_len1 = this.options_len1.concat(res.data.data)
+                            temp_options = this.options_len1
+                        }else if(this.category_id.length == 2) {
+                            this.options_len2 = this.options_len1
+                            this.options_len2 = this.options_len2.concat(res.data.data)
+                            temp_options = this.options_len2
+                        }else if(this.category_id.length == 3) {
+                            this.options_len3 = this.options_len2
+                            this.options_len3 = this.options_len3.concat(res.data.data)
+                            temp_options = this.options_len3
+                        }else if(this.category_id.length == 4) {
+                            this.options_len4 = this.options_len3
+                            this.options_len4 = this.options_len4.concat(res.data.data)
+                            temp_options = this.options_len4
+                        }else{
+                            
+                        }
+                        this.options = this.options.concat(this.getCategoryTree(temp_options,0))
+                    }
+                }).catch((res) => {
+                    console.log('error')
                 })
             },
         },

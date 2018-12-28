@@ -107,6 +107,16 @@
                         ]
                     },
                     {
+                        icon: 'el-icon-date',
+                        index: '7',
+                        title: '主体管理',
+                        subs: [{
+                            index: 'subjectsmanage',
+                            title: '主体管理'
+                        },
+                        ]
+                    },
+                    {
                         icon: 'el-icon-news',
                         index: '2',
                         title: '样品管理',

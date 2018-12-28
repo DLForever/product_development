@@ -236,7 +236,7 @@
                 this.getPolicies()
                 const item = this.tableData[index]
                 item.policies_list.forEach((data) => {
-                    this.policesSelect.push(data.code)
+                    this.policesSelect.push(data.id)
                 })
                 this.policesSave = this.policesSelect
                 this.editPoliciesVisible = true;

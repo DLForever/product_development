@@ -55,6 +55,11 @@ export default new Router({
                     meta: { title: '审核申请查看' }
                 },
                 {
+                    path: '/subjectsmanage',
+                    component: resolve => require(['../components/page/SubjectsManage.vue'], resolve),
+                    meta: { title: '变体管理' }
+                },
+                {
                     path: '/addSamples',
                     component: resolve => require(['../components/page/AddSamples.vue'], resolve),
                     meta: { title: '添加样品' }

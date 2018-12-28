@@ -15,7 +15,7 @@
 								<el-input v-model.trim="classifyName"></el-input>
 							</el-form-item>
 							<el-form-item label="上级分类">
-                        		<el-cascader :options="options" v-model="category_id" expand-trigger="hover" change-on-select></el-cascader>
+                        		<el-cascader :options="options" v-model="category_id" expand-trigger="hover" change-on-select @change="getCatetory"></el-cascader>
                     		</el-form-item>
 							<el-form-item>
 								<el-button type="primary" @click="onSubmit" :disabled="submitDisabled">新建</el-button>
@@ -59,6 +59,12 @@
 				category_id: [],
 				classifyName: '',
 				caterory_page: 1,
+				options3: [],
+				options4: [],
+				options_len1: [],
+				options_len2: [],
+				options_len3: [],
+				options_len4: [],
 				rules: {
 					name: [{
 						required: true,
@@ -137,6 +143,8 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	// this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
+                    	// this.options = res.data.data
+                    	this.options3 = res.data.data
                     	this.getCatetoryLoop(1)
                     	// for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
                     	// 	this.getCatetoryLoop(i+1)
@@ -275,6 +283,51 @@
 			exceed() {
 				this.$message.error("对不起，超过个数限制")
 			},
+			test() {
+				console.log(this.category_id)
+				this.getCatetory()
+				this.$axios.get( '/categories?parent_id=' + this.category_id , {
+                	headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                    	this.getCatetory()
+                    }
+                }).catch((res) => {
+                	console.log('error')
+                })
+			},
+			getCatetory() {
+            	this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1] , {
+                	headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                    	this.options = []
+                    	let temp_options = []
+                    	if(this.category_id.length == 1) {
+                    		this.options_len1 = this.options3
+                    		this.options_len1 = this.options_len1.concat(res.data.data)
+                    		temp_options = this.options_len1
+                    	}else if(this.category_id.length == 2) {
+                    		this.options_len2 = this.options_len1
+                    		this.options_len2 = this.options_len2.concat(res.data.data)
+                    		temp_options = this.options_len2
+                    	}else if(this.category_id.length == 3) {
+                    		this.options_len3 = this.options_len2
+                    		this.options_len3 = this.options_len3.concat(res.data.data)
+                    		temp_options = this.options_len3
+                    	}else if(this.category_id.length == 4) {
+                    		this.options_len4 = this.options_len3
+                    		this.options_len4 = this.options_len4.concat(res.data.data)
+                    		temp_options = this.options_len4
+                    	}
+                    	this.options = this.options.concat(this.getCategoryTree(temp_options,0))
+                    }
+                }).catch((res) => {
+                	console.log('error')
+                })
+            },
 		},
 	}
 </script>

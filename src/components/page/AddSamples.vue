@@ -15,7 +15,7 @@
 								<el-input v-model.trim="form.name"></el-input>
 							</el-form-item>
 							<el-form-item label="样品分类" required>
-                        		<el-cascader :options="options" v-model="category_id" expand-trigger="hover" change-on-select></el-cascader>
+                        		<el-cascader :options="options" v-model="category_id" @change="getCatetory" expand-trigger="hover" change-on-select></el-cascader>
                     		</el-form-item>
 							<el-form-item label="样品标题">
 								<el-input v-model.trim="form.title"></el-input>
@@ -114,7 +114,7 @@
 									<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
 									<div class="el-upload__tip" slot="tip">只能上传xls/xlsx格式文件</div>
 								</el-upload>
-								<a :href="$axios.defaults.baseURL +'/batch_template.xls'">模板下载</a>
+								<a :href="$axios.defaults.baseURL +'/sample_batch_template.xls'">模板下载</a>
 							</el-form-item>
 						</el-form>
 						<el-form ref="form" :model="form" label-width="100px">
@@ -220,7 +220,12 @@
 				cur_page: 1,
 				supplierOptions: [],
 				supplier_page: 1,
-				supplier_total: 0
+				supplier_total: 0,
+				options_len1: [],
+              	options_len2: [],
+              	options_len3: [],
+              	options_len4: [],
+              	options3: []
 			}
 		},
 		beforeRouteEnter: (to, from, next) => {
@@ -239,6 +244,7 @@
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
+                    	this.options3 = res.data.data
                     	this.getCatetoryLoop(1)
                     	// for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
                     	// 	this.getCatetoryLoop(i+1)
@@ -481,6 +487,37 @@
 					console.log(obj.complete())
 				}
 			},
+			getCatetory() {
+                this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1] , {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.options = []
+                        let temp_options = []
+                        if(this.category_id.length == 1) {
+                            this.options_len1 = this.options3
+                            this.options_len1 = this.options_len1.concat(res.data.data)
+                            temp_options = this.options_len1
+                        }else if(this.category_id.length == 2) {
+                            this.options_len2 = this.options_len1
+                            this.options_len2 = this.options_len2.concat(res.data.data)
+                            temp_options = this.options_len2
+                        }else if(this.category_id.length == 3) {
+                            this.options_len3 = this.options_len2
+                            this.options_len3 = this.options_len3.concat(res.data.data)
+                            temp_options = this.options_len3
+                        }else if(this.category_id.length == 4) {
+                            this.options_len4 = this.options_len3
+                            this.options_len4 = this.options_len4.concat(res.data.data)
+                            temp_options = this.options_len4
+                        }
+                        this.options = this.options.concat(this.getCategoryTree(temp_options,0))
+                    }
+                }).catch((res) => {
+                    console.log('error')
+                })
+            },
 		},
 		components: {
 			"infinite-loading": VueInfiniteLoading

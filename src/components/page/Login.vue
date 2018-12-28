@@ -50,7 +50,7 @@
             submitForm2(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        localStorage.setItem('ms_username',this.ruleForm.username);
+                        localStorage.setItem('ms_username',this.ruleForm.name);
                         this.$router.push('/');
                     } else {
                         console.log('error submit!!');
@@ -71,7 +71,7 @@
                                 password: this.ruleForm.password
                         },
                         ).then((res) => {
-                            localStorage.setItem('ms_username', this.ruleForm.username)
+                            localStorage.setItem('ms_username', res.data.data.name)
                             localStorage.setItem('token', res.data.data.token)
                             console.log(localStorage.getItem('token'))
                             this.$router.push('/');
