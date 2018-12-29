@@ -11,6 +11,8 @@
                 <div class="fnsku_filter">
                     分类名称:
                     <el-input style="width:150px" placeholder="请输入分类名称" v-model.trim="category_name"></el-input>
+                    别名:
+                    <el-input style="width:150px" placeholder="请输入别名" v-model.trim="remark"></el-input>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
                 </div>
@@ -18,15 +20,17 @@
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column prop="id" label="分类ID" show-overflow-tooltip>
+                <el-table-column prop="id" label="分类ID" width="120" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="name" label="分类名称" show-overflow-tooltip>
+                <el-table-column prop="name" label="分类名称" width="350" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="relation" label="层级关系" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable>
+                <el-table-column prop="remark" label="别名" width="150" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable>
+                <el-table-column prop="created_at" label="创建时间" width="200" :formatter="formatter_created_at" sortable>
+                </el-table-column>
+                <el-table-column prop="updated_at" label="更新时间" width="200" :formatter="formatter_updated_at" sortable>
                 </el-table-column>
                 <!-- <el-table-column label="操作" width="100">
                     <template slot-scope="scope">
@@ -149,14 +153,20 @@
                 detailVisible: false,
                 products_details: [],
                 category_relation: '',
-                category_name: ''
+                category_name: '',
+                category_total: [],
+                isFilter: false,
+                remark: ''
             }
         },
         created() {
+            this.getTotalCategory()
             this.getData();
         },
         watch: {
-        	"$route": "getData"
+        	"$route": "getData",
+            "category_name": "clear_remark",
+            "remark": "clear_category"
         },
         computed: {
             data() {
@@ -177,11 +187,7 @@
             },
             // 获取 easy-mock 的模拟数据
             getData() {
-                // 开发环境使用 easy-mock 数据，正式环境使用 json 文件
-                if (process.env.NODE_ENV === 'development') {
-//                  this.url = '/ms/table/list';
-                };
-                this.$axios.get( '/categories?page='+this.cur_page + '&name=' + this.category_name + '&list=true', {
+                this.$axios.get( '/categories?page='+this.cur_page + '&name=' + this.category_name + '&remark=' + this.remark + '&list=true', {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -199,31 +205,80 @@
                 	console.log('error')
                 })
             },
-            categories_loop(c) {
-                this.tableData.forEach((data) => {
-                    if(c==data.id) {
-                        if(data.parent_id) {
-                            if(this.category_relation == '') {
-                                this.category_relation = data.name
-                            }else {
-                                this.category_relation = data.name + '>' + this.category_relation
-                            }
-                            // this.category_id.unshift(data.parent_id)
-                            this.categories_loop(data.parent_id)
-                        }else{
-                            if(this.category_relation == '') {
-                                this.category_relation = data.name
-                            }else {
-                                this.category_relation = data.name + '>' + this.category_relation
-                            }
+            getTotalCategory() {
+                this.$axios.get( '/categories?page='+this.cur_page + '&list=true', {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
+                            this.getTotalCategory2(i+1)
                         }
                     }
+                }).catch((res) => {
+                    console.log('error')
                 })
             },
+            getTotalCategory2(page) {
+                this.$axios.get( '/categories?page='+page + '&list=true', {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.category_total = this.category_total.concat(res.data.data)
+                    }
+                }).catch((res) => {
+                    console.log('error')
+                })
+            },
+            categories_loop(c) {
+                if(this.cur_page == 1 && this.isFilter == false) {
+                    this.tableData.forEach((data) => {
+                        if(c==data.id) {
+                            if(data.parent_id) {
+                                if(this.category_relation == '') {
+                                    this.category_relation = data.name
+                                }else {
+                                    this.category_relation = data.name + '>' + this.category_relation
+                                }
+                                // this.category_id.unshift(data.parent_id)
+                                this.categories_loop(data.parent_id)
+                            }else{
+                                if(this.category_relation == '') {
+                                    this.category_relation = data.name
+                                }else {
+                                    this.category_relation = data.name + '>' + this.category_relation
+                                }
+                            }
+                        }
+                    })
+                }else {
+                    this.category_total.forEach((data) => {
+                        if(c==data.id) {
+                            if(data.parent_id) {
+                                if(this.category_relation == '') {
+                                    this.category_relation = data.name
+                                }else {
+                                    this.category_relation = data.name + '>' + this.category_relation
+                                }
+                                // this.category_id.unshift(data.parent_id)
+                                this.categories_loop(data.parent_id)
+                            }else{
+                                if(this.category_relation == '') {
+                                    this.category_relation = data.name
+                                }else {
+                                    this.category_relation = data.name + '>' + this.category_relation
+                                }
+                            }
+                        }
+                    })
+                }
+            },
             filter_product() {
+                this.isFilter = true
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/categories?page='+this.cur_page + '&name=' + this.category_name + '&list=true', {
+                this.$axios.get( '/categories?page='+this.cur_page + '&name=' + this.category_name + '&remark=' + this.remark + '&list=true', {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -245,6 +300,7 @@
                 this.paginationShow = false
                 this.cur_page = 1
                 this.category_name = ''
+                this.remark = ''
                 this.getData()
             },
             formatter_created_at(row, column) {
@@ -406,6 +462,12 @@
 
                 })
             },
+            clear_remark() {
+                this.remark = ''
+            },
+            clear_category() {
+                this.category_name = ''
+            }
         }
     }
 

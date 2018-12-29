@@ -17,6 +17,9 @@
 							<el-form-item label="上级分类">
                         		<el-cascader :options="options" v-model="category_id" expand-trigger="hover" change-on-select @change="getCatetory"></el-cascader>
                     		</el-form-item>
+                    		<el-form-item label="别名">
+								<el-input v-model.trim="remark"></el-input>
+							</el-form-item>
 							<el-form-item>
 								<el-button type="primary" @click="onSubmit" :disabled="submitDisabled">新建</el-button>
 							</el-form-item>
@@ -65,6 +68,7 @@
 				options_len2: [],
 				options_len3: [],
 				options_len4: [],
+				remark: '',
 				rules: {
 					name: [{
 						required: true,
@@ -200,7 +204,8 @@
 				// }, 10000)
 				let params= {
 					category_id: this.category_id.pop(),
-					name: this.classifyName
+					name: this.classifyName,
+					remark: this.remark
 				}
 				let config = {
 					headers: {
@@ -213,6 +218,7 @@
 						this.classifyName = ''
 						this.$message.success('提交成功！')
 						this.options = []
+						this.remark = ''
 						this.getData()
 						// this.$router.push('/productmanage')
 					}

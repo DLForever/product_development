@@ -36,7 +36,7 @@
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column fixed prop="sku" label="SKU" width="120" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="图片" show-overflow-tooltip>
+                <el-table-column label="图片" width="120">
                     <template slot-scope="scope">
                         <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
                         <img  v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
@@ -45,7 +45,9 @@
                         <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
                 </el-table-column>
-                <el-table-column label="主体(点击查看)">
+                <el-table-column prop="username" label="开发人员" width="120" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column label="主体(点击查看)" width="120">
                     <template slot-scope="scope">
                         <span style="cursor: pointer;" @click="showChangeProduct(scope.$index, scope.row)">{{scope.row.sku.substring(0, scope.row.sku.length-2)}}</span>
                     </template>
@@ -53,7 +55,7 @@
                 <el-table-column prop="name" label="产品名称" width="230" show-overflow-tooltip>
                 </el-table-column>
                 
-                <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
+                <el-table-column prop="category_name" label="分类" show-overflow-tooltip>
                 </el-table-column>
                 
                 <!-- <el-table-column prop="user" label="开发人员" show-overflow-tooltip>
@@ -82,7 +84,7 @@
                         <a v-if="scope.row.picture_url != null && scope.row.picture_url != '' && scope.row.picture_url != 'null'" :href="scope.row.picture_url" target="_blank">查看图片</a>
                     </template>
                 </el-table-column> -->
-                <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip>
+                <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">
@@ -339,15 +341,15 @@
         <el-dialog title="导出产品" :visible.sync="exportVisible" width="35%" @close="closeExport">
             <el-form label-width="100px">
                 <el-form-item label="导出平台" required>
-                    <el-button type="primary">
+                    <!-- <el-button type="primary">
                         <a style="color:#fff;" :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Ebay'+ '&token=' + export_token">导出到Ebay</a>
-                    </el-button>
+                    </el-button> -->
                     <el-button type="primary">
                         <a style="color:#fff;" :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Amazon'+ '&token=' + export_token">导出到Amazon</a>
                     </el-button>
-                    <el-button type="primary">
+                    <!-- <el-button type="primary">
                         <a style="color:#fff;" :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Wish'+ '&token=' + export_token">导出到Wish</a>
-                    </el-button>
+                    </el-button> -->
                 </el-form-item>
             </el-form>
         </span>
@@ -357,6 +359,8 @@
         <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
             <el-table :data="products_details" border style="width: 100%">
                 <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="username" label="开发人员" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>

@@ -99,7 +99,7 @@
 		        let result = []
 		        for (var i = 0; i < categories.length; i++){
 			       	if(categories[i].parent_id == id || categories[i].parent_id == null){
-				        result.push({value:categories[i].id,label:categories[i].name,children:this.getTree(categories,categories[i].id)})
+				        result.push({value:categories[i].id,label:categories[i].name+ '(' + categories[i].id + ')',children:this.getTree(categories,categories[i].id)})
 				    }
 				}
 		        return result
@@ -109,7 +109,7 @@
 			    	return s.parent_id == id
 			   		})
 			    return tmp.map((s) => {
-			    	return {value:s.id,label:s.name,children:this.getTree(categories,s.id)}
+			    	return {value:s.id,label:s.name + '(' + s.id + ')',children:this.getTree(categories,s.id)}
 			   })
 			},
             deleteCategory() {

@@ -38,7 +38,7 @@
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column fixed prop="sku" label="SKU" width="120" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="图片" show-overflow-tooltip>
+                <el-table-column label="图片" width="120">
                     <template slot-scope="scope">
                         <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
                         <img v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
@@ -47,7 +47,9 @@
                         <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
                 </el-table-column>
-                <el-table-column prop="ebay_operate_username" label="分配" show-overflow-tooltip>
+                <el-table-column prop="ebay_operate_username" label="分配" width="120" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="username" label="开发人员" width="120" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column label="主体(点击查看)">
                     <template slot-scope="scope">
@@ -56,7 +58,7 @@
                 </el-table-column>
                 <el-table-column prop="name" label="产品名称" width="230" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
+                <el-table-column prop="category_name" label="分类" width="250" show-overflow-tooltip>
                 </el-table-column>
                 <!-- <el-table-column prop="user" label="开发人员" show-overflow-tooltip>
                 </el-table-column> -->
@@ -353,6 +355,8 @@
         <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
             <el-table :data="products_details" border style="width: 100%">
                 <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="username" label="开发人员" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
