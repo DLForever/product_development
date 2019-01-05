@@ -14,6 +14,13 @@
                     </el-tooltip>
                 </div>
                 <!-- 消息中心 -->
+                <el-badge :value="message_count" class="item" >
+                    <el-tooltip effect="dark" :content="message_count?`有${message_count}条未读消息`:`消息中心`" placement="bottom">
+                        <router-link to="/notifications">
+                            <i class="el-icon-bell"></i>
+                        </router-link>
+                    </el-tooltip>
+                </el-badge>
                 <!-- <div class="btn-bell">
                     <el-tooltip effect="dark" :content="message?`有${message}条未读消息`:`消息中心`" placement="bottom">
                         <router-link to="/tabs">
@@ -44,9 +51,14 @@
             return {
                 collapse: false,
                 fullscreen: false,
-                name: 'linxin',
-                message: 2
+                name: 'lyh',
+                message: 2,
             }
+        },
+        props:{
+            clearInte: Function,
+            message_count:Number,
+            notifications:Array,
         },
         computed:{
             username(){

@@ -114,6 +114,14 @@
             <el-table :data="suppliers_details" border style="width: 100%">
                 <el-table-column prop="name" label="供应商名称" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column label="营业执照">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.pictures.length === 0">无</span>
+                        <img class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url"/>
+                        <span v-else>无</span>
+                        <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
+                    </template>
+                </el-table-column>
                 <el-table-column prop="phone" label="电话" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="email" label="邮箱" show-overflow-tooltip>
@@ -328,9 +336,10 @@
                         this.getData()
                         this.editVisible = false
                     }
-                    this.submitDisabled = false
                 }).catch((res) => {
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
             // 确定删除
@@ -400,5 +409,9 @@
     .img_fnsku {
         width:6rem;
         height:6rem;
+    }
+    .img {
+        width:3rem;
+        height:3rem;
     }
 </style>

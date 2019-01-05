@@ -2,8 +2,8 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-tickets"></i> 审核管理</el-breadcrumb-item>
-                <el-breadcrumb-item>审核借样</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-tickets"></i> 借样管理</el-breadcrumb-item>
+                <el-breadcrumb-item>借样管理</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="container">
@@ -57,10 +57,16 @@
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
-                                    <el-button @click="handleDetails(scope.$index, scope.row)" type="text">详情</el-button>
+                                    <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp&nbsp情</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
-                                    <el-button @click="check(scope.$index, scope.row)" type="text">审核</el-button>
+                                    <el-button @click="check(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp审&nbsp&nbsp核</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="returnSamples(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp归&nbsp&nbsp还</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleCheckReturnSamples(scope.$index, scope.row)" type="text">审核归还</el-button>
                                 </el-dropdown-item>
 <!--                                 <el-dropdown-item>
                                     <el-button @click="returnSamples(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp归&nbsp&nbsp还</el-button>
@@ -69,7 +75,7 @@
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp编&nbsp&nbsp辑</el-button>
                                 </el-dropdown-item> -->
                                 <el-dropdown-item>
-                                    <el-button @click="handleDelete(scope.$index, scope.row)" type="text">删除</el-button>
+                                    <el-button @click="handleDelete(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp删&nbsp&nbsp除</el-button>
                                 </el-dropdown-item>
                             </el-dropdown-menu>
                         </el-dropdown>
@@ -218,7 +224,7 @@
                 <el-button type="primary" @click="checkdone">审核通过</el-button>
             </span>
         </el-dialog>
-         <!-- 归还提示框 -->
+        <!-- 归还提示框 -->
         <el-dialog title="提示" :visible.sync="returnVisible" width="50%" center>
             <el-form label-width="50px">
                 <el-form-item label="备注">
@@ -234,12 +240,13 @@
         <!-- 详情提示 -->
         <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
             <el-table :data="products_details" border style="width: 100%">
+                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
-                </el-table-column>
+                
                 <el-table-column prop="number" label="产品编码" width="110" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
@@ -264,6 +271,18 @@
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
             </el-table>
+        </el-dialog>
+        <!-- 审核归还提示框 -->
+        <el-dialog title="提示" :visible.sync="checkreturnVisible" width="50%" center>
+            <el-form label-width="50px">
+                <el-form-item label="备注">
+                    <el-input placeholder="请输入备注" v-model.trim="check_return_remark"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="checkreturnVisible = false">取 消</el-button>
+                <el-button type="primary" @click="checkReturnSamples">确认归还</el-button>
+            </span>
         </el-dialog>
     </div>
 </template>
@@ -335,6 +354,8 @@
                 user_total2: 0,
                 query2: undefined,
                 loading2: false,
+                check_return_remark: '',
+                checkreturnVisible: false
             }
         },
         created() {
@@ -364,8 +385,9 @@
             statusFilter(status) {
                 const statusMap = {
                     1: 'danger',
-                    2: 'warning',
-                    3: 'success',
+                    2: 'primary',
+                    3: 'warning',
+                    4: 'success'
                 }
                 return statusMap[status]
             },
@@ -547,10 +569,10 @@
                         this.getData()
                         this.editVisible = false
                     }
-                    this.submitDisabled = false
                 }).catch((res) => {
-                    this.submitDisabled = false
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
             closeEdit() {
@@ -646,6 +668,10 @@
                 this.returnVisible = true
             },
             returndone() {
+                if(this.return_remark == undefined) {
+                    this.$message.error('请输入备注')
+                    return
+                } 
                 let params = {
                     remark: this.return_remark
                 }
@@ -654,7 +680,7 @@
                     params
                 }).then((res) => {
                     if(res.data.code == 200) {
-                        this.$message.success('归还成功')
+                        this.$message.success('归还申请已提交')
                         this.getData()
                         this.returnVisible = false
                     }
@@ -788,14 +814,41 @@
                     })
                 }
             },
+            handleCheckReturnSamples(index, row) {
+                this.check_return_remark = ''
+                this.idx = row.id
+                this.checkreturnVisible = true
+            },
+            checkReturnSamples() {
+                if(this.check_return_remark == '') {
+                    this.$message.error('请输入备注')
+                    return
+                } 
+                let params = {
+                    remark: this.check_return_remark
+                }
+                this.$axios.post('/sample_outs/' + this.idx + '/check_done', params, {
+                    headers: {'Authorization': localStorage.getItem('token')},
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('归还申请已提交')
+                        this.getData()
+                        this.checkreturnVisible = false
+                    }
+                }).catch((res) => {
+                    console.log('err')
+                })
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "待审核"
                 }else if (status == 2) {
                     return "已借出"
                 }else if (status == 3) {
-                    return "已归还"
-                } else {
+                    return "申请归还"
+                } else if(status ==4) {
+                    return '已完成'
+                } else{
                     return "其他"
                 }
             },

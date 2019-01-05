@@ -287,10 +287,10 @@
                         this.getData()
                         this.editPoliciesVisible = false
                     }
-                    this.submitDisabled = false
                 }).catch((res) => {
-                    this.submitDisabled = false
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
             closeEdit() {

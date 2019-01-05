@@ -249,11 +249,11 @@
 								this.$refs['form'].resetFields()
 								this.$router.push('/usersmanage')
 							}
-							this.submitDisabled = false
 						}).catch((res) => {
 							console.log('err')
-							this.submitDisabled = false
-						})
+						}).finally((res) => {
+		                    this.submitDisabled = false
+		                })
 					} else {
 						this.$message.error("请填写完整信息")
 						return false

@@ -352,9 +352,10 @@
                         this.getData()
                         this.editVisible = false
                     }
-                    this.submitDisabled = false
                 }).catch((res) => {
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
             // 确定删除

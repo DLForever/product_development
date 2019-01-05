@@ -24,14 +24,14 @@
                 </el-table-column>
                 <el-table-column prop="name" label="姓名" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="shop_sum" label="店铺数量" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column prop="email" label="邮箱" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="phone" label="电话" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="sex2" label="性别">
                 </el-table-column>
-                <!-- <el-table-column prop="user" label="开发人员" show-overflow-tooltip>
-                </el-table-column> -->
                 <el-table-column prop="created_at_format" label="创建时间" sortable width="140">
                 </el-table-column>
                 <el-table-column prop="updated_at" label="更新时间" sortable width="140">
@@ -47,6 +47,9 @@
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp编&nbsp&nbsp辑&nbsp&nbsp</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleEditShopCount(scope.$index, scope.row)" type="text">修改店铺数量</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleEditPolicy(scope.$index, scope.row)" type="text">查看/修改权限</el-button>
@@ -114,7 +117,7 @@
                 <el-button type="primary" @click="saveEditPolicy" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
-         <!-- 修改角色弹出框 -->
+        <!-- 修改角色弹出框 -->
         <el-dialog title="修改角色" :visible.sync="editRolesVisible" width="50%" @close="closeEdit">
             <el-form>
                 <el-form-item label="角色">
@@ -126,6 +129,18 @@
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editRolesVisible = false">取 消</el-button>
                 <el-button type="primary" @click="saveEditRoles" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
+        <!-- 修改店铺数量弹出框 -->
+        <el-dialog title="修改店铺数量" :visible.sync="editCountVisible" width="50%">
+            <el-form>
+                <el-form-item label="店铺数量">
+                    <el-input-number v-model.trim="shopCount" :min="0"></el-input-number>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editCountVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveEditShop" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
     </div>
@@ -173,7 +188,10 @@
                 rolesSave: [],
                 editPoliciesVisible: false,
                 roles_page: 1,
-                editRolesVisible: false
+                editRolesVisible: false,
+                editCountVisible: false,
+                shopCount: 0,
+                user_id: undefined
             }
         },
         created() {
@@ -364,10 +382,10 @@
                         this.getData()
                         this.editVisible = false
                     }
-                    this.submitDisabled = false
                 }).catch((res) => {
-                    this.submitDisabled = false
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
             closeEdit() {
@@ -397,27 +415,25 @@
             	this.form = {
             		id: item.id
             	}
-            	this.$axios.delete('/users/'+this.form.id, 
-            	{
-            		headers: {'Authorization': localStorage.getItem('token')}
-            	}
-            ).then((res) => {
-            	if(res.data.code == 200){
-            		this.tableData.splice(this.idx, 1)
-            		this.getData()
-            		this.$message.success("删除成功")           		
-            	}
-            }).catch((res) => {
-            	this.$message.error("删除失败")
-            })
-                this.delVisible = false;
+            	this.$axios.delete('/users/'+this.form.id,
+                	{
+                		headers: {'Authorization': localStorage.getItem('token')}
+                	}).then((res) => {
+                    	if(res.data.code == 200){
+                    		this.tableData.splice(this.idx, 1)
+                    		this.getData()
+                            this.delVisible = false;
+                    		this.$message.success("删除成功")           		
+                    	}
+                        }).catch((res) => {
+                        	this.$message.error("删除失败")
+                        })
             },
             handleEditPolicy(index, row) {
                 this.getPolicies()
                 this.policesSelect = []
                 this.policesSave = []
                 this.idx = row.id
-                
                 this.$axios.get('/users/' + this.idx, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 }).then((res) => {
@@ -427,9 +443,9 @@
                             this.policesSave.push(data.id)
                         })
                         this.editPoliciesVisible = true
-                        console.log(this.policesSelect)
                     }
                 }).catch((res) => {
+                    this.$message.error('系统异常,请联系管理员')
                     console.log('err')
                 })
             },
@@ -461,10 +477,10 @@
                         this.getData()
                         this.editPoliciesVisible = false
                     }
-                    this.submitDisabled = false
                 }).catch((res) => {
-                    this.submitDisabled = false
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
             handleEditRoles(index, row) {
@@ -483,6 +499,7 @@
                         this.editRolesVisible = true
                     }
                 }).catch((res) => {
+                    this.$message.error('系统异常,请联系管理员')
                     console.log('err')
                 })
             },
@@ -518,6 +535,32 @@
                 }).catch((res) => {
                     this.submitDisabled = false
                     console.log('err')
+                })
+            },
+            handleEditShopCount(index, row) {
+                this.user_id = row.id
+                this.shopCount = row.shop_sum
+                this.editCountVisible = true
+            },
+            saveEditShop() {
+                this.submitDisabled = true
+                let params = {
+                    sum: this.shopCount
+                }
+                this.$axios.post('/users/' + this.user_id + '/update_shopsum', params,{
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('修改成功')
+                        this.editCountVisible = false
+                        this.getData()
+                    }
+                }).catch((res) => {
+
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
         }

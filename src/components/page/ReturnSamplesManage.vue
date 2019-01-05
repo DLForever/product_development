@@ -62,7 +62,7 @@
                 </el-pagination>
             </div>
         </div>
-         <!-- 归还提示框 -->
+        <!-- 归还提示框 -->
         <el-dialog title="提示" :visible.sync="returnVisible" width="50%" center>
             <el-form label-width="50px">
                 <el-form-item label="备注">
@@ -326,10 +326,10 @@
                         this.getData()
                         this.editVisible = false
                     }
-                    this.submitDisabled = false
                 }).catch((res) => {
-                    this.submitDisabled = false
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
             closeEdit() {

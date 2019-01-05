@@ -19,7 +19,7 @@
                         <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
                     </el-select>
                     供应商:
-                    <el-select v-model="supplier_id_filter" placeholder="选择供应商" class="handle-select mr10">
+                    <el-select v-model="supplier_id_filter" placeholder="选择供应商" @visible-change="supplierselectVisble" class="handle-select mr10">
                         <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
                     </el-select>
@@ -31,10 +31,10 @@
             </div>
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
-                <!-- <el-table-column type="selection" width="55"></el-table-column> -->
-                <!-- <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
-                </el-table-column> -->
-                <el-table-column prop="name" label="样品名称" show-overflow-tooltip>
+                <el-table-column type="selection" width="55"></el-table-column>
+                <el-table-column fixed prop="sku" label="SKU" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column  prop="name" label="样品名称" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column label="图片" show-overflow-tooltip>
                     <template slot-scope="scope">
@@ -80,7 +80,7 @@
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="操作" width="100">
+                <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">
                         <el-dropdown>
                             <el-button type="primary">
@@ -88,10 +88,10 @@
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
-                                    <el-button @click="showProduct(scope.$index, scope.row)" type="text">&nbsp样品图片</el-button>
+                                    <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp情</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
-                                    <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp情</el-button>
+                                    <el-button @click="showProduct(scope.$index, scope.row)" type="text">&nbsp样品图片</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleStock(scope.$index, scope.row)" type="text">添加库存</el-button>
@@ -99,6 +99,9 @@
                                <!--  <el-dropdown-item>
                                     <el-button @click="handleApply(scope.$index, scope.row)" type="text">借出样品</el-button>
                                 </el-dropdown-item> -->
+                                <el-dropdown-item>
+                                    <el-button @click="handleApply(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp借&nbsp出</el-button>
+                                </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp编&nbsp&nbsp辑</el-button>
                                 </el-dropdown-item>
@@ -252,9 +255,14 @@
         </el-dialog>
         <!-- 申请借样提示框 -->
         <el-dialog title="编辑" :visible.sync="applyVisible" width="50%" center>
-            <el-form label-width="50px">
+            <el-form label-width="100px">
                 <el-form-item label="数量">
                     <el-input placeholder="请输入数量" v-model.trim="apply_stocksum"></el-input>
+                </el-form-item>
+                <el-form-item label="出库方式">
+                    <el-radio v-model="out_type" label="1" border>借出</el-radio>
+                    <el-radio v-model="out_type" label="2" border>赠品</el-radio>
+                    <el-radio v-model="out_type" label="3" border>销售</el-radio>
                 </el-form-item>
                 <el-form-item label="备注">
                     <el-input placeholder="请输入备注" v-model.trim="apply_stockremark"></el-input>
@@ -338,6 +346,7 @@
             <el-button type="danger" @click="deleteProductImg">确 定</el-button>
         </span>
         </el-dialog>
+        
     </div>
 </template>
 
@@ -450,15 +459,18 @@
               options3: [],
               options4: [],
               edit_category_options: [],
-              options5: []
+              options5: [],
+              out_type: 0,
+              returnVisible: false,
+              return_remark: ''
             }
         },
         created() {
             this.getData();
             // this.getUsers()
-            this.getSuppliers()
+            // this.getSuppliers()
             this.getCategories()
-            this.getSuppliersEdit()
+            // this.getSuppliersEdit()
         },
         watch: {
         	"$route": "getData"
@@ -650,6 +662,9 @@
                 return row.tag === value;
             },
             handleEdit(index, row) {
+                this.supplier_page_edit = 1
+                this.supplier_options_edit = []
+                this.getSuppliersEdit()
                 this.idx = index;
                 const item = this.tableData[index];
                 this.form = {
@@ -762,10 +777,10 @@
                         this.getData()
                         this.editVisible = false
                     }
-                    this.submitDisabled = false
                 }).catch((res) => {
-                    this.submitDisabled = false
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
             closeEdit() {
@@ -850,10 +865,11 @@
                 this.idx = row.id
                 this.apply_stocksum = ''
                 this.apply_stockremark = undefined
+                this.out_type = 0
                 this.applyVisible = true
             },
             saveApply() {
-                if(this.apply_stocksum == '' || this.apply_stockremark == undefined) {
+                if(this.apply_stocksum == '' || this.apply_stockremark == undefined || this.out_type == 0) {
                     this.$message.error('请输入完整信息')
                     return
                 }
@@ -861,6 +877,7 @@
                 let params = {
                     id: this.idx,
                     sum: this.apply_stocksum,
+                    out_type: this.out_type,
                     remark: this.apply_stockremark
                 }
                 this.$axios.post('/sample_outs', params, {
@@ -870,11 +887,11 @@
                         this.$message.success('提交成功')
                         this.getData()
                         this.applyVisible = false
-                        this.submitDisabled = false
                     }
                 }).catch((res) => {
-                    this.submitDisabled = false
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
             handleDetails(index, row) {
@@ -1052,7 +1069,7 @@
                             this.options_len4 = this.options_len4.concat(res.data.data)
                             temp_options = this.options_len4
                         }else{
-                            
+
                         }
                         this.options = this.options.concat(this.getCategoryTree(temp_options,0))
                     }
@@ -1060,6 +1077,15 @@
                     console.log('error')
                 })
             },
+            supplierselectVisble(visible) {
+                this.supplier_options = []
+                this.supplier_page = 1
+                this.$refs.infiniteLoading2.stateChanger.reset()
+                if(visible) {
+                    this.getSuppliers()
+                }
+            },
+            
         },
         components: {
             "infinite-loading": VueInfiniteLoading

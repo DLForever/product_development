@@ -175,6 +175,9 @@
 									</tbody>
 								</table>
 							</el-form-item>
+							<el-form-item label="英文名">
+								<el-input v-model.trim="subject_form.english_name"></el-input>
+							</el-form-item>
 							<el-form-item label="产品标题">
 								<el-input v-model.trim="subject_form.title"></el-input>
 							</el-form-item>
@@ -228,6 +231,40 @@
 							</el-form-item>
 							<el-form-item label="包装重量(g)">
 								<el-input v-model.trim="subject_form.package_weight"></el-input>
+							</el-form-item>
+
+							<el-form-item label="型号">
+								<el-input v-model.trim="subject_form.model_number"></el-input>
+							</el-form-item>
+							<el-form-item label="材质">
+								<el-input v-model.trim="subject_form.texture"></el-input>
+							</el-form-item>
+							<el-form-item label="外箱规格">
+								<template slot-scope="scope">
+									<el-col :span="7">
+										<el-form-item>
+											<el-input v-model.trim="subject_form.box_length" placeholder="长(cm)"></el-input>
+										</el-form-item>
+									</el-col>
+									<el-col class="line" :span="1">-</el-col>
+									<el-col :span="7">
+										<el-form-item>
+											<el-input v-model.trim="subject_form.box_width" placeholder="宽(cm)"></el-input>
+										</el-form-item>
+									</el-col>
+									<el-col class="line" :span="1">-</el-col>
+									<el-col :span="7">
+										<el-form-item>
+											<el-input v-model.trim="subject_form.box_height" placeholder="高(cm)"></el-input>
+										</el-form-item>
+									</el-col>
+								</template>
+							</el-form-item>
+							<el-form-item label="单箱实重">
+								<el-input v-model.trim="subject_form.box_weight"></el-input>
+							</el-form-item>
+							<el-form-item label="单箱数量">
+								<el-input v-model.trim="subject_form.box_sum"></el-input>
 							</el-form-item>
 							<el-form-item label="产品描述">
 								<el-input v-model.trim="subject_form.desc"></el-input>
@@ -538,7 +575,7 @@
 				console.log(this.$refs[formName].validate())
 				this.$refs[formName].validate((valid) => {
 					if(valid) {
-						// this.submitDisabled = true
+						this.submitDisabled = true
 						// setTimeout(() => {
 						// 	this.submitDisabled = false
 						// }, 10000)
@@ -579,7 +616,6 @@
 						formData.append('product[price]', this.form.price)
 						formData.append('product[origin_url]', this.form.origin_url)
 						formData.append('product[picture_url]', this.form.picture_url)
-						// formData.append('product[supplier_id]', this.form.supplier_id)
 						formData.append('product[remark]', this.form.remark)
 						formData.append('product[wish]', this.isWish)
 						formData.append('product[ebay]', this.iseBay)
@@ -622,11 +658,11 @@
 								this.options = []
 								this.$router.push('/productmanage')
 							}
-							this.submitDisabled = false
 						}).catch((res) => {
 							console.log('err')
-							this.submitDisabled = false
-						})
+						}).finally((res) => {
+		                    this.submitDisabled = false
+		                })
 					} else {
 						this.$message.error("请填写完整信息")
 						return false
@@ -845,6 +881,14 @@
 						formData.append('product[remark]', this.subject_form.remark)
 						formData.append('product[wish]', this.subject_form.isWish)
 						formData.append('product[ebay]', this.subject_form.iseBay)
+						formData.append('product[model_number]', this.subject_form.model_number)
+						formData.append('product[texture]', this.subject_form.texture)
+						formData.append('product[box_length]', this.subject_form.box_length)
+						formData.append('product[box_width]', this.subject_form.box_width)
+						formData.append('product[box_height]', this.subject_form.box_height)
+						formData.append('product[box_weight]', this.subject_form.box_weight)
+						formData.append('product[box_sum]', this.subject_form.box_sum)
+						formData.append('product[english_name]', this.subject_form.english_name)
 						this.subject_fileList.forEach((item) => {
 							formData.append('product[pictures][]', item.raw)
 						})
@@ -855,8 +899,8 @@
 						}
 						this.$axios.post('/products/add_attr', formData, config).then((res) => {
 							if(res.data.code == 200) {
-								this.$message.success('提交成功，等待管理员审核！');
-								this.$refs['form'].resetFields()
+								this.$message.success('提交成功！');
+								this.$refs['subject_form'].resetFields()
 								this.subject_form.length = ''
 								this.subject_form.width = ''
 								this.subject_form.height = ''

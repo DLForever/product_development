@@ -132,18 +132,18 @@
                             index: 'samplesinManage',
                             title: '入库管理'
                         },
-                        {
-                            index: 'applysampleoutsManage',
-                            title: '申请借样'
-                        },
+                        // {
+                        //     index: 'applysampleoutsManage',
+                        //     title: '申请借样'
+                        // },
                         {
                             index: 'sampleoutsManage',
-                            title: '审核借样'
+                            title: '借样管理'
                         },
-                        {
-                            index: 'returnsamplesManage',
-                            title: '归还样品'
-                        },
+                        // {
+                        //     index: 'returnsamplesManage',
+                        //     title: '归还样品'
+                        // },
                         ]
                     },
                     // {

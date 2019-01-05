@@ -39,7 +39,7 @@
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column  fixed prop="sku" label="SKU" width="120" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="图片" width="120">
+                <el-table-column label="图片" width="80">
                     <template slot-scope="scope">
                         <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
                         <img v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
@@ -48,11 +48,11 @@
                         <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
                 </el-table-column>
-                <el-table-column prop="wish_operate_username" label="分配给" width="120" show-overflow-tooltip>
+                <el-table-column prop="wish_operate_username" label="分配给" width="80" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="username" label="开发人员" width="120" show-overflow-tooltip>
+                <el-table-column prop="username" label="开发人员" width="80" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="主体(点击查看)">
+                <el-table-column label="主体(点击查看)" width="120">
                     <template slot-scope="scope">
                         <span style="cursor: pointer;" @click="showChangeProduct(scope.$index, scope.row)">{{scope.row.sku.substring(0, scope.row.sku.length-2)}}</span>
                     </template>
@@ -86,7 +86,14 @@
                         <a v-if="scope.row.picture_url != null && scope.row.picture_url != '' && scope.row.picture_url != 'null'" :href="scope.row.picture_url" target="_blank">查看图片</a>
                     </template>
                 </el-table-column> -->
+                <el-table-column prop="status" label="状态" width="120">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status)}}</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="img_count" label="图片数量" width="80">
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">
@@ -97,6 +104,9 @@
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
                                     <el-button @click="showProduct(scope.$index, scope.row)" type="text">&nbsp产品图片</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="showSubjectPictures(scope.$index, scope.row)" type="text">&nbsp主体图片</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp&nbsp情</el-button>
@@ -117,7 +127,7 @@
             </el-table>
             </el-table>
             <div class="pagination">
-                <el-pagination v-if="paginationShow" @current-change="handleCurrentChange" @size-change="handleSizeChange" :page-size="pagesize" layout="prev, pager, next" :total="totals">
+                <el-pagination v-if="paginationShow" @current-change="handleCurrentChange" @size-change="handleSizeChange" :page-sizes="[20,50,100,200]" :page-size="pagesize" layout="sizes,prev, pager, next" :total="totals">
                 </el-pagination>
             </div>
         </div>
@@ -143,6 +153,9 @@
                         <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
                     </el-select>
                 </el-form-item> -->
+                <el-form-item label="英文名">
+                    <el-input v-model="form.english_name"></el-input>
+                </el-form-item>
                 <el-form-item label="产品标题">
                     <el-input v-model="form.title"></el-input>
                 </el-form-item>
@@ -197,6 +210,41 @@
                 <el-form-item label="包装重量(g)">
                     <el-input v-model="form.package_weight"></el-input>
                 </el-form-item>
+
+                <el-form-item label="型号">
+                    <el-input v-model.trim="form.model_number"></el-input>
+                </el-form-item>
+                <el-form-item label="材质">
+                    <el-input v-model.trim="form.texture"></el-input>
+                </el-form-item>
+                <el-form-item label="外箱规格">
+                    <template slot-scope="scope">
+                        <el-col :span="7">
+                            <el-form-item>
+                                <el-input v-model.trim="form.box_length" placeholder="长(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col class="line" :span="1">-</el-col>
+                        <el-col :span="7">
+                            <el-form-item>
+                                <el-input v-model.trim="form.box_width" placeholder="宽(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col class="line" :span="1">-</el-col>
+                        <el-col :span="7">
+                            <el-form-item>
+                                <el-input v-model.trim="form.box_height" placeholder="高(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                </el-form-item>
+                <el-form-item label="单箱实重">
+                    <el-input v-model.trim="form.box_weight"></el-input>
+                </el-form-item>
+                <el-form-item label="单箱数量">
+                    <el-input v-model.trim="form.box_sum"></el-input>
+                </el-form-item>
+
                 <el-form-item label="产品描述">
                     <el-input v-model="form.desc"></el-input>
                 </el-form-item>
@@ -274,54 +322,12 @@
             <!-- <el-button type="primary" @click="productVisible = false">确 定</el-button> -->
         </span>
         </el-dialog>
-        <!-- 查看包装图片 -->
-        <el-dialog title="产品图片" :visible.sync="packageVisible" width="20%" @close="closePackage">
-            <el-table :data="picturesPackageList" border style="width: 100%">
-                <el-table-column prop="sum" label="包装图片">
-                    <template slot-scope="scope">
-                        <!-- <span>{{scope.row.url}}</span> -->
-                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
-                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
-                        <!-- <span v-else>无</span> -->
-                    </template>
-                    <!-- <template slot-scope="scope">
-                        <img class="img_fnsku" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url" />                  
-                    </template> -->
-                </el-table-column>
-                
-                <el-table-column label="操作" width="100">
-                    <template slot-scope="scope">
-                        <el-button type="danger" @click="handleDeletePac(scope.$index, scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-            <!-- <el-carousel :interval="4000" type="card" height="200px" v-if="img_package">
-                <el-carousel-item v-for="item in form.pictures">
-                    <img :src="$axios.defaults.baseURL+item.url.url" />
-                </el-carousel-item>
-            </el-carousel>
-            <div v-if="pdf_package" v-for="item in form.pictures">
-                <a target="_blank" :href="$axios.defaults.baseURL + ':3000' +item.url.url">{{'查看' + item.id + '.pdf'}}</a>
-            </div> -->
-            <!-- <span slot="footer" class="dialog-footer"> -->
-            <!--<el-button @click="showImg = false">取 消</el-button>-->
-            <!-- <el-button type="primary" @click="packageVisible = false">确 定</el-button> -->
-        </span>
-        </el-dialog>
         <!-- 删除产品图片提示 -->
         <el-dialog title="删除产品图片" :visible.sync="confirmDelProVis" width="35%">
             <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
             <span slot="footer" class="dialog-footer">
             <el-button @click="confirmDelProVis = false">取 消</el-button>
             <el-button type="danger" @click="deleteProductImg">确 定</el-button>
-        </span>
-        </el-dialog>
-        <!-- 删除包装图片提示 -->
-        <el-dialog title="删除产品图片" :visible.sync="confirmDElPacVis" width="35%">
-            <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
-            <span slot="footer" class="dialog-footer">
-            <el-button @click="confirmDElPacVis = false">取 消</el-button>
-            <el-button type="danger" @click="deletePackageImg">确 定</el-button>
         </span>
         </el-dialog>
         <!-- 申请查看产品提示 -->
@@ -361,6 +367,8 @@
                 </el-table-column>
                 <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="english_name" label="英文名" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
@@ -369,13 +377,23 @@
                 </el-table-column>
                 <el-table-column prop="price" label="采购价">
                 </el-table-column>
-                <el-table-column prop="size" label="尺寸(长*宽*高)" width="100">
+                <el-table-column prop="size" label="尺寸(长*宽*高cm)" width="120">
                 </el-table-column>
-                <el-table-column prop="weight" label="重量">
+                <el-table-column prop="weight" label="重量(g)">
                 </el-table-column>
-                <el-table-column prop="package_size" label="包装尺寸(长*宽*高)" width="130">
+                <el-table-column prop="package_size" label="包装尺寸(长*宽*高cm)" width="140">
                 </el-table-column>
-                <el-table-column prop="package_weight" label="包装重量">
+                <el-table-column prop="package_weight" label="包装重量(g)" width="100">
+                </el-table-column>
+                <el-table-column prop="model_number" label="型号"  show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="texture" label="材质" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="box_size" label="外箱尺寸(长*宽*高cm)" width="180">
+                </el-table-column>
+                <el-table-column prop="box_weight" label="单箱实重(g)" width="90" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="box_sum" label="单箱数量(g)" width="90">
                 </el-table-column>
                 <el-table-column prop="desc" label="描述" show-overflow-tooltip>
                 </el-table-column>
@@ -439,6 +457,16 @@
                 </el-table-column>
                 <el-table-column prop="package_weight" label="包装重量">
                 </el-table-column>
+                <el-table-column prop="model_number" label="型号"  show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="texture" label="材质" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="box_size" label="外箱尺寸(长*宽*高cm)" width="160">
+                </el-table-column>
+                <el-table-column prop="box_weight" label="单箱实重(g)" width="100" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="box_sum" label="单箱数量(g)" width="100">
+                </el-table-column>
                 <el-table-column prop="desc" label="描述" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
@@ -463,6 +491,31 @@
                 <el-button @click="addPictureVisible = false">取 消</el-button>
                 <el-button type="danger" @click="submitAddPictures">确 定</el-button>
             </span>
+        </el-dialog>
+        <!-- 查看主体图片 -->
+        <el-dialog title="主体图片" :visible.sync="subjectPicturesVisible" width="20%">
+            <el-table :data="picturesSubjectsList" border style="width: 100%">
+                <el-table-column prop="sum" label="主体图片">
+                    <template slot-scope="scope">
+                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
+                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作" width="100">
+                    <template slot-scope="scope">
+                        <el-button type="danger" @click="handleDeleteSubjectPic(scope.$index, scope.row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </span>
+        </el-dialog>
+        <!-- 删除主体图片提示 -->
+        <el-dialog title="删除产品图片" :visible.sync="confirmDelSubjectPicVis" width="35%">
+            <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
+            <span slot="footer" class="dialog-footer">
+            <el-button @click="confirmDelSubjectPicVis = false">取 消</el-button>
+            <el-button type="danger" @click="DeleteSubjectPicture">确 定</el-button>
+        </span>
         </el-dialog>
     </div>
 </template>
@@ -590,7 +643,10 @@
               subject_name: '',
               addPictureVisible: false,
               supplier_id: [],
-              suppliers_temp: []
+              suppliers_temp: [],
+              picturesSubjectsList: [],
+              subjectPicturesVisible: false,
+              confirmDelSubjectPicVis: false
             }
         },
         created() {
@@ -599,6 +655,20 @@
             // this.getSuppliers()
             this.getCategories()
             // this.getSuppliersEdit()
+        },
+        filters: {
+            //类型转换
+            statusFilter(status) {
+                const statusMap = {
+                    1: 'danger',
+                    2: 'warning',
+                    3: 'danger',
+                    4: 'success',
+                    5: 'primary',
+                    6: 'success'
+                }
+                return statusMap[status]
+            },
         },
         watch: {
         	"$route": "getData"
@@ -614,6 +684,7 @@
         methods: {
         	handleSizeChange(val) {
         		this.pagesize = val;
+                this.getData()
         	},
             // 分页导航
             handleCurrentChange(val) {
@@ -636,14 +707,16 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/products/wish_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&self=' + this.selfdata, {
+                this.$axios.get( '/products/wish_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&self=' + this.selfdata + '&page_size=' + this.pagesize, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.size = data.length + '*' + data.width + '*' + data.height
-                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                            data.img_count = data.pictures.length + data.subject_pictures.length
+                            // data.size = data.length + '*' + data.width + '*' + data.height
+                            // data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                            // data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -666,14 +739,16 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/products/wish_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&self=' + this.selfdata, {
+                this.$axios.get( '/products/wish_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&self=' + this.selfdata + '&page_size=' + this.pagesize, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.size = data.length + '*' + data.width + '*' + data.height
-                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                            data.img_count = data.pictures.length + data.subject_pictures.length
+                            // data.size = data.length + '*' + data.width + '*' + data.height
+                            // data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                            // data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -802,36 +877,49 @@
                 //         })
                 //     }
                 // })
-                this.idx = index;
-                const item = this.tableData[index];
-                this.form = {
-                    id: item.id,
-                    name: item.name,
-                    title: item.title,
-                    price: item.price,
-                    length: item.length,
-                    width: item.width,
-                    height: item.height,
-                    weight: item.weight,
-                    package_length: item.package_length,
-                    package_width: item.package_width,
-                    package_height: item.package_height,
-                    package_weight: item.package_weight,
-                    desc: item.desc,
-                    desc_url: item.desc_url,
-                    origin_url: item.origin_url,
-                    picture_url: item.picture_url,
-                    remark: item.remark,
-                    supplier_id: item.supplier_id,
-                    wish: item.wish,
-                    ebay: item.ebay,
-                    category_name: item.category_name
-                }
-                // this.category_id = this.category_id.concat(item.category_id)
-                // this.getCategories()
-                // this.getSuppliers()
-                // this.categories_loop(item.category_id)
-                this.editVisible = true;
+                this.$axios.get('/products/' + row.id, {
+                    headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.form = {
+                            id: res.data.data.id,
+                            name: res.data.data.name,
+                            title: res.data.data.title,
+                            price: res.data.data.price,
+                            length: res.data.data.length,
+                            width: res.data.data.width,
+                            height: res.data.data.height,
+                            weight: res.data.data.weight,
+                            package_length: res.data.data.package_length,
+                            package_width: res.data.data.package_width,
+                            package_height: res.data.data.package_height,
+                            package_weight: res.data.data.package_weight,
+                            desc: res.data.data.desc,
+                            desc_url: res.data.data.desc_url,
+                            origin_url: res.data.data.origin_url,
+                            picture_url: res.data.data.picture_url,
+                            remark: res.data.data.remark,
+                            wish: res.data.data.wish,
+                            ebay: res.data.data.ebay,
+                            category_name: res.data.data.category_name,
+                            model_number: res.data.data.model_number,
+                            texture: res.data.data.texture,
+                            origin_url: res.data.data.origin_url,
+                            box_length: res.data.data.box_length,
+                            box_width: res.data.data.box_width,
+                            box_height: res.data.data.box_height,
+                            box_weight: res.data.data.box_weight,
+                            box_sum: res.data.data.box_sum,
+                            english_name: res.data.data.english_name,
+                        }
+                        this.idx = index;
+                        this.editVisible = true;
+                    }
+                }).catch((res) =>{
+
+                })
             },
             categories_loop(c) {
                 this.categories_options.forEach((data) => {
@@ -895,6 +983,16 @@
                 formData.append('product[origin_url]', this.form.origin_url)
                 formData.append('product[picture_url]', this.form.picture_url)
                 formData.append('product[remark]', this.form.remark)
+                formData.append('product[model_number]', this.form.model_number)
+                formData.append('product[texture]', this.form.texture)
+                formData.append('product[box_length]', this.form.box_length)
+                formData.append('product[box_width]', this.form.box_width)
+                formData.append('product[box_height]', this.form.box_height)
+                formData.append('product[box_weight]', this.form.box_weight)
+                formData.append('product[box_sum]', this.form.box_sum)
+                formData.append('product[english_name]', this.form.english_name)
+                formData.append('product[wish]', this.form.wish)
+                formData.append('product[ebay]', this.form.ebay)
                 // this.supplier_id.forEach((data) => {
                 //     formData.append('product[supplier_id][]', data)
                 // })
@@ -916,10 +1014,10 @@
                         this.getData()
                         this.editVisible = false
                     }
-                    this.submitDisabled = false
                 }).catch((res) => {
-                    this.submitDisabled = false
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
                 // this.$axios.patch('/admin/users/' + this.form.id, params, {
                 //     headers: {
@@ -991,23 +1089,18 @@
                 }
                 this.productVisible = true;
             },
-            showPackage(index, row) {
-                this.product_id = row.id
+            showSubjectPictures(index, row) {
+                this.picturesSubjectsList = []
+                this.product_id = row.product_subject_id
                 const item = this.tableData[index]
-                item.pictures.forEach((data) => {
-                    if(data.remark == 'package') {
-                        this.picturesPackageList.push(data)
-                    }
+                item.subject_pictures.forEach((data) => {
+                    this.picturesSubjectsList.push(data)
                 })
-                this.packageVisible = true;
+                this.subjectPicturesVisible = true;
             },
             closeProduct() {
                 this.productVisible = false
                 this.picturesProductList = []
-            },
-            closePackage() {
-                this.packageVisible = false
-                this.picturesPackageList = []
             },
             deleteProductImg() {
                 let params = {
@@ -1028,17 +1121,20 @@
 
                 })
             },
-            deletePackageImg() {
-                this.$axios.get('/products/' + this.product_id+ '/delete_picture?picture_id=' + this.picture_id ,{
+            DeleteSubjectPicture() {
+                let params = {
+                    img_id: this.picture_id
+                }
+                this.$axios.post('/product_subjects/' + this.product_id+ '/delete_img', params, {
                      headers: {
                         'Authorization': localStorage.getItem('token')
                     }
                 }).then((res) => {
                     if(res.data.code == 200) {
-                        this.picturesPackageList.splice(this.idx, 1);
+                        this.confirmDelSubjectPicVis = false
+                        this.picturesSubjectsList.splice(this.idx, 1);
                         this.getData()
                         this.$message.success("删除成功")
-                        this.confirmDElPacVis = false
                     }
                 }).catch((res) => {
 
@@ -1049,10 +1145,10 @@
                 this.idx = index;
                 this.confirmDelProVis = true;
             },
-            handleDeletePac(index, row) {
+            handleDeleteSubjectPic(index, row) {
                 this.picture_id = row.id
                 this.idx = index;
-                this.confirmDElPacVis = true;
+                this.confirmDelSubjectPicVis = true;
             },
             handleApply() {
                 if(this.multipleSelection.length == 0){
@@ -1138,8 +1234,23 @@
             },
             handleDetails(index, row) {
                 this.product_id = row.id
-                this.products_details = [row]
-                this.detailVisible = true
+                this.$axios.get('/products/' + row.id, {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.products_details = [res.data.data]
+                        this.products_details.forEach((data) => {
+                            data.size = data.length + '*' + data.width + '*' + data.height
+                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                            data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
+                        })
+                        this.detailVisible = true
+                    }
+                }).catch((res) => {
+
+                })
             },
             onInfinite_suppliers(obj) {
                 if((this.supplier_page * 20) < this.supplier_total) {
@@ -1182,6 +1293,7 @@
                     this.$message.error('请选择至少一个产品')
                     return
                 }
+                this.distributeUser = ''
                 this.distributeVisible = true
             },
             distributenProduct() {
@@ -1201,7 +1313,7 @@
                 this.$axios.post('/products/allocate_product', params, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 }).then((res) => {
-                    if(res.data.code = 200) {
+                    if(res.data.code == 200) {
                         this.$message.success('分配成功!')
                         this.distributeVisible = false
                         this.distributeUser = ''
@@ -1362,6 +1474,7 @@
                         res.data.data.forEach((data) => {
                             data.size = data.length + '*' + data.width + '*' + data.height
                             data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                            data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
                             if(data.wish && data.ebay){
                                 data.platform = 'wish+ebay'
                             }else if(data.wish){
@@ -1450,6 +1563,23 @@
                     this.getSuppliers()
                 }
             },
+            getStatusName(status) {
+                if(status == 1) {
+                    return "未审核"
+                } else if(status == 2) {
+                    return "未上架"
+                } else if(status == 3) {
+                    return "删除"
+                }else if(status == 4) {
+                    return "wish上架"
+                }else if(status == 5) {
+                    return "ebay上架"
+                }else if(status == 6) {
+                    return "都已上架"
+                } else {
+                    return '其他'
+                }
+            }
         },
         components: {
             "infinite-loading": VueInfiniteLoading

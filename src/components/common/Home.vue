@@ -1,13 +1,13 @@
 <template>
     <div class="wrapper">
-        <v-head></v-head>
+        <v-head :message_count="message_count" :notifications="notifications" :clearInte="clearInte"></v-head>
         <v-sidebar></v-sidebar>
         <div class="content-box" :class="{'content-collapse':collapse}">
             <v-tags></v-tags>
             <div class="content">
                 <transition name="move" mode="out-in">
                     <keep-alive :include="tagsList">
-                        <router-view></router-view>
+                        <router-view :getMessageCount="getMessageCount" :changeMessageCount="changeMessageCount" ></router-view>
                     </keep-alive>
                 </transition>
             </div>
@@ -20,11 +20,15 @@
     import vSidebar from './Sidebar.vue';
     import vTags from './Tags.vue';
     import bus from './bus';
+    import notificatinImg from "@/assets/close.png"
     export default {
         data(){
             return {
                 tagsList: [],
-                collapse: false
+                collapse: false,
+                notifications:[],
+                message_count: 0,
+                myVal: undefined
             }
         },
         components:{
@@ -43,6 +47,65 @@
                 }
                 this.tagsList = arr;
             })
+        },
+        methods:{
+            changeMessageCount(count){
+                this.message_count = count
+            },
+            getMessageTimer() {
+                this.getMessageCount()
+                this.myVal = setInterval(this.getMessageCount, 1000*30)
+            },
+            clearInte() {
+                clearInterval(this.myVal)
+            },
+            popMes(index,id) {
+                this.notifications[index].close()
+                this.notifications[index] = undefined
+                this.message_count -= 1
+                this.$axios.patch('/notifications/' + id, '',{
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    },
+                }).then((res) => {
+                    if(res.data.code = 200) {
+
+                    }
+                }).catch((res) => {
+                    console.log('error')
+                })
+            },
+            getMessageCount() {
+                let mesId =  JSON.parse(localStorage.getItem('notifyid')) || []
+                this.$axios.get('/users/notifications', {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    },
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.message_count = res.data.data.length
+                        res.data.data.forEach((data, index) => {
+                            let offsettemp = 100 + 70 * index
+                            if(mesId.indexOf(data.id) == -1) {
+                               this.notifications.push(this.$notify({
+                                    title: '您有新的消息',
+                                    dangerouslyUseHTMLString: true,
+                                    offset: offsettemp,
+                                    message: data.message + `&nbsp<img src="${notificatinImg}"></img>`,
+                                    onClick: this.popMes.bind(null,this.notifications.length,data.id),
+                                    customClass: "testlzh",
+                                    duration: 7000,
+                                    showClose: false
+                                    // onClose: this.popMes.bind(data.id)
+                                })) 
+                                mesId.push(data.id)
+                                localStorage.removeItem('notifyid')
+                                localStorage.setItem('notifyid', JSON.stringify(mesId))  
+                            }
+                        })
+                    }
+                })
+            }
         }
     }
 </script>

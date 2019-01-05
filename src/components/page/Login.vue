@@ -73,7 +73,7 @@
                         ).then((res) => {
                             localStorage.setItem('ms_username', res.data.data.name)
                             localStorage.setItem('token', res.data.data.token)
-                            console.log(localStorage.getItem('token'))
+                            localStorage.setItem('notifyid', JSON.stringify([])) //保存消息id到本地
                             this.$router.push('/');
                         }).catch((res) => {
                             this.$message.error('用户名或密码错误')

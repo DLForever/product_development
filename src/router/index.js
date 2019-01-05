@@ -135,9 +135,9 @@ export default new Router({
                     meta: { title: '角色管理' }
                 },
                 {
-                    path: '/tabs',
+                    path: '/notifications',
                     component: resolve => require(['../components/page/Tabs.vue'], resolve),
-                    meta: { title: 'tab选项卡' }
+                    meta: { title: '未读消息' }
                 },
                 {
                     path: '/form',

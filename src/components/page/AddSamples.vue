@@ -392,12 +392,11 @@
 								// this.fileList2 = []
 								this.$router.push('/samplesManage')
 							}
-							this.submitDisabled = false
 						}).catch((res) => {
 							console.log('err')
-							console.log(this.category_id)
-							this.submitDisabled = false
-						})
+						}).finally((res) => {
+		                    this.submitDisabled = false
+		                })
 					} else {
 						this.$message.error("请填写完整信息")
 						return false

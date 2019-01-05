@@ -8,14 +8,17 @@
         </div>
         <div class="container">
             <div class="handle-box">
-                <!-- <div class="fnsku_filter">
-                    开发人员:
-                    <el-input style="width:150px" placeholder="请输入开发人员" v-model.trim="search_shopname"></el-input>
-                    产品名称:
-                    <el-input style="width:150px" placeholder="请输入产品名称" v-model.trim="search_fnsku"></el-input>
+                <el-button type="primary" @click="confirmDistribute">分配</el-button>
+                <div class="fnsku_filter">
+                    日期:
+                    <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
+                    分类:
+                    <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" change-on-select @change="getCatetory" class="handle-select mr10"></el-cascader>
+                    SKU:
+                    <el-input style="width:150px" placeholder="请输入SKU" v-model.trim="sku_filter"></el-input>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
-                </div> -->
+                </div>
             </div>
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
@@ -48,7 +51,10 @@
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
-                                    <el-button @click="showProduct(scope.$index, scope.row)" type="text">&nbsp主体图片</el-button>
+                                    <el-button @click="showSubjects(scope.$index, scope.row)" type="text">查看详情</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="showProduct(scope.$index, scope.row)" type="text">主体图片</el-button>
                                 </el-dropdown-item>
                                 <!-- <el-dropdown-item>
                                     <el-button @click="showProduct(scope.$index, scope.row)" type="text">&nbsp产品图片</el-button>
@@ -61,6 +67,9 @@
                                 </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">修改图片</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleEditName(scope.$index, scope.row)" type="text">修改主体</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleEditSuppliers(scope.$index, scope.row)" type="text">修改供应商</el-button>
@@ -184,6 +193,86 @@
             <el-button type="danger" @click="deleteProductImg">确 定</el-button>
         </span>
         </el-dialog>
+
+        <!-- 变体详情提示 -->
+        <el-dialog title="详情" :visible.sync="subjectsVisible" width="90%">
+            <el-button type="primary">
+                <a style="color:#fff;" :href="$axios.defaults.baseURL + '/product_subjects/' + subject_id + '?token=' + export_token">导出图片</a>
+            </el-button>
+            <br><br>
+            <el-table :data="subjectsOptions" border style="width: 100%">
+                <!-- <el-table-column type="selection" width="55"></el-table-column> -->
+                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="price" label="采购价">
+                </el-table-column>
+                <el-table-column prop="size" label="尺寸(长*宽*高cm)" width="120">
+                </el-table-column>
+                <el-table-column prop="weight" label="重量(g)">
+                </el-table-column>
+                <el-table-column prop="package_size" label="包装尺寸(长*宽*高cm)" width="140">
+                </el-table-column>
+                <el-table-column prop="package_weight" label="包装重量(g)" width="90">
+                </el-table-column>
+                <el-table-column prop="model_number" label="型号"  show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="texture" label="材质" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="box_size" label="外箱尺寸(长*宽*高cm)" width="160">
+                </el-table-column>
+                <el-table-column prop="box_weight" label="单箱实重(g)" width="100" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="box_sum" label="单箱数量(g)" width="100">
+                </el-table-column>
+                <el-table-column prop="desc" label="描述" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="created_at_format" label="创建时间" width="140">
+                </el-table-column>
+                <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
+            </el-table>
+            <!-- </div> -->
+        </el-dialog>
+        <!-- 分配提示 -->
+        <el-dialog title="确认分配" :visible.sync="distributeVisible" width="35%">
+            <el-form label-width="110px">
+                <el-form-item label="选择开发人员">
+                    <el-select v-model="distributeUser" placeholder="选择用户" filterable remote :loading="loading2" @visible-change="selectVisble2" :remote-method="remoteMethod2" class="handle-select mr10">
+                        <el-option v-for="item in distributeUserOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_dis_user" ref="infiniteLoading5"></infinite-loading>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="distributenWish" :disabled="submitDisabled">分配到WISH</el-button>
+            <el-button type="primary" @click="distributenEbay" :disabled="submitDisabled">分配到EBAY</el-button>
+        </span>
+        </el-dialog>
+        <!-- 修改名称 -->
+        <el-dialog title="编辑" :visible.sync="editNameVisible" width="50%">
+            <el-form ref="form" :model="form" label-width="100px">
+                <el-form-item label="主体名称">
+                    <el-input v-model.trim="subject_name" placeholder="请输入名称"></el-input>
+                </el-form-item>
+                <el-form-item label="价格">
+                    <el-input v-model.trim="subject_price" placeholder="请输入价格"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <div class="el-upload__tip">温馨提示:   将应用于主体下的所有变体</div>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editNameVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveEditSubjectName" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -241,11 +330,60 @@
                 subject_id: undefined,
                 suppliers_temp: [],
                 productVisible: false,
-                confirmDelProVis: false
+                confirmDelProVis: false,
+                subjectsVisible: false,
+                subjectsOptions: [],
+                export_token: '',
+                distributeUserOptions: [],
+                distributeUser: '',
+                dis_user_page: 1,
+                dis_user_total: 0,
+                query2: undefined,
+                loading2: false,
+                distributeVisible: false,
+                subject_name: '',
+                subject_price: '',
+                editNameVisible: false,
+                pickerOptions2: {
+                shortcuts: [{
+                  text: '最近一周',
+                  onClick(picker) {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                    picker.$emit('pick', [start, end]);
+                  }
+                }, {
+                  text: '最近一个月',
+                  onClick(picker) {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                    picker.$emit('pick', [start, end]);
+                  }
+                }, {
+                  text: '最近三个月',
+                  onClick(picker) {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                    picker.$emit('pick', [start, end]);
+                  }
+                }]
+              },
+              date_filter: [],
+              options: [],
+              options_len1: [],
+              options_len2: [],
+              options_len3: [],
+              options_len4: [],
+              options3: [],
+              category_id_filter: []
             }
         },
         created() {
             this.getData();
+            this.getCatetoryLoop()
             // this.getSuppliersEdit()
         },
         watch: {
@@ -273,7 +411,17 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
-                this.$axios.get( '/product_subjects/?page='+this.cur_page + '&sku=' + this.sku_filter + '&img=true', {
+                let category_id_temp = this.category_id_filter[this.category_id_filter.length-1]
+                if(category_id_temp == undefined) {
+                    category_id_temp = ''
+                }
+                let date_begin_temp = this.date_filter[0]
+                let date_end_temp = this.date_filter[1]
+                if(this.date_filter.length == 0) {
+                    date_begin_temp = ''
+                    date_end_temp = ''
+                }
+                this.$axios.get( '/product_subjects/?page='+this.cur_page + '&sku=' + this.sku_filter + '&img=true' + '&date_begin=' + date_begin_temp + '&date_end=' + date_end_temp + '&category_id=' + category_id_temp, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -289,7 +437,17 @@
             filter_product() {
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/products?page='+this.cur_page + '&shopname=' + this.search_shopname + '&fnsku=' + this.search_fnsku, {
+                let category_id_temp = this.category_id_filter[this.category_id_filter.length-1]
+                if(category_id_temp == undefined) {
+                    category_id_temp = ''
+                }
+                let date_begin_temp = this.date_filter[0]
+                let date_end_temp = this.date_filter[1]
+                if(this.date_filter.length == 0) {
+                    date_begin_temp = ''
+                    date_end_temp = ''
+                }
+                this.$axios.get( '/product_subjects/?page='+this.cur_page + '&sku=' + this.sku_filter + '&img=true' + '&date_begin=' + date_begin_temp + '&date_end=' + date_end_temp + '&category_id=' + category_id_temp, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -308,9 +466,95 @@
             clear_filter() {
                 this.paginationShow = false
                 this.cur_page = 1
-                this.search_fnsku = ''
+                this.sku_filter = ''
                 this.search_shopname = ''
+                this.category_id_filter = []
+                this.date_filter = []
                 this.getData()
+            },
+            getCategories() {
+                if (process.env.NODE_ENV === 'development') {
+                };
+                this.$axios.get( '/categories?page='+this.category_page, {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        // this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
+                        this.options3 = res.data.data
+                        this.getCatetoryLoop(1)
+                        // for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
+                        //     this.getCatetoryLoop(i+1)
+                        // }
+                        // this.total = res.data.count
+                    }
+                }).catch((res) => {
+                    console.log('error')
+                })
+            },
+            getCatetoryLoop() {
+                this.$axios.get( '/categories?page=1', {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.options3 = res.data.data
+                        this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
+                        // this.categories_options = this.categories_options.concat(res.data.data)
+                        // this.options_edit = this.options
+                        // this.total = res.data.count
+                    }
+                }).catch((res) => {
+                    console.log('error')
+                })
+            },
+            getCategoryTree(categories,id){
+                let result = []
+                for (var i = 0; i < categories.length; i++){
+                    if(categories[i].parent_id == id || categories[i].parent_id == null){
+                        result.push({value:categories[i].id,label:categories[i].name,children:this.getTree(categories,categories[i].id)})
+                    }
+                }
+                return result
+            },
+            getTree(categories,id){
+                let tmp =  categories.filter((s) => {
+                    return s.parent_id == id
+                    })
+                return tmp.map((s) => {
+                    return {value:s.id,label:s.name,children:this.getTree(categories,s.id)}
+               })
+            },
+            getCatetory() {
+                this.$axios.get( '/categories?parent_id=' + this.category_id_filter[this.category_id_filter.length -1] , {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.options = []
+                        let temp_options = []
+                        if(this.category_id_filter.length == 1) {
+                            this.options_len1 = this.options3
+                            this.options_len1 = this.options_len1.concat(res.data.data)
+                            temp_options = this.options_len1
+                        }else if(this.category_id_filter.length == 2) {
+                            this.options_len2 = this.options_len1
+                            this.options_len2 = this.options_len2.concat(res.data.data)
+                            temp_options = this.options_len2
+                        }else if(this.category_id_filter.length == 3) {
+                            this.options_len3 = this.options_len2
+                            this.options_len3 = this.options_len3.concat(res.data.data)
+                            temp_options = this.options_len3
+                        }else if(this.category_id_filter.length == 4) {
+                            this.options_len4 = this.options_len3
+                            this.options_len4 = this.options_len4.concat(res.data.data)
+                            temp_options = this.options_len4
+                        }
+                        this.options = this.options.concat(this.getCategoryTree(temp_options,0))
+                    }
+                }).catch((res) => {
+                    console.log('error')
+                })
             },
             formatter_created_at(row, column) {
 				return row.created_at.substr(0, 19);
@@ -532,7 +776,177 @@
                 this.supplier_page_edit = 1
                 this.$refs.infiniteLoading3.stateChanger.reset()
                 this.editVisibleSuppliers = false
-            }
+            },
+            showSubjects(index, row) {
+                this.export_token = localStorage.getItem('token')
+                this.subject_id = row.id
+                this.$axios.get('/products?product_subject_id=' + row.id, {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        res.data.data.forEach((data) => {
+                            data.size = data.length + '*' + data.width + '*' + data.height
+                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                            data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
+                        })
+                        this.subjectsOptions = res.data.data
+                        this.subjectsVisible = true
+                    }
+                }).catch((res) => {
+
+                })
+            },
+            confirmDistribute() {
+                if(this.multipleSelection.length == 0) {
+                    this.$message.error('请选择至少一个产品')
+                    return
+                }
+                this.distributeUser = ''
+                this.distributeVisible = true
+            },
+            distributenEbay() {
+                if(this.distributeUser == '') {
+                    this.$message.error('请选择分配人员')
+                    return
+                }
+                let id = []
+                this.multipleSelection.forEach((data) => {
+                    id.push(data.id)
+                })
+                let params = {
+                    product_subject_id: id,
+                    user_id: this.distributeUser,
+                    platform: 'Ebay'
+                }
+                this.$axios.post('/products/allocate_product', params, {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('分配成功!')
+                        this.distributeVisible = false
+                        this.distributeUser = ''
+                        this.getData()
+                    }
+                }).catch((res) => {
+
+                })
+            },
+            distributenWish() {
+                if(this.distributeUser == '') {
+                    this.$message.error('请选择分配人员')
+                    return
+                }
+                let id = []
+                this.multipleSelection.forEach((data) => {
+                    id.push(data.id)
+                })
+                let params = {
+                    product_subject_id: id,
+                    user_id: this.distributeUser,
+                    platform: 'Wish'
+                }
+                this.$axios.post('/products/allocate_product', params, {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        console.log(6666)
+                        console.log(res)
+                        this.$message.success('分配成功!')
+                        this.distributeVisible = false
+                        this.distributeUser = ''
+                        this.getData()
+                    }
+                }).catch((res) => {
+
+                })
+            },
+            remoteMethod2(query, callback = undefined) {
+                if(query != "" || this.query2 != "" || callback) {
+                    let reload = false
+                    if(this.query2 != query) {
+                        this.loading2 = true
+                        this.dis_user_page = 1
+                        this.query2 = query
+                        reload = true
+                        if(this.$refs.infiniteLoading5.isComplete) {
+                            this.$refs.infiniteLoading5.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/users/?page=" + this.dis_user_page + '&name=' + query.trim(), {
+                        headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading2 = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                let tempOptions = []
+                                // this.distributeUserOptions = res.data.data
+                                this.distributeUserOptions = tempOptions.concat(res.data.data)
+                            } else {
+                                this.distributeUserOptions = this.distributeUserOptions.concat(res.data.data)
+                            }
+                            console.log(this.distributeUserOptions)
+                            this.dis_user_total = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
+            },
+            onInfinite_dis_user(obj) {
+                if((this.dis_user_page * 20) < this.dis_user_total) {
+                    this.dis_user_page += 1
+                    this.remoteMethod2(this.query2, obj.loaded)
+                    //                  this.getUser(obj.loaded)
+                } else {
+                    obj.complete()
+                }
+            },
+            selectVisble2(visible) {
+                if(visible) {
+                    this.query2 = undefined
+                    this.remoteMethod2("")
+                }
+            },
+            handleEditName(index, row) {
+                this.subject_id = row.id
+                this.subject_name = ''
+                this.subject_price = ''
+                this.editNameVisible = true
+            },
+            saveEditSubjectName() {
+                if(this.subject_name == '' && this.subject_price == '') {
+                    this.$message.error('请至少修改一项')
+                    return false
+                }
+                this.submitDisabled = true
+                let params = {
+                    name: this.subject_name,
+                    price: this.subject_price
+                }
+                this.$axios.post('/product_subjects/' + this.subject_id + '/update_info', params, {
+                    headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.$message.success('更改成功!')
+                            this.getData()
+                            this.editNameVisible = false
+                        }
+                    }).catch((res) => {
+
+                    }).finally((res) => {
+                        this.submitDisabled = false
+                    })
+            },
         },
         components: {
             "infinite-loading": VueInfiniteLoading

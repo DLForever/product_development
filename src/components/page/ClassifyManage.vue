@@ -162,11 +162,11 @@
 						this.getData()
 						// this.$router.push('/productmanage')
 					}
-					this.submitDisabled = false
 				}).catch((res) => {
-					this.submitDisabled = false
 					console.log('err')
-				})
+				}).finally((res) => {
+                    this.submitDisabled = false
+                })
 			},
 			uploadproduct() {
 				if(this.batchList.length == 0) {

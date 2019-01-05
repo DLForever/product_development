@@ -418,10 +418,10 @@
                         this.getData()
                         this.editVisible = false
                     }
-                    this.submitDisabled = false
                 }).catch((res) => {
-                    this.submitDisabled = false
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
             closeEdit() {
@@ -499,7 +499,7 @@
                 this.idx = row.id
                 this.apply_stocksum = ''
                 this.apply_stockremark = undefined
-                this.out_type == 0
+                this.out_type = 0
                 this.applyVisible = true
             },
             saveApply() {
@@ -514,6 +514,9 @@
                     out_type: this.out_type,
                     remark: this.apply_stockremark
                 }
+                // setTimeout(() => {
+                //         this.submitDisabled = false
+                //     }, 2500)
                 this.$axios.post('/sample_outs', params, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 }).then((res) => {
@@ -521,11 +524,11 @@
                         this.$message.success('提交成功')
                         this.getData()
                         this.applyVisible = false
-                        this.submitDisabled = false
                     }
                 }).catch((res) => {
-                    this.submitDisabled = false
                     console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
                 })
             },
             handleDetails(index, row) {
