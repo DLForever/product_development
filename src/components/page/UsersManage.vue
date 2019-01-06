@@ -273,7 +273,7 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             this.policyoptions.push({
-                                key: data.code,
+                                key: data.id,
                                 label: data.desc
                             })
                         })

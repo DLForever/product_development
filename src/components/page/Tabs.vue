@@ -6,6 +6,23 @@
             </el-breadcrumb>
         </div>
         <div class="container">
+            <!-- <div class="handle-box">
+                <el-button type="primary" @click="handleRead">标记已读</el-button>
+            </div>
+            <br><br>
+            <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="55"></el-table-column>
+                <el-table-column prop="username" label="用户名" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="name" label="姓名" show-overflow-tooltip>
+                </el-table-column>
+            </el-table>
+            </el-table>
+            <div class="pagination">
+                <el-pagination v-if="paginationShow" @current-change="handleCurrentChange" @size-change="handleSizeChange" :page-size="pagesize" layout="prev, pager, next" :total="totals">
+                </el-pagination>
+            </div>
+ -->
             <el-tabs v-model="message">
                 <el-tab-pane :label="`未读消息(${unread.length})`" name="first">
                     <el-table :data="unread" :show-header="false" style="width: 100%">
@@ -17,7 +34,7 @@
                         <el-table-column prop="date" width="180"></el-table-column>
                         <el-table-column width="120">
                             <template slot-scope="scope">
-                                <el-button size="small" @click="handleRead(scope.$index)">标为已读</el-button>
+                                <el-button size="small" @click="handleRead(scope.$index,  scope.row)">标为已读</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -77,6 +94,12 @@
             return {
                 message: 'first',
                 showHeader: false,
+                multipleSelection: [],
+                tableData: [],
+                paginationShow: true,
+                cur_page: 1,
+                pagesize: 20,
+                totals: 0,
                 unread:[],
                 unread2:[{
                     date: '',
@@ -112,6 +135,32 @@
             //     console.log(item);
             //     this.read = item.concat(this.read);
             // },
+            handleSizeChange(val) {
+                this.pagesize = val;
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            // 分页导航
+            handleCurrentChange(val) {
+                this.cur_page = val;
+                this.getData();
+            },
+            // 获取 easy-mock 的模拟数据
+            getData() {
+                this.$axios.get( '/users/notifications?page='+this.cur_page, {
+                    headers: {'Authorization': localStorage.getItem('token')}
+                },
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.tableData = res.data.data
+                        this.totals = res.data.count
+                        this.paginationShow = true
+                    }
+                }).catch((res) => {
+                    console.log('error')
+                })
+            },
             handleDel(index) {
                 const item = this.read.splice(index, 1);
                 this.recycle = item.concat(this.recycle);
@@ -142,7 +191,9 @@
                 })
             },
             handleRead(index, row) {
-                this.$axios.patch('/notifications/' + row.id, '',{
+                let id = []
+                id.push(row.id)
+                this.$axios.get('/users/read_notification?id[]=' + id,{
                     headers: {
                         'Authorization': localStorage.getItem('token')
                     },
@@ -160,6 +211,12 @@
         computed: {
             unreadNum(){
                 return this.unread.length;
+            },
+            data() {
+                return this.tableData.filter((d) => {
+                    return d;
+                    let is_del = false;
+                })
             }
         }
     }
@@ -172,6 +229,18 @@
 }
 .handle-row{
     margin-top: 30px;
+}
+.handle-box {
+    margin-bottom: 20px;
+}
+
+.handle-select {
+    width: 120px;
+}
+
+.handle-input {
+    width: 300px;
+    display: inline-block;
 }
 </style>
 

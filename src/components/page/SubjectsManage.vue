@@ -12,6 +12,11 @@
                 <div class="fnsku_filter">
                     日期:
                     <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
+                    开发人员:
+                    <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
+                        <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
+                    </el-select>
                     分类:
                     <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" change-on-select @change="getCatetory" class="handle-select mr10"></el-cascader>
                     SKU:
@@ -378,7 +383,13 @@
               options_len3: [],
               options_len4: [],
               options3: [],
-              category_id_filter: []
+              category_id_filter: [],
+              user_page: 1,
+              user_total: 0,
+              user_options: [],
+              query: undefined,
+              loading: false,
+              user_id_filter: ''
             }
         },
         created() {
@@ -421,7 +432,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/product_subjects/?page='+this.cur_page + '&sku=' + this.sku_filter + '&img=true' + '&date_begin=' + date_begin_temp + '&date_end=' + date_end_temp + '&category_id=' + category_id_temp, {
+                this.$axios.get( '/product_subjects/?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&sku=' + this.sku_filter + '&img=true' + '&date_begin=' + date_begin_temp + '&date_end=' + date_end_temp + '&category_id=' + category_id_temp, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -447,7 +458,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/product_subjects/?page='+this.cur_page + '&sku=' + this.sku_filter + '&img=true' + '&date_begin=' + date_begin_temp + '&date_end=' + date_end_temp + '&category_id=' + category_id_temp, {
+                this.$axios.get( '/product_subjects/?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&sku=' + this.sku_filter + '&img=true' + '&date_begin=' + date_begin_temp + '&date_end=' + date_end_temp + '&category_id=' + category_id_temp, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -470,6 +481,7 @@
                 this.search_shopname = ''
                 this.category_id_filter = []
                 this.date_filter = []
+                this.user_id_filter = ''
                 this.getData()
             },
             getCategories() {
@@ -946,6 +958,58 @@
                     }).finally((res) => {
                         this.submitDisabled = false
                     })
+            },
+            onInfinite_user(obj) {
+                if((this.user_page * 20) < this.user_total) {
+                    this.user_page += 1
+                    // this.getUsers(obj.loaded)
+                    this.remoteMethod(this.query,obj.loaded)
+                } else {
+                    obj.complete()
+                    console.log(obj.complete())
+                }
+            },
+            selectVisble(visible) {
+                if(visible) {
+                    this.query = undefined
+                    this.remoteMethod("")
+                }
+            },
+            remoteMethod(query, callback = undefined) {
+                if(query != "" || this.query != "" || callback) {
+                    let reload = false
+                    if(this.query != query) {
+                        this.loading = true
+                        this.user_page = 1
+                        this.query = query
+                        reload = true
+                        if(this.$refs.infiniteLoading.isComplete) {
+                            this.$refs.infiniteLoading.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim(), {
+                        headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                let tempOptions = []
+                                this.user_options = tempOptions.concat(res.data.data)
+                            } else {
+                                this.user_options = this.user_options.concat(res.data.data)
+                            }
+                            this.user_total = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
             },
         },
         components: {

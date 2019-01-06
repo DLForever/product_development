@@ -47,6 +47,7 @@
                 }
                 this.tagsList = arr;
             })
+            this.getMessageTimer()
         },
         methods:{
             changeMessageCount(count){
@@ -63,7 +64,9 @@
                 this.notifications[index].close()
                 this.notifications[index] = undefined
                 this.message_count -= 1
-                this.$axios.patch('/notifications/' + id, '',{
+                let temp_id = []
+                temp_id.push(id)
+                this.$axios.get('/users/read_notification?id[]=' + temp_id,{
                     headers: {
                         'Authorization': localStorage.getItem('token')
                     },
@@ -91,10 +94,10 @@
                                     title: '您有新的消息',
                                     dangerouslyUseHTMLString: true,
                                     offset: offsettemp,
-                                    message: data.message + `&nbsp<img src="${notificatinImg}"></img>`,
+                                    message: data.message,
                                     onClick: this.popMes.bind(null,this.notifications.length,data.id),
                                     customClass: "testlzh",
-                                    duration: 7000,
+                                    duration: 3000,
                                     showClose: false
                                     // onClose: this.popMes.bind(data.id)
                                 })) 
