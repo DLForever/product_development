@@ -196,6 +196,7 @@
         },
         created() {
             this.getData();
+            this.getPolicies()
         },
         watch: {
         	"$route": "getData"
@@ -430,7 +431,7 @@
                         })
             },
             handleEditPolicy(index, row) {
-                this.getPolicies()
+                // this.getPolicies()
                 this.policesSelect = []
                 this.policesSave = []
                 this.idx = row.id

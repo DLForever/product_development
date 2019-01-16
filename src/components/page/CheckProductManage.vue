@@ -31,8 +31,8 @@
                 <el-table-column label="图片" width="80" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
-                        <img v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
-                        <img  v-else-if="scope.row.subject_pictures[0] != undefined && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url"/>
+                        <img v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
+                        <img  v-else-if="scope.row.subject_pictures[0] != undefined && scope.row.subject_pictures[0].url.thumb.url != null && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url"/>
                         <span v-else>无</span>
                         <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>

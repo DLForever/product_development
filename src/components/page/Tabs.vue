@@ -6,15 +6,17 @@
             </el-breadcrumb>
         </div>
         <div class="container">
-            <!-- <div class="handle-box">
+            <div class="handle-box">
                 <el-button type="primary" @click="handleRead">标记已读</el-button>
             </div>
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column prop="username" label="用户名" show-overflow-tooltip>
+                <el-table-column prop="id" label="序号" width="60">
                 </el-table-column>
-                <el-table-column prop="name" label="姓名" show-overflow-tooltip>
+                <el-table-column prop="message" label="消息">
+                </el-table-column>
+                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable width="140">
                 </el-table-column>
             </el-table>
             </el-table>
@@ -22,8 +24,8 @@
                 <el-pagination v-if="paginationShow" @current-change="handleCurrentChange" @size-change="handleSizeChange" :page-size="pagesize" layout="prev, pager, next" :total="totals">
                 </el-pagination>
             </div>
- -->
-            <el-tabs v-model="message">
+
+            <!-- <el-tabs v-model="message">
                 <el-tab-pane :label="`未读消息(${unread.length})`" name="first">
                     <el-table :data="unread" :show-header="false" style="width: 100%">
                         <el-table-column>
@@ -38,10 +40,10 @@
                             </template>
                         </el-table-column>
                     </el-table>
-                    <!-- <div class="handle-row">
+                    <div class="handle-row">
                         <el-button type="primary">全部标为已读</el-button>
-                    </div> -->
-                </el-tab-pane>
+                    </div>
+                </el-tab-pane> -->
                 <!-- <el-tab-pane :label="`已读消息(${read.length})`" name="second">
                     <template v-if="message === 'second'">
                         <el-table :data="read" :show-header="false" style="width: 100%">
@@ -82,14 +84,14 @@
                         </div>
                     </template>
                 </el-tab-pane> -->
-            </el-tabs>
+            <!-- </el-tabs> -->
         </div>
     </div>
 </template>
 
 <script>
     export default {
-        name: 'tabs',
+        // name: 'tabs',
         data() {
             return {
                 message: 'first',
@@ -127,7 +129,7 @@
             changeMessageCount:Function
         },
         created() {
-            this.getMessage();
+            this.getData();
         },
         methods: {
             // handleRead(index) {
@@ -156,9 +158,12 @@
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
+                        this.changeMessageCount(this.totals)
                     }
                 }).catch((res) => {
                     console.log('error')
+                }).finally((res) => {
+                    this.paginationShow = true
                 })
             },
             handleDel(index) {
@@ -190,22 +195,40 @@
                     }
                 })
             },
-            handleRead(index, row) {
-                let id = []
-                id.push(row.id)
-                this.$axios.get('/users/read_notification?id[]=' + id,{
+            handleRead() {
+                if(this.multipleSelection.length == 0) {
+                    this.$message.error('请至少选择一条消息')
+                    return
+                }
+                let temp_ids = ''
+                let temp_id = 0
+                this.multipleSelection.forEach((data) => {
+                    if(temp_id == 0) {
+                        temp_ids = 'id[]=' + data.id
+                    }else{
+                        temp_ids += '&id[]=' + data.id
+                    }
+                    temp_id++
+                })
+                this.$axios.get('/users/read_notification?' + temp_ids,{
                     headers: {
                         'Authorization': localStorage.getItem('token')
                     },
                 }).then((res) => {
                     if(res.data.code == 200) {
-                        this.unread.splice(index, 1);
-                        this.changeMessageCount(this.unread.length)
+                        // this.unread.splice(index, 1);
+                        // this.changeMessageCount(this.unread.length)
+                        this.cur_page = 1
+                        this.paginationShow = false
+                        this.getData()
                         this.$message.success('已读消息')
                     }
                 }).catch((res) => {
                     console.log('error')
                 })
+            },
+            formatter_created_at(row, column) {
+                return row.created_at.substr(0, 19);
             },
         },
         computed: {

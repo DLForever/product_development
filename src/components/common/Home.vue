@@ -28,7 +28,8 @@
                 collapse: false,
                 notifications:[],
                 message_count: 0,
-                myVal: undefined
+                myVal: undefined,
+                cur_page: 1,
             }
         },
         components:{
@@ -54,8 +55,8 @@
                 this.message_count = count
             },
             getMessageTimer() {
-                this.getMessageCount()
-                this.myVal = setInterval(this.getMessageCount, 1000*30)
+                this.getMessageLoop()
+                this.myVal = setInterval(this.getMessageLoop, 1000*30)
             },
             clearInte() {
                 clearInterval(this.myVal)
@@ -78,18 +79,34 @@
                     console.log('error')
                 })
             },
-            getMessageCount() {
-                let mesId =  JSON.parse(localStorage.getItem('notifyid')) || []
-                this.$axios.get('/users/notifications', {
+            getMessageLoop() {
+                this.$axios.get( '/users/notifications?page='+this.cur_page, {
                     headers: {
                         'Authorization': localStorage.getItem('token')
                     },
                 }).then((res) => {
                     if(res.data.code == 200) {
-                        this.message_count = res.data.data.length
+                        for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
+                            this.getMessageCount(i+1)
+                        }
+                    }
+                })
+            },
+            getMessageCount(page) {
+                let mesId =  JSON.parse(localStorage.getItem('notifyid')) || []
+                this.$axios.get( '/users/notifications?page='+ page, {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    },
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.message_count = res.data.count
+                        let temp_index = 1
                         res.data.data.forEach((data, index) => {
-                            let offsettemp = 100 + 70 * index
+                            let offsettemp = 100 + 70 * temp_index
                             if(mesId.indexOf(data.id) == -1) {
+                                temp_index++
+                                console.log(temp_index)
                                this.notifications.push(this.$notify({
                                     title: '您有新的消息',
                                     dangerouslyUseHTMLString: true,

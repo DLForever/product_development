@@ -7,9 +7,11 @@
             </el-breadcrumb>
         </div>
         <div class="container">
+            <el-button type="primary" @click="handleApply">申请查看详情</el-button>
+            <el-button type="primary" @click="confirmDistribute">分配</el-button>
+            <el-button type="default" @click="exportProduct">导出</el-button>
+            <br><br>
             <div class="handle-box">
-                <el-button type="primary" @click="handleApply">申请查看详情</el-button>
-                <el-button type="default" @click="exportProduct">导出</el-button>
                 <div class="fnsku_filter">
                     日期:
                     <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
@@ -28,11 +30,15 @@
                     </el-select>
                     SKU:
                     <el-input style="width:150px" v-model="filter_sku" placeholder="请输入SKU"></el-input>
+                    状态:
+                    <el-select v-model="statusSelect" placeholder="请选择" class="handle-select mr10">
+                        <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
                 </div>
             </div>
-            <el-button type="primary" @click="confirmDistribute">分配</el-button>
+            
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
@@ -41,8 +47,8 @@
                 <el-table-column label="图片" width="80">
                     <template slot-scope="scope">
                         <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
-                        <img v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
-                        <img  v-else-if="scope.row.subject_pictures[0] != undefined && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url"/>
+                        <img v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
+                        <img  v-else-if="scope.row.subject_pictures[0] != undefined && scope.row.subject_pictures[0].url.thumb.url != null && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url"/>
                         <span v-else>无</span>
                         <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
@@ -644,7 +650,9 @@
               suppliers_temp: [],
               picturesSubjectsList: [],
               subjectPicturesVisible: false,
-              confirmDelSubjectPicVis: false
+              confirmDelSubjectPicVis: false,
+              statusOptions: [{value: 2, label: '未上架'}, {value: 4, label: 'wish上架'}, {value: 5, label: 'ebay上架'}, {value: 6, label: 'W+E上架'}, {value: 7, label: 'amazon上架'}, {value: 8, label: 'W+A上架'}, {value: 9, label: 'E+A上架'}, {value: 10, label: 'W+E+A上架'}],
+              statusSelect: '',
             }
         },
         created() {
@@ -663,7 +671,8 @@
                     3: 'danger',
                     4: 'success',
                     5: 'primary',
-                    6: 'success'
+                    6: 'success',
+                    10: 'success',
                 }
                 return statusMap[status]
             },
@@ -705,7 +714,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/products/ebay_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku  + '&self=' + this.selfdata + '&page_size=' + this.pagesize, {
+                this.$axios.get( '/products/ebay_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku  + '&self=' + this.selfdata + '&page_size=' + this.pagesize + '&status=' + this.statusSelect, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -737,7 +746,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/products/ebay_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku  + '&self=' + this.selfdata + '&page_size=' + this.pagesize, {
+                this.$axios.get( '/products/ebay_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku  + '&self=' + this.selfdata + '&page_size=' + this.pagesize + '&status=' + this.statusSelect, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -764,6 +773,7 @@
                 this.supplier_id_filter = ''
                 this.date_filter = []
                 this.filter_sku = ''
+                this.statusSelect = ''
                 this.selfdata = false
                 this.getData()
             },
@@ -1576,7 +1586,15 @@
                 }else if(status == 5) {
                     return "ebay上架"
                 }else if(status == 6) {
-                    return "都已上架"
+                    return "W+E上架"
+                }else if(status == 7) {
+                    return "amazon上架"
+                }else if(status == 8) {
+                    return "W+A上架"
+                }else if(status == 9) {
+                    return "E+A上架"
+                }else if(status == 10) {
+                    return "W+E+A上架"
                 } else {
                     return '其他'
                 }

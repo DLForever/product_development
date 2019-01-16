@@ -21,6 +21,8 @@
                     <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" change-on-select @change="getCatetory" class="handle-select mr10"></el-cascader>
                     SKU:
                     <el-input style="width:150px" placeholder="请输入SKU" v-model.trim="sku_filter"></el-input>
+                    名称:
+                    <el-input style="width:150px" placeholder="请输入主体名称" v-model.trim="name_filter"></el-input>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
                 </div>
@@ -389,7 +391,8 @@
               user_options: [],
               query: undefined,
               loading: false,
-              user_id_filter: ''
+              user_id_filter: '',
+              name_filter: ''
             }
         },
         created() {
@@ -432,7 +435,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/product_subjects/?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&sku=' + this.sku_filter + '&img=true' + '&date_begin=' + date_begin_temp + '&date_end=' + date_end_temp + '&category_id=' + category_id_temp, {
+                this.$axios.get( '/product_subjects/?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&name=' + this.name_filter + '&sku=' + this.sku_filter + '&img=true' + '&date_begin=' + date_begin_temp + '&date_end=' + date_end_temp + '&category_id=' + category_id_temp, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -458,7 +461,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/product_subjects/?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&sku=' + this.sku_filter + '&img=true' + '&date_begin=' + date_begin_temp + '&date_end=' + date_end_temp + '&category_id=' + category_id_temp, {
+                this.$axios.get( '/product_subjects/?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&name=' + this.name_filter + '&sku=' + this.sku_filter + '&img=true' + '&date_begin=' + date_begin_temp + '&date_end=' + date_end_temp + '&category_id=' + category_id_temp, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -482,6 +485,7 @@
                 this.category_id_filter = []
                 this.date_filter = []
                 this.user_id_filter = ''
+                this.name_filter = ''
                 this.getData()
             },
             getCategories() {

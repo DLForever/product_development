@@ -514,9 +514,6 @@
                     out_type: this.out_type,
                     remark: this.apply_stockremark
                 }
-                // setTimeout(() => {
-                //         this.submitDisabled = false
-                //     }, 2500)
                 this.$axios.post('/sample_outs', params, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 }).then((res) => {

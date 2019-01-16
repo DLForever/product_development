@@ -57,7 +57,7 @@ export default new Router({
                 {
                     path: '/subjectsmanage',
                     component: resolve => require(['../components/page/SubjectsManage.vue'], resolve),
-                    meta: { title: '变体管理' }
+                    meta: { title: '主体管理' }
                 },
                 {
                     path: '/addSamples',
