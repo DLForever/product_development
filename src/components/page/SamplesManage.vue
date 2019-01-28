@@ -38,9 +38,12 @@
                 </el-table-column>
                 <el-table-column label="图片" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <span v-if="scope.row.pictures.length === 0">无</span>
-                        <img class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
-                        <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
+                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
+                            <span v-if="scope.row.pictures.length === 0">无</span>
+                            <img class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
+                            <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
+                        </el-badge>
+                        <span v-else>无</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="title" label="样品标题" show-overflow-tooltip>
@@ -519,6 +522,7 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
+                            data.img_count = data.pictures.length
                             data.size = data.length + '*' + data.width + '*' + data.height
                             data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                         })
@@ -549,6 +553,7 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
+                            data.img_count = data.pictures.length
                             data.size = data.length + '*' + data.width + '*' + data.height
                             data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                         })
@@ -1124,5 +1129,10 @@
     .img {
         width:3rem;
         height:3rem;
+    }
+
+    .item {
+      margin-top: 10px;
+      margin-right: 40px;
     }
 </style>

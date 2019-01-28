@@ -2,34 +2,31 @@
 	<div>
 		<div class="crumbs">
 			<el-breadcrumb separator="/">
-				<el-breadcrumb-item><i class="el-icon-date"></i> 供应商管理</el-breadcrumb-item>
-				<el-breadcrumb-item>新建供应商</el-breadcrumb-item>
+				<el-breadcrumb-item><i class="el-icon-lx-global"></i> 知识产权管理</el-breadcrumb-item>
+				<el-breadcrumb-item>新建知识产权</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
 		<div class="container">
 			<el-tabs v-model="message">
-				<el-tab-pane label="新建供应商" name="first">
+				<el-tab-pane label="新建知识产权" name="first">
 					<div class="form-box">
 						<el-form ref="form" :rules="rules" :model="form" label-width="110px">
-							<el-form-item label="公司名" prop="name">
-								<el-input v-model.trim="form.name"></el-input>
+							<el-form-item label="知识产权名称" prop="brand_name">
+								<el-input v-model.trim="form.brand_name"></el-input>
 							</el-form-item>
-							<el-form-item label="电话" prop="phone">
-								<el-input v-model.trim="form.phone"></el-input>
+							<el-form-item label="知识产权类目" prop="product_category">
+								<el-input v-model.trim="form.product_category"></el-input>
 							</el-form-item>
-							<el-form-item label="地址" prop="address">
-								<el-input v-model.trim="form.address"></el-input>
+							<el-form-item label="知识产权类型" prop="brand_type">
+								<el-input v-model.trim="form.brand_type"></el-input>
 							</el-form-item>
-							<el-form-item label="网址">
-								<el-input v-model.trim="form.website"></el-input>
-							</el-form-item>
-							<el-form-item label="邮箱">
-								<el-input v-model.trim="form.email"></el-input>
+							<el-form-item label="官网链接" prop="name">
+								<el-input v-model.trim="form.website" placeholder="需加入https://或http://前缀"></el-input>
 							</el-form-item>
 							<el-form-item label="备注">
 								<el-input v-model.trim="form.remark"></el-input>
 							</el-form-item>
-							<el-form-item label="营业执照">
+							<el-form-item label="知识产权LOGO">
 								<el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
 									<i class="el-icon-upload"></i>
 									<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -40,6 +37,7 @@
 							</el-form-item>
 						</el-form>
 					</div>
+
 				</el-tab-pane>
 				<!-- <el-tab-pane label="批量上传" name="second">
 					<template v-if="message === 'second'">
@@ -51,6 +49,18 @@
 									<div class="el-upload__tip" slot="tip">只能上传xls/xlsx格式文件</div>
 								</el-upload>
 								<a :href="$axios.defaults.baseURL +'/batch_product.xlsx'">模板下载</a>
+							</el-form-item>
+						</el-form>
+						<el-form ref="form" :model="form" label-width="100px">
+							<el-form-item label="批量上传图片">
+								<el-upload class="upload-demo" drag action="" :on-exceed="exceed" :file-list="batchImg" :on-remove="handleRemoveImgs" :auto-upload="false" :on-change="changeImgs" :before-upload="beforeAvatarUpload" :limit="1">
+									<i class="el-icon-upload"></i>
+									<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+								</el-upload>
+								<a :href="$axios.defaults.baseURL +'/batch_product.xlsx'">模板下载</a>
+							</el-form-item>
+							<el-form-item>
+								<el-button type="primary" @click="uploadproduct">上传文件</el-button>
 							</el-form-item>
 						</el-form>
 					</template>
@@ -73,36 +83,26 @@
 				batchProduct: [],
 				batchImg: [],
 				form: {
-					name: '',
-					remark: '',
-					phone: '',
-					address: '',
-					website: ''
+					brand_name: '',
+					product_category: '',
+					brand_type: '',
+					website: '',
+					remark: ''
 				},
 				rules: {
-					name: [{
+					brand_name: [{
 						required: true,
-						message: '请输入名称',
+						message: '请输入知识产权名称',
 						trigger: 'blur'
 					}],
-					phone: [{
+					product_category: [{
 						required: true,
-						message: '请输入电话',
+						message: '请输入知识产权类目',
 						trigger: 'blur'
 					}],
-					email: [{
+					brand_type: [{
 						required: true,
-						message: '请输入邮箱',
-						trigger: 'blur'
-					}],
-					address: [{
-						required: true,
-						message: '请输入地址',
-						trigger: 'blur'
-					}],
-					website: [{
-						required: true,
-						message: '请输入网址',
+						message: '请输入知识产权类型',
 						trigger: 'blur'
 					}],
 				},
@@ -128,8 +128,8 @@
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
+
                     }
-                    console.log(this.options)
                 }).catch((res) => {
                 	console.log('error')
                 })
@@ -139,40 +139,38 @@
 				formData.append('file', content.file)
 			},
 			onSubmit(formName) {
+				// if(this.form.password == '' || this.form.name == '' || this.form.username == '') {
+				// 	this.$message.error('请填写必填信息')
+				// 	return
+				// }
+				// let arr = []
+				// arr.push(this.form.length, this.form.width, this.form.height, this.form.weight, this.form.price, this.form.package_length, this.form.package_width, this.form.package_height, this.form.package_weight)
+				// if(this.judge_addproduct(arr)){
+				// }else{
+				// 	return
+				// }
 				let formData = new FormData()
 				this.$refs[formName].validate((valid) => {
 					if(valid) {
-						let temp = 0
-						this.fileList.forEach((item) => {
-							if(!(item.raw.type.match(/image/))){
-								temp = 1
-							}
-						})
-						if(temp) {
-							this.$message.error('请上传正确的图片格式!')
-							return
-						}
 						this.submitDisabled = true
-						formData.append('supplier[name]', this.form.name)
-						formData.append('supplier[phone]', this.form.phone)
-						formData.append('supplier[email]', this.form.email)
-						formData.append('supplier[address]', this.form.address)
-						formData.append('supplier[website]', this.form.website)
-						formData.append('supplier[remark]', this.form.remark)
+						formData.append('brand_name', this.form.brand_name)
+						formData.append('product_category', this.form.product_category)
+						formData.append('website', this.form.website)
+						formData.append('brand_type', this.form.brand_type)
+						formData.append('remark', this.form.remark)
 						this.fileList.forEach((item) => {
-							formData.append('supplier[pictures][]', item.raw)
+							formData.append('logo[]', item.raw)
 						})
 						let config = {
 							headers: {
 								'Authorization': localStorage.getItem('token')
 							}
 						}
-						this.$axios.post('/suppliers', formData, config).then((res) => {
+						this.$axios.post('/intellectual_properties', formData, config).then((res) => {
 							if(res.data.code == 200) {
-								this.$message.success('提交成功！');
+								this.$message.success('提交成功！')
 								this.$refs['form'].resetFields()
-								this.fileList = []
-								this.$router.push('/suppliersManage')
+								this.$router.push('/brandsmanage')
 							}
 						}).catch((res) => {
 							console.log('err')

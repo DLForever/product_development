@@ -135,6 +135,16 @@ export default new Router({
                     meta: { title: '角色管理' }
                 },
                 {
+                    path: '/addbrands',
+                    component: resolve => require(['../components/page/AddBrands.vue'], resolve),
+                    meta: { title: '新建知识产权' }
+                },
+                {
+                    path: '/brandsmanage',
+                    component: resolve => require(['../components/page/BrandsManage.vue'], resolve),
+                    meta: { title: '知识产权管理' }
+                },
+                {
                     path: '/notifications',
                     component: resolve => require(['../components/page/Tabs.vue'], resolve),
                     meta: { title: '未读消息' }

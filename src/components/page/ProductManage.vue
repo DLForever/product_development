@@ -43,18 +43,20 @@
                 </el-table-column>
                 <el-table-column label="图片" width="120">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
-                        <img  v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
-                        <img  v-else-if="scope.row.subject_pictures[0] != undefined && scope.row.subject_pictures[0].url.thumb.url != null && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url"/>
+                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
+                            <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
+                            <img  v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
+                            <img  v-else-if="scope.row.subject_pictures[0] != undefined && scope.row.subject_pictures[0].url.thumb.url != null && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url"/>
+                            <span v-else>无</span>
+                        </el-badge>
                         <span v-else>无</span>
-                        <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
                 </el-table-column>
                 <el-table-column prop="username" label="开发人员" width="120" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="主体(点击查看)" width="120">
+                <el-table-column label="主体" width="120">
                     <template slot-scope="scope">
-                        <span style="cursor: pointer;" @click="showChangeProduct(scope.$index, scope.row)">{{scope.row.sku.substring(0, scope.row.sku.length-2)}}</span>
+                        <span class="link-type" @click="showChangeProduct(scope.$index, scope.row)">{{scope.row.sku.substring(0, scope.row.sku.length-2)}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="name" label="产品名称" width="230" show-overflow-tooltip>
@@ -95,8 +97,6 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="img_count" label="图片数量" width="80">
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">
@@ -1594,5 +1594,19 @@
     .img {
         width:3rem;
         height:3rem;
+    }
+
+    .item {
+      margin-top: 10px;
+      margin-right: 40px;
+    }
+
+    .link-type,
+    .link-type:focus {
+      color: #337ab7;
+      cursor: pointer;
+    }
+    .link-type:hover {
+        color: rgb(32, 160, 255);
     }
 </style>

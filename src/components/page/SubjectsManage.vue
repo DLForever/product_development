@@ -32,8 +32,11 @@
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column label="图片" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <span v-if="scope.row.pictures.length === 0">无</span>
-                        <img  v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
+                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
+                            <span v-if="scope.row.pictures.length === 0">无</span>
+                            <img  v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
+                            <span v-else>无</span>
+                        </el-badge>
                         <span v-else>无</span>
                         <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
@@ -440,6 +443,9 @@
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
+                        res.data.data.forEach((data) => {
+                            data.img_count = data.pictures.length
+                        })
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
@@ -467,8 +473,9 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                        data.size = data.length + '*' + data.width + '*' + data.height
-                    })
+                            data.img_count = data.pictures.length
+                            // data.size = data.length + '*' + data.width + '*' + data.height
+                        })
                         this.tableData = res.data.data
                         this.totals = res.data.count
                     }
@@ -1048,5 +1055,10 @@
     .img_fnsku {
         width:6rem;
         height:6rem;
+    }
+
+    .item {
+      margin-top: 10px;
+      margin-right: 40px;
     }
 </style>

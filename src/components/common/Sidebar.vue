@@ -171,6 +171,19 @@
                             title: '角色管理'
                         }]
                     },
+                    {
+                        icon: 'el-icon-lx-global',
+                        index: '8',
+                        title: '知识产权管理',
+                        subs: [{
+                            index: 'addbrands',
+                            title: '新建知识产权'
+                        },
+                        {
+                            index: 'brandsmanage',
+                            title: '知识产权管理'
+                        }]
+                    },
                     // {
                     //     icon: 'el-icon-lx-calendar',
                     //     index: '3',

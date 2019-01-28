@@ -13,9 +13,14 @@
             <br><br>
             <div class="handle-box">
                 <div class="fnsku_filter">
-                    日期:
+                    <!-- 日期: -->
                     <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
-                    <el-radio v-model="selfdata" label="true" border>被分配的</el-radio>
+                    <!-- <el-radio v-model="selfdata" label="true" border>被分配的</el-radio> -->
+                    被分配:
+                    <el-select v-model="operate_user_id" filterable remote :loading="loading3" @visible-change="selectVisble3" :remote-method="remoteMethod3" placeholder="选择用户" class="handle-select mr10">
+                        <el-option v-for="item in user_options3" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_dis_user2" ref="infiniteLoading6"></infinite-loading>
+                    </el-select>
                     分类:
                     <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" @change="getCatetory" change-on-select class="handle-select mr10"></el-cascader>
                     开发人员:
@@ -44,22 +49,24 @@
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column  fixed prop="sku" label="SKU" width="120" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="图片" width="80">
+                <el-table-column label="图片" width="120">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
-                        <img v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
-                        <img  v-else-if="scope.row.subject_pictures[0] != undefined && scope.row.subject_pictures[0].url.thumb.url != null && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url"/>
+                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
+                            <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
+                            <img  v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
+                            <img  v-else-if="scope.row.subject_pictures[0] != undefined && scope.row.subject_pictures[0].url.thumb.url != null && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url"/>
+                            <span v-else>无</span>
+                        </el-badge>
                         <span v-else>无</span>
-                        <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
                 </el-table-column>
                 <el-table-column prop="wish_operate_username" label="分配给" width="80" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="username" label="开发人员" width="80" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="主体(点击查看)" width="120">
+                <el-table-column label="主体" width="120">
                     <template slot-scope="scope">
-                        <span style="cursor: pointer;" @click="showChangeProduct(scope.$index, scope.row)">{{scope.row.sku.substring(0, scope.row.sku.length-2)}}</span>
+                        <span class="link-type" @click="showChangeProduct(scope.$index, scope.row)">{{scope.row.sku.substring(0, scope.row.sku.length-2)}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="name" label="产品名称" width="230" show-overflow-tooltip>
@@ -97,8 +104,6 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="img_count" label="图片数量" width="80">
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">
@@ -654,6 +659,12 @@
               confirmDelSubjectPicVis: false,
               statusOptions: [{value: 2, label: '未上架'}, {value: 4, label: 'wish上架'}, {value: 5, label: 'ebay上架'}, {value: 6, label: 'W+E上架'}, {value: 7, label: 'amazon上架'}, {value: 8, label: 'W+A上架'}, {value: 9, label: 'E+A上架'}, {value: 10, label: 'W+E+A上架'}],
               statusSelect: '',
+              loading3: false,
+              query3: undefined,
+              user_options3: [],
+              dis_user_total2: 0,
+              dis_user_page2: 1,
+              operate_user_id: ''
             }
         },
         created() {
@@ -715,7 +726,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/products/wish_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&self=' + this.selfdata + '&page_size=' + this.pagesize + '&status=' + this.statusSelect, {
+                this.$axios.get( '/products/wish_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&operate_user_id=' + this.operate_user_id + '&page_size=' + this.pagesize + '&status=' + this.statusSelect, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -747,7 +758,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/products/wish_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&self=' + this.selfdata + '&page_size=' + this.pagesize + '&status=' + this.statusSelect, {
+                this.$axios.get( '/products/wish_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&operate_user_id=' + this.operate_user_id + '&page_size=' + this.pagesize + '&status=' + this.statusSelect, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -773,7 +784,7 @@
                 this.category_id_filter = []
                 this.supplier_id_filter = ''
                 this.date_filter = []
-                this.selfdata = false
+                this.operate_user_id = ''
                 this.filter_sku = ''
                 this.statusSelect = ''
                 this.getData()
@@ -1572,6 +1583,58 @@
                     this.getSuppliers()
                 }
             },
+            remoteMethod3(query, callback = undefined) {
+                if(query != "" || this.query3 != "" || callback) {
+                    let reload = false
+                    if(this.query3 != query) {
+                        this.loading3 = true
+                        this.dis_user_page2 = 1
+                        this.query3 = query
+                        reload = true
+                        if(this.$refs.infiniteLoading6.isComplete) {
+                            this.$refs.infiniteLoading6.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/users/?page=" + this.dis_user_page2 + '&name=' + query.trim(), {
+                        headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading3 = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                let tempOptions = []
+                                // this.distributeUserOptions = res.data.data
+                                this.user_options3 = tempOptions.concat(res.data.data)
+                            } else {
+                                this.user_options3 = this.user_options3.concat(res.data.data)
+                            }
+                            this.dis_user_total2 = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
+            },
+            onInfinite_dis_user2(obj) {
+                if((this.dis_user_page2 * 20) < this.dis_user_total2) {
+                    this.dis_user_page2 += 1
+                    this.remoteMethod3(this.query3, obj.loaded)
+                    //                  this.getUser(obj.loaded)
+                } else {
+                    obj.complete()
+                }
+            },
+            selectVisble3(visible) {
+                if(visible) {
+                    this.query3 = undefined
+                    this.remoteMethod3("")
+                }
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "未审核"
@@ -1635,5 +1698,19 @@
     .img {
         width:3rem;
         height:3rem;
+    }
+
+    .item {
+      margin-top: 10px;
+      margin-right: 40px;
+    }
+
+    .link-type,
+    .link-type:focus {
+      color: #337ab7;
+      cursor: pointer;
+    }
+    .link-type:hover {
+        color: rgb(32, 160, 255);
     }
 </style>
