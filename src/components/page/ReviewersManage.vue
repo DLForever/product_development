@@ -2,8 +2,8 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-lx-global"></i> 知识产权管理</el-breadcrumb-item>
-                <el-breadcrumb-item>知识产权管理</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-lx-global"></i> 测评管理</el-breadcrumb-item>
+                <el-breadcrumb-item>测评任务管理</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="container">
@@ -11,8 +11,20 @@
                 <div class="fnsku_filter">
                     <!-- 开发人员:
                     <el-input style="width:150px" placeholder="请输入开发人员" v-model.trim="search_shopname"></el-input> -->
-                    关键词:
-                    <el-input style="width:150px" placeholder="请输入关键词" v-model.trim="search_keyword"></el-input>
+                    送测人员:
+                    <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
+                        <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
+                    </el-select>
+                    申请人员:
+                    <el-select v-model="apply_user_id" filterable remote :loading="loading2" @visible-change="selectVisble2" :remote-method="remoteMethod2" placeholder="选择用户" class="handle-select mr10">
+                        <el-option v-for="item in user_options2" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_user2" ref="infiniteLoading2"></infinite-loading>
+                    </el-select>
+                    状态:
+                    <el-select v-model="statusSelect" placeholder="请选择" class="handle-select mr10">
+                        <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
                 </div>
@@ -20,7 +32,26 @@
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column prop="email" label="公司LOGO" width="120">
+                <el-table-column prop="brand_name" label="送测人" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="asin" label="ASIN" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="country" label="站点" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="price" label="价格" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="shopname" label="店铺" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="keyword_index" label="广告位置" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="url" label="url" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <a v-if="scope.row.url != null && scope.row.url != '' && scope.row.url != 'null'" :href="scope.row.url" target="_blank">查看链接</a>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="email" label="Review截图" width="120">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0">无</span>
@@ -28,17 +59,6 @@
                             <span v-else>无</span>
                         </el-badge>
                         <span v-else>无</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="brand_name" label="知识产权名称" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="product_category" label="知识产权类目" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="brand_type" label="知识产权类型" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="website" label="官网链接" show-overflow-tooltip>
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.website != null && scope.row.website != '' && scope.row.website != 'null'" :href="scope.row.website" target="_blank">查看网站</a>
                     </template>
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
@@ -55,13 +75,21 @@
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
-                                    <el-button @click="showPictures(scope.$index, scope.row)" type="text">图片</el-button>
+                                    <el-button @click="handleCreate(scope.$index, scope.row)" type="text">添加送测记录</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
-                                    <el-button @click="handleEdit(scope.$index, scope.row)" type="text">编辑</el-button>
+                                    <el-button type="text" @click="toReviewers">查看送测记录
+                                        <!-- <router-link to="./reviewersinfomanage"></router-link> -->
+                                    </el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
-                                    <el-button @click="handleDelete(scope.$index, scope.row)" type="text">删除</el-button>
+                                    <el-button @click="showPictures(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp图片</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp编辑</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleDelete(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp删除</el-button>
                                 </el-dropdown-item>
                             </el-dropdown-menu>
                         </el-dropdown>
@@ -77,24 +105,42 @@
 
         <!-- 编辑弹出框 -->
         <el-dialog title="编辑" :visible.sync="editVisible" width="50%">
-            <el-form ref="form" :model="form" label-width="100px">
-                <el-form-item label="知识产权名称">
-                    <el-input v-model="form.brand_name"></el-input>
+            <el-form ref="form" :model="form" label-width="110px">
+                <el-form-item label="ASIN">
+                    <el-input v-model="form.asin"></el-input>
                 </el-form-item>
-                <el-form-item label="知识产权类目">
-                    <el-input v-model="form.product_category"></el-input>
+                <el-form-item label="站点">
+                    <el-input v-model="form.country"></el-input>
                 </el-form-item>
-                <el-form-item label="知识产权类型">
-                    <el-input v-model="form.brand_type"></el-input>
+                <el-form-item label="名称">
+                    <el-input v-model="form.name"></el-input>
                 </el-form-item>
-                <el-form-item label="官网链接">
-                    <el-input v-model="form.website"></el-input>
+                <el-form-item label="价格">
+                    <el-input v-model="form.price"></el-input>
+                </el-form-item>
+                <el-form-item label="url">
+                    <el-input v-model="form.url"></el-input>
+                </el-form-item>
+                <el-form-item label="店铺">
+                    <el-input v-model="form.shopname"></el-input>
+                </el-form-item>
+                <el-form-item label="关键词">
+                    <el-input v-model="form.keywords"></el-input>
+                </el-form-item>
+                <el-form-item label="关键词位置">
+                    <el-input v-model="form.keyword_index"></el-input>
                 </el-form-item>
                  <el-form-item label="备注">
                     <el-input v-model="form.remark"></el-input>
                 </el-form-item>
-                <el-form-item label="知识产权图片">
+                <el-form-item label="产品广告位图片">
                     <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="产品无logo非产品主图图片">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
                         <i class="el-icon-upload"></i>
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     </el-upload>
@@ -103,6 +149,37 @@
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editVisible = false">取 消</el-button>
                 <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 添加送测记录 -->
+        <el-dialog title="添加送测信息" :visible.sync="addreviewerVisible" width="50%">
+            <el-form ref="form" :model="form" label-width="100px">
+                <el-form-item label="名称">
+                    <el-input v-model="form.brand_name"></el-input>
+                </el-form-item>
+                <el-form-item label="名称">
+                    <el-input v-model="form.product_category"></el-input>
+                </el-form-item>
+                <el-form-item label="名称">
+                    <el-input v-model="form.brand_type"></el-input>
+                </el-form-item>
+                <el-form-item label="名称">
+                    <el-input v-model="form.website"></el-input>
+                </el-form-item>
+                 <el-form-item label="备注">
+                    <el-input v-model="form.remark"></el-input>
+                </el-form-item>
+                <el-form-item label="图片">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="addreviewerVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveReviewer" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
 
@@ -149,18 +226,27 @@
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="知识产权图片" :visible.sync="productVisible" width="20%" @close="closeProduct">
+        <el-dialog title="图片" :visible.sync="productVisible" width="20%">
             <el-table :data="picturestList" border style="width: 100%">
-                <el-table-column prop="sum" label="图片">
+                <el-table-column prop="sum" label="产品广告位图片">
                     <template slot-scope="scope">
-                        <!-- <span>{{scope.row.url}}</span> -->
                         <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
                         <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
-                        <!-- <span v-else>无</span> -->
                     </template>
-                    <!-- <template slot-scope="scope">
-                        <img class="img_fnsku" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url" />                  
-                    </template> -->
+                </el-table-column>
+                <el-table-column label="操作" width="100">
+                    <template slot-scope="scope">
+                        <el-button type="danger" @click="handleDeletePic(scope.$index, scope.row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <br>
+            <el-table :data="picturestList2" border style="width: 100%">
+                <el-table-column prop="sum" label="无logo非产品主图">
+                    <template slot-scope="scope">
+                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
+                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
+                    </template>
                 </el-table-column>
                 <el-table-column label="操作" width="100">
                     <template slot-scope="scope">
@@ -182,6 +268,7 @@
 </template>
 
 <script>
+    import VueInfiniteLoading from "vue-infinite-loading"
     export default {
 //      name: 'product_manage',
         data() {
@@ -225,7 +312,25 @@
                 fileList: [],
                 picturestList: [],
                 productVisible: false,
-                search_keyword: ''
+                search_keyword: '',
+                addreviewerVisible: false,
+                status: '',
+                user_id_filter: '',
+                query: undefined,
+                user_page: 1,
+                user_total: 0,
+                loading: false,
+                user_options: [],
+                apply_user_id: '',
+                query2: undefined,
+                user_page2: 1,
+                user_total2: 0,
+                loading2: false,
+                user_options2: [],
+                fileList2: [],
+                statusSelect: '',
+                statusOptions: [{value: 2, label: '未上架'}, {value: 4, label: 'wish上架'}, {value: 5, label: 'ebay上架'}],
+                picturestList2: []
             }
         },
         created() {
@@ -257,7 +362,7 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
-                this.$axios.get( '/intellectual_properties?page='+this.cur_page + '&keyword=' + this.search_keyword, {
+                this.$axios.get( '/tasks?page='+this.cur_page + '&status=' + this.status + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -276,7 +381,7 @@
             filter_product() {
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/intellectual_properties?page='+this.cur_page + '&keyword=' + this.search_keyword, {
+                this.$axios.get( '/tasks?page='+this.cur_page + '&status=' + this.statusSelect + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -286,8 +391,9 @@
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
+                        this.paginationShow = true
                     }
-                    this.paginationShow = true
+                    
                 }).catch((res) => {
                     console.log('error')
                 }).finally(() => {
@@ -297,7 +403,9 @@
             clear_filter() {
                 this.paginationShow = false
                 this.cur_page = 1
-                this.search_keyword = ''
+                this.user_id_filter = ''
+                this.apply_user_id = ''
+                this.statusSelect = ''
                 this.getData()
             },
             formatter_created_at(row, column) {
@@ -319,19 +427,24 @@
                 this.idx = row.id
                 this.checkVisible = true
             },
-            
             handleEdit(index, row) {
                 this.idx = index;
                 const item = this.tableData[index];
                 this.form = {
                     id: item.id,
-                    brand_name: item.brand_name,
-                    product_category: item.product_category,
-                    brand_type: item.brand_type,
-                    website: item.website,
+                    asin: item.asin,
+                    country: item.country,
+                    name: item.name,
+                    url: item.url,
+                    shopname: item.shopname,
+                    price: item.price,
+                    keywords: item.keywords,
+                    keyword_index: item.keyword_index,
                     remark: item.remark
                 }
+                console.log(item)
                 this.fileList = []
+                this.fileList2 = []
                 this.editVisible = true;
             },
             handleDelete(index, row) {
@@ -390,7 +503,7 @@
             	this.form = {
             		id: item.id
             	}
-            	this.$axios.delete('/intellectual_properties/'+this.form.id, 
+            	this.$axios.delete('/tasks/'+this.form.id, 
             	{
             		headers: {'Authorization': localStorage.getItem('token')}
             	}
@@ -425,17 +538,26 @@
             handleRemove(a, b) {
                 this.fileList = b
             },
+            changeFile2(file) {
+                this.fileList2.push(file)
+            },
+            handleRemove2(a, b) {
+                this.fileList2 = b
+            },
             showPictures(index, row) {
+                this.picturestList = []
+                this.picturestList2 = []
                 this.product_id = row.id
                 const item = this.tableData[index]
                 item.pictures.forEach((data) => {
-                    this.picturestList.push(data)
+                    if(data.remark == 'adv') {
+                        this.picturestList.push(data)
+                    }else {
+                        this.picturestList2.push(data)
+                    }
+                    
                 })
                 this.productVisible = true;
-            },
-            closeProduct() {
-                this.productVisible = false
-                this.picturestList = []
             },
             handleDeletePic(index, row) {
                 this.picture_id = row.id
@@ -444,10 +566,10 @@
             },
             deleteImg() {
                 let params = {
-                    id: this.product_id,
+                    // id: this.product_id,
                     img_id: this.picture_id
                 }
-                this.$axios.post('/intellectual_properties/delete_img', params, {
+                this.$axios.post('/tasks/' + this.product_id + '/delete_img', params, {
                      headers: {
                         'Authorization': localStorage.getItem('token')
                     }
@@ -468,6 +590,120 @@
             formatter_updated_at(row, column) {
                 return row.updated_at.substr(0, 19);
             },
+            handleCreate(index, row) {
+                this.addreviewerVisible = true
+            },
+            saveReviewer() {
+
+            },
+            onInfinite_user(obj) {
+                if((this.user_page * 20) < this.user_total) {
+                    this.user_page += 1
+                    // this.getUsers(obj.loaded)
+                    this.remoteMethod(this.query,obj.loaded)
+                } else {
+                    obj.complete()
+                }
+            },
+            selectVisble(visible) {
+                if(visible) {
+                    this.query = undefined
+                    this.remoteMethod("")
+                }
+            },
+            remoteMethod(query, callback = undefined) {
+                if(query != "" || this.query != "" || callback) {
+                    let reload = false
+                    if(this.query != query) {
+                        this.loading = true
+                        this.user_page = 1
+                        this.query = query
+                        reload = true
+                        if(this.$refs.infiniteLoading.isComplete) {
+                            this.$refs.infiniteLoading.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim(), {
+                        headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                let tempOptions = []
+                                this.user_options = tempOptions.concat(res.data.data)
+                            } else {
+                                this.user_options = this.user_options.concat(res.data.data)
+                            }
+                            this.user_total = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
+            },
+            onInfinite_user2(obj) {
+                if((this.user_page2 * 20) < this.user_total2) {
+                    this.user_page2 += 1
+                    // this.getUsers(obj.loaded)
+                    this.remoteMethod(this.query2,obj.loaded)
+                } else {
+                    obj.complete()
+                }
+            },
+            selectVisble2(visible) {
+                if(visible) {
+                    this.query2 = undefined
+                    this.remoteMethod2("")
+                }
+            },
+            remoteMethod2(query, callback = undefined) {
+                if(query != "" || this.query2 != "" || callback) {
+                    let reload = false
+                    if(this.query2 != query) {
+                        this.loading2 = true
+                        this.user_page2 = 1
+                        this.query2 = query
+                        reload = true
+                        if(this.$refs.infiniteLoading2.isComplete) {
+                            this.$refs.infiniteLoading2.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/users/?page=" + this.user_page2 + '&name=' + query.trim(), {
+                        headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading2 = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                let tempOptions = []
+                                this.user_options2 = tempOptions.concat(res.data.data)
+                            } else {
+                                this.user_options2 = this.user_options2.concat(res.data.data)
+                            }
+                            this.user_total2 = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
+            },
+            toReviewers() {
+                this.$router.push('/reviewersinfomanage');
+            }
+        },
+        components: {
+            "infinite-loading": VueInfiniteLoading
         }
     }
 

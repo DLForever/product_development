@@ -184,6 +184,19 @@
                             title: '知识产权管理'
                         }]
                     },
+                    {
+                        icon: 'el-icon-lx-goodsfill',
+                        index: '9',
+                        title: '测评管理',
+                        subs: [{
+                            index: 'addreviewers',
+                            title: '新建测评任务'
+                        },
+                        {
+                            index: 'reviewersmanage',
+                            title: '测评任务管理'
+                        }]
+                    },
                     // {
                     //     icon: 'el-icon-lx-calendar',
                     //     index: '3',

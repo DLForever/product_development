@@ -9,7 +9,6 @@
         <div class="container">
             <div class="handle-box">
                 <el-button type="primary" @click="handleApply">申请查看详情</el-button>
-                
                 <div class="fnsku_filter">
                     日期:
                     <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>

@@ -2,8 +2,8 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-lx-global"></i> 知识产权管理</el-breadcrumb-item>
-                <el-breadcrumb-item>知识产权管理</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-lx-global"></i> 测评管理</el-breadcrumb-item>
+                <el-breadcrumb-item>测评任务管理</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="container">
@@ -15,12 +15,13 @@
                     <el-input style="width:150px" placeholder="请输入关键词" v-model.trim="search_keyword"></el-input>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
+                    <el-button @click="handleCreate" type="primary">临时</el-button>
                 </div>
             </div>
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column prop="email" label="公司LOGO" width="120">
+                <el-table-column prop="email" label="Review截图" width="120">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0">无</span>
@@ -30,11 +31,13 @@
                         <span v-else>无</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="brand_name" label="知识产权名称" show-overflow-tooltip>
+                <el-table-column prop="brand_name" label="送测人" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="product_category" label="知识产权类目" show-overflow-tooltip>
+                <el-table-column prop="product_category" label="ASIN" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="brand_type" label="知识产权类型" show-overflow-tooltip>
+                <el-table-column prop="brand_type" label="站点" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="brand_type" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="website" label="官网链接" show-overflow-tooltip>
                     <template slot-scope="scope">
@@ -54,6 +57,9 @@
                                 操作<i class="el-icon-arrow-down el-icon--right"></i>
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item>
+                                    <el-button @click="handleCreate(scope.$index, scope.row)" type="text">添加送测记录</el-button>
+                                </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="showPictures(scope.$index, scope.row)" type="text">图片</el-button>
                                 </el-dropdown-item>
@@ -78,6 +84,37 @@
         <!-- 编辑弹出框 -->
         <el-dialog title="编辑" :visible.sync="editVisible" width="50%">
             <el-form ref="form" :model="form" label-width="100px">
+                <el-form-item label="ASIN">
+                    <el-input v-model="form.brand_name"></el-input>
+                </el-form-item>
+                <el-form-item label="产品价格">
+                    <el-input v-model="form.product_category"></el-input>
+                </el-form-item>
+                <el-form-item label="知识产权类型">
+                    <el-input v-model="form.brand_type"></el-input>
+                </el-form-item>
+                <el-form-item label="官网链接">
+                    <el-input v-model="form.website"></el-input>
+                </el-form-item>
+                 <el-form-item label="备注">
+                    <el-input v-model="form.remark"></el-input>
+                </el-form-item>
+                <el-form-item label="知识产权图片">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 添加送测记录 -->
+        <el-dialog title="添加送测信息" :visible.sync="addreviewerVisible" width="50%">
+            <el-form ref="form" :model="form" label-width="100px">
                 <el-form-item label="知识产权名称">
                     <el-input v-model="form.brand_name"></el-input>
                 </el-form-item>
@@ -101,8 +138,8 @@
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="editVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
+                <el-button @click="addreviewerVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveReviewer" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
 
@@ -225,7 +262,8 @@
                 fileList: [],
                 picturestList: [],
                 productVisible: false,
-                search_keyword: ''
+                search_keyword: '',
+                addreviewerVisible: false
             }
         },
         created() {
@@ -257,7 +295,7 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
-                this.$axios.get( '/intellectual_properties?page='+this.cur_page + '&keyword=' + this.search_keyword, {
+                this.$axios.get( '/intellectual_properties/?page='+this.cur_page + '&keyword=' + this.search_keyword, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -276,7 +314,7 @@
             filter_product() {
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/intellectual_properties?page='+this.cur_page + '&keyword=' + this.search_keyword, {
+                this.$axios.get( '/intellectual_properties/?page='+this.cur_page + '&keyword=' + this.search_keyword, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -468,6 +506,12 @@
             formatter_updated_at(row, column) {
                 return row.updated_at.substr(0, 19);
             },
+            handleCreate(index, row) {
+                this.addreviewerVisible = true
+            },
+            saveReviewer() {
+
+            }
         }
     }
 

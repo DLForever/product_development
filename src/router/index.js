@@ -145,6 +145,21 @@ export default new Router({
                     meta: { title: '知识产权管理' }
                 },
                 {
+                    path: '/addreviewers',
+                    component: resolve => require(['../components/page/AddReviewers.vue'], resolve),
+                    meta: { title: '新建测评任务' }
+                },
+                {
+                    path: '/reviewersmanage',
+                    component: resolve => require(['../components/page/ReviewersManage.vue'], resolve),
+                    meta: { title: '测评任务管理' }
+                },
+                {
+                    path: '/reviewersinfomanage',
+                    component: resolve => require(['../components/page/ReviewersInfoManage.vue'], resolve),
+                    meta: { title: '测评记录管理' }
+                },
+                {
                     path: '/notifications',
                     component: resolve => require(['../components/page/Tabs.vue'], resolve),
                     meta: { title: '未读消息' }
