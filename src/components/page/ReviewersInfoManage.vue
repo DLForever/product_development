@@ -11,38 +11,58 @@
                 <div class="fnsku_filter">
                     <!-- 开发人员:
                     <el-input style="width:150px" placeholder="请输入开发人员" v-model.trim="search_shopname"></el-input> -->
-                    关键词:
-                    <el-input style="width:150px" placeholder="请输入关键词" v-model.trim="search_keyword"></el-input>
+                    送测人员:
+                    <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
+                        <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
+                    </el-select>
+                    状态:
+                    <el-select v-model="statusSelect" placeholder="请选择" class="handle-select mr10">
+                        <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
-                    <el-button @click="handleCreate" type="primary">临时</el-button>
                 </div>
             </div>
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column prop="email" label="Review截图" width="120">
+                <el-table-column fixed prop="asin" label="ASIN" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="keyword" label="关键词" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="order_number" label="订单号" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="pay_type" label="支付类型" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="currency" label="币种" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="pay_time" label="支付时间" :formatter="formatter_pay_time" width="150">
+                </el-table-column>
+                <el-table-column prop="pay_price" label="支付价格" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="commission" label="佣金" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="need_refund2" label="是否需要返款" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="paypal_account" label="paypal账号" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="profile_url" label="亚马逊profile url" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
-                            <span v-if="scope.row.pictures.length === 0">无</span>
-                            <img  v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
-                            <span v-else>无</span>
-                        </el-badge>
-                        <span v-else>无</span>
+                        <a v-if="scope.row.profile_url != null && scope.row.profile_url != '' && scope.row.profile_url != 'null'" :href="scope.row.profile_url" target="_blank">查看链接</a>
                     </template>
                 </el-table-column>
-                <el-table-column prop="brand_name" label="送测人" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="product_category" label="ASIN" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="brand_type" label="站点" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="brand_type" label="产品名称" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="website" label="官网链接" show-overflow-tooltip>
+                <el-table-column prop="facebook_url" label="fackbook url" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <a v-if="scope.row.website != null && scope.row.website != '' && scope.row.website != 'null'" :href="scope.row.website" target="_blank">查看网站</a>
+                        <a v-if="scope.row.facebook_url != null && scope.row.facebook_url != '' && scope.row.facebook_url != 'null'" :href="scope.row.facebook_url" target="_blank">查看链接</a>
                     </template>
+                </el-table-column>
+                <el-table-column prop="status" label="状态" width="120">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status)}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="feedback" label="反馈" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
@@ -50,7 +70,7 @@
                 </el-table-column>
                 <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="150">
                 </el-table-column>
-                <el-table-column label="操作" width="100">
+                <el-table-column label="操作" width="100" fixed="right">
                     <template slot-scope="scope">
                         <el-dropdown>
                             <el-button type="primary">
@@ -58,7 +78,10 @@
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
-                                    <el-button @click="handleCreate(scope.$index, scope.row)" type="text">添加送测记录</el-button>
+                                    <el-button @click="handleDone(scope.$index, scope.row)" type="text">完成</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleFeedback(scope.$index, scope.row)" type="text">失败</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="showPictures(scope.$index, scope.row)" type="text">图片</el-button>
@@ -81,65 +104,103 @@
             </div>
         </div>
 
-        <!-- 编辑弹出框 -->
-        <el-dialog title="编辑" :visible.sync="editVisible" width="50%">
+        <!-- 完成弹出框 -->
+        <el-dialog title="完成测评" :visible.sync="doneVisible" width="50%">
             <el-form ref="form" :model="form" label-width="100px">
-                <el-form-item label="ASIN">
-                    <el-input v-model="form.brand_name"></el-input>
-                </el-form-item>
-                <el-form-item label="产品价格">
-                    <el-input v-model="form.product_category"></el-input>
-                </el-form-item>
-                <el-form-item label="知识产权类型">
-                    <el-input v-model="form.brand_type"></el-input>
-                </el-form-item>
-                <el-form-item label="官网链接">
-                    <el-input v-model="form.website"></el-input>
-                </el-form-item>
-                 <el-form-item label="备注">
-                    <el-input v-model="form.remark"></el-input>
-                </el-form-item>
-                <el-form-item label="知识产权图片">
+                <el-form-item label="评论截图">
                     <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
                         <i class="el-icon-upload"></i>
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     </el-upload>
                 </el-form-item>
+                <el-form-item label="退款截图">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+                 <el-form-item label="备注">
+                    <el-input v-model="form.remark"></el-input>
+                </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="editVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
+                <el-button @click="doneVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveDone" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
 
-        <!-- 添加送测记录 -->
-        <el-dialog title="添加送测信息" :visible.sync="addreviewerVisible" width="50%">
-            <el-form ref="form" :model="form" label-width="100px">
-                <el-form-item label="知识产权名称">
-                    <el-input v-model="form.brand_name"></el-input>
+        <!-- 更新送测记录 -->
+        <el-dialog title="添加送测信息" :visible.sync="updatereviewerVisible" width="50%">
+            <el-form ref="addReviewerForm" :rules="rules" :model="addReviewerForm" label-width="130px">
+                <el-form-item label="ASIN" prop="asin">
+                    <el-input v-model="addReviewerForm.asin"></el-input>
                 </el-form-item>
-                <el-form-item label="知识产权类目">
-                    <el-input v-model="form.product_category"></el-input>
+                <el-form-item label="关键词" prop="keyword">
+                    <el-input v-model="addReviewerForm.keyword"></el-input>
                 </el-form-item>
-                <el-form-item label="知识产权类型">
-                    <el-input v-model="form.brand_type"></el-input>
+                <el-form-item label="订单号" prop="order_number">
+                    <el-input v-model="addReviewerForm.order_number"></el-input>
                 </el-form-item>
-                <el-form-item label="官网链接">
-                    <el-input v-model="form.website"></el-input>
+                <el-form-item label="支付类型" prop="pay_type">
+                    <el-input v-model="addReviewerForm.pay_type"></el-input>
+                </el-form-item>
+                <el-form-item label="币种" prop="currency">
+                    <el-input v-model="addReviewerForm.currency"></el-input>
+                </el-form-item>
+                <el-form-item label="支付时间" prop="pay_time">
+                    <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="addReviewerForm.pay_time" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="支付价格" prop="pay_price">
+                    <el-input v-model="addReviewerForm.pay_price"></el-input>
+                </el-form-item>
+                <el-form-item label="佣金" prop="commission">
+                    <el-input v-model="addReviewerForm.commission"></el-input>
+                </el-form-item>
+                <el-form-item label="paypal账号" prop="paypal_account">
+                    <el-input v-model="addReviewerForm.paypal_account"></el-input>
+                </el-form-item>
+                <el-form-item label="亚马逊profile url" prop="profile_url">
+                    <el-input v-model="addReviewerForm.profile_url"></el-input>
+                </el-form-item>
+                <el-form-item label="facebook url" prop="facebook_url">
+                    <el-input v-model="addReviewerForm.facebook_url"></el-input>
+                </el-form-item>
+                <el-form-item label="是否需要返款" prop="isPay">
+                    <el-radio v-model="addReviewerForm.isPay" label="true">是</el-radio>
+                    <el-radio v-model="addReviewerForm.isPay" label="false">否</el-radio>
                 </el-form-item>
                  <el-form-item label="备注">
-                    <el-input v-model="form.remark"></el-input>
+                    <el-input v-model="addReviewerForm.remark"></el-input>
                 </el-form-item>
-                <el-form-item label="知识产权图片">
+                <el-form-item label="评论截图">
                     <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="退款截图">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
                         <i class="el-icon-upload"></i>
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     </el-upload>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="addreviewerVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveReviewer" :disabled="submitDisabled">确 定</el-button>
+                <el-button @click="updatereviewerVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveReviewer('addReviewerForm')" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 添加失败反馈信息 -->
+        <el-dialog title="失败反馈信息" :visible.sync="feedbackVisible" width="50%">
+            <el-form ref="form" :model="form" label-width="100px">
+                 <el-form-item label="问题反馈" required>
+                    <el-input v-model="form.feedback"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="feedbackVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveFeedback" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
 
@@ -186,18 +247,27 @@
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="知识产权图片" :visible.sync="productVisible" width="20%" @close="closeProduct">
+        <el-dialog title="测评截图" :visible.sync="productVisible" width="20%" @close="closeProduct">
             <el-table :data="picturestList" border style="width: 100%">
-                <el-table-column prop="sum" label="图片">
+                <el-table-column label="评论截图">
                     <template slot-scope="scope">
-                        <!-- <span>{{scope.row.url}}</span> -->
                         <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
                         <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
-                        <!-- <span v-else>无</span> -->
                     </template>
-                    <!-- <template slot-scope="scope">
-                        <img class="img_fnsku" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url" />                  
-                    </template> -->
+                </el-table-column>
+                <el-table-column label="操作" width="100">
+                    <template slot-scope="scope">
+                        <el-button type="danger" @click="handleDeletePic(scope.$index, scope.row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <br>
+            <el-table :data="picturestList2" border style="width: 100%">
+                <el-table-column label="退款截图">
+                    <template slot-scope="scope">
+                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
+                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
+                    </template>
                 </el-table-column>
                 <el-table-column label="操作" width="100">
                     <template slot-scope="scope">
@@ -219,6 +289,7 @@
 </template>
 
 <script>
+    import VueInfiniteLoading from "vue-infinite-loading"
     export default {
 //      name: 'product_manage',
         data() {
@@ -241,6 +312,9 @@
                     name: '',
                     date: '',
                     address: '',
+                    remark: '',
+                    feedback: '',
+                    id: ''
                 },
                 idx: -1,
                 productVisible: false,
@@ -263,7 +337,103 @@
                 picturestList: [],
                 productVisible: false,
                 search_keyword: '',
-                addreviewerVisible: false
+                feedbackVisible: false,
+                status: '',
+                statusOptions: [{value: 1, label: '正在进行中'}, {value: 2, label: '已评论'}, {value: 3, label: '已完成'}, {value: 5, label: '失败'}],
+                statusSelect: '',
+                user_id_filter: '',
+                query: undefined,
+                user_page: 1,
+                user_total: 0,
+                loading: false,
+                user_options: [],
+                task_id: '',
+                fileList2: [],
+                fan_id: '',
+                picturestList2: [],
+                addReviewerForm: {
+                    task_period_id: '',
+                    task_id: '',
+                    asin: '',
+                    keyword: '',
+                    order_number: '',
+                    pay_type: '',
+                    currency: '',
+                    pay_time: '',
+                    pay_price: '',
+                    commission: '',
+                    paypal_account: '',
+                    profile_url: '',
+                    facebook_url: '',
+                    isPay: undefined,
+                    remark: '',
+                    task_period_id: '',
+                    task_id: ''
+                },
+                rules: {
+                    keyword: [{
+                        required: true,
+                        message: '请输入关键词',
+                        trigger: 'blur'
+                    }],
+                    pay_price: [{
+                        required: true,
+                        message: '请输入支付价格',
+                        trigger: 'blur'
+                    }],
+                    asin: [{
+                        required: true,
+                        message: '请输入asin',
+                        trigger: 'blur'
+                    }],
+                    order_number: [{
+                        required: true,
+                        message: '请输入订单号',
+                        trigger: 'blur'
+                    }],
+                    pay_type: [{
+                        required: true,
+                        message: '请输入支付类型',
+                        trigger: 'blur'
+                    }],
+                    currency: [{
+                        required: true,
+                        message: '请输入币种',
+                        trigger: 'blur'
+                    }],
+                    pay_time: [{
+                        required: true,
+                        message: '请输入支付时间',
+                        trigger: 'blur'
+                    }],
+                    commission: [{
+                        required: true,
+                        message: '请输入佣金',
+                        trigger: 'blur'
+                    }],
+                    paypal_account: [{
+                        required: true,
+                        message: '请输入paypal账号',
+                        trigger: 'blur'
+                    }],
+                    profile_url: [{
+                        required: true,
+                        message: '请输入亚马逊profile url',
+                        trigger: 'blur'
+                    }],
+                    facebook_url: [{
+                        required: true,
+                        message: '请输入facebook url',
+                        trigger: 'blur'
+                    }],
+                    isPay: [{
+                        required: true,
+                        message: '请选择是否需要返款',
+                        trigger: 'blur'
+                    }],
+                },
+                doneVisible: false,
+                updatereviewerVisible: false
             }
         },
         created() {
@@ -271,6 +441,21 @@
         },
         watch: {
         	"$route": "getData"
+        },
+        filters: {
+            //类型转换
+            statusFilter(status) {
+                const statusMap = {
+                    1: 'warning',
+                    2: 'primary',
+                    3: 'success',
+                    4: 'danger',
+                    5: 'danger',
+                    6: 'success',
+                    10: 'success',
+                }
+                return statusMap[status]
+            },
         },
         computed: {
             data() {
@@ -295,12 +480,20 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
-                this.$axios.get( '/intellectual_properties/?page='+this.cur_page + '&keyword=' + this.search_keyword, {
+                if (!this.$route.params.task_id) {
+                    this.$route.params.task_id = ''
+                }
+                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
+                            if (String(data.need_refund) == 'true') {
+                                data.need_refund2 = '是'
+                            } else if(String(data.need_refund) == 'false'){
+                                data.need_refund2 = '否'
+                            }
                             data.img_count = data.pictures.length
                         })
                         this.tableData = res.data.data
@@ -314,12 +507,20 @@
             filter_product() {
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/intellectual_properties/?page='+this.cur_page + '&keyword=' + this.search_keyword, {
+                if (!this.$route.params.task_id) {
+                    this.$route.params.task_id = ''
+                }
+                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
+                            if (String(data.need_refund) == 'true') {
+                                data.need_refund2 = '是'
+                            } else if(String(data.need_refund) == 'false'){
+                                data.need_refund2 = '否'
+                            }
                             data.img_count = data.pictures.length
                         })
                         this.tableData = res.data.data
@@ -335,7 +536,8 @@
             clear_filter() {
                 this.paginationShow = false
                 this.cur_page = 1
-                this.search_keyword = ''
+                this.statusSelect = ''
+                this.user_id_filter = ''
                 this.getData()
             },
             formatter_created_at(row, column) {
@@ -344,6 +546,9 @@
 			formatter_updated_at(row, column) {
 				return row.updated_at.substr(0, 19);
 			},
+            formatter_pay_time(row, column) {
+                return row.pay_time.substr(0, 19);
+            },
             search() {
                 this.is_search = true;
             },
@@ -358,19 +563,16 @@
                 this.checkVisible = true
             },
             
-            handleEdit(index, row) {
+            handleDone(index, row) {
                 this.idx = index;
                 const item = this.tableData[index];
                 this.form = {
                     id: item.id,
-                    brand_name: item.brand_name,
-                    product_category: item.product_category,
-                    brand_type: item.brand_type,
-                    website: item.website,
-                    remark: item.remark
                 }
+                this.form.remark = ''
                 this.fileList = []
-                this.editVisible = true;
+                this.fileList2 = []
+                this.doneVisible = true;
             },
             handleDelete(index, row) {
                 this.idx = index;
@@ -390,30 +592,26 @@
                 this.multipleSelection = val;
             },
             // 保存编辑
-            saveEdit() {
+            saveDone() {
                 this.submitDisabled = true
-                let params = {
-                    remark: this.form.remark,
-                }
                 let formData = new FormData()
-                formData.append('brand_name', this.form.brand_name)
-                formData.append('product_category', this.form.product_category)
-                formData.append('website', this.form.website)
-                formData.append('brand_type', this.form.brand_type)
                 formData.append('remark', this.form.remark)
                 this.fileList.forEach((item) => {
-                    formData.append('logo[]', item.raw)
+                    formData.append('picture_review[]', item.raw)
+                })
+                this.fileList2.forEach((item) => {
+                    formData.append('picture_refund[]', item.raw)
                 })
                 let config = {
                     headers: {
                         'Authorization': localStorage.getItem('token')
                     }
                 }
-                this.$axios.patch('/intellectual_properties/' + this.form.id, formData, config).then((res) => {
+                this.$axios.post('/task_records/' + this.form.id + '/done', formData, config).then((res) => {
                     if(res.data.code == 200) {
-                        this.$message.success('更新成功！')
+                        this.$message.success('完成送测！')
                         this.getData()
-                        this.editVisible = false
+                        this.doneVisible = false
                     }
                 }).catch((res) => {
                     console.log('err')
@@ -428,7 +626,7 @@
             	this.form = {
             		id: item.id
             	}
-            	this.$axios.delete('/intellectual_properties/'+this.form.id, 
+            	this.$axios.delete('/task_records/'+this.form.id, 
             	{
             		headers: {'Authorization': localStorage.getItem('token')}
             	}
@@ -463,35 +661,51 @@
             handleRemove(a, b) {
                 this.fileList = b
             },
+            changeFile2(file) {
+                this.fileList2.push(file)
+            },
+            handleRemove2(a, b) {
+                this.fileList2 = b
+            },
             showPictures(index, row) {
                 this.product_id = row.id
                 const item = this.tableData[index]
                 item.pictures.forEach((data) => {
-                    this.picturestList.push(data)
+                    if (data.remark == 'review') {
+                        this.picturestList.push(data)
+                    } else {
+                        this.picturestList2.push(data)
+                    }
                 })
                 this.productVisible = true;
             },
             closeProduct() {
                 this.productVisible = false
                 this.picturestList = []
+                this.picturestList2 = []
             },
             handleDeletePic(index, row) {
+                this.remark = row.remark
                 this.picture_id = row.id
                 this.idx = index;
                 this.confirmDelProVis = true;
             },
             deleteImg() {
                 let params = {
-                    id: this.product_id,
+                    // id: this.product_id,
                     img_id: this.picture_id
                 }
-                this.$axios.post('/intellectual_properties/delete_img', params, {
+                this.$axios.post('/task_records/' + this.product_id + '/delete_img', params, {
                      headers: {
                         'Authorization': localStorage.getItem('token')
                     }
                 }).then((res) => {
                     if(res.data.code == 200) {
-                        this.picturestList.splice(this.idx, 1);
+                        if (this.remark == 'review') {
+                            this.picturestList.splice(this.idx, 1)
+                        } else {
+                            this.picturestList2.splice(this.idx, 1)
+                        }
                         this.getData()
                         this.$message.success("删除成功")
                         this.confirmDelProVis = false
@@ -506,12 +720,175 @@
             formatter_updated_at(row, column) {
                 return row.updated_at.substr(0, 19);
             },
-            handleCreate(index, row) {
-                this.addreviewerVisible = true
+            handleFeedback(index, row) {
+                this.form.id = row.id
+                this.feedbackVisible = true
             },
-            saveReviewer() {
+            saveFeedback() {
+                if(this.form.feedback.trim() == '') {
+                    this.$message.error('请输入反馈内容')
+                    return
+                }
+                let params = {
+                    feedback: this.form.feedback
+                }
+                this.$axios.post('/task_records/' + this.form.id + '/done_failure', params, {
+                     headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.getData()
+                        this.$message.success("反馈成功!")
+                        this.feedbackVisible = false
+                    }
+                }).catch((res) => {
 
-            }
+                })
+            },
+            onInfinite_user(obj) {
+                if((this.user_page * 20) < this.user_total) {
+                    this.user_page += 1
+                    // this.getUsers(obj.loaded)
+                    this.remoteMethod(this.query,obj.loaded)
+                } else {
+                    obj.complete()
+                }
+            },
+            selectVisble(visible) {
+                if(visible) {
+                    this.query = undefined
+                    this.remoteMethod("")
+                }
+            },
+            remoteMethod(query, callback = undefined) {
+                if(query != "" || this.query != "" || callback) {
+                    let reload = false
+                    if(this.query != query) {
+                        this.loading = true
+                        this.user_page = 1
+                        this.query = query
+                        reload = true
+                        if(this.$refs.infiniteLoading.isComplete) {
+                            this.$refs.infiniteLoading.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim(), {
+                        headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                let tempOptions = []
+                                this.user_options = tempOptions.concat(res.data.data)
+                            } else {
+                                this.user_options = this.user_options.concat(res.data.data)
+                            }
+                            this.user_total = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
+            },
+            handleEdit(index, row) {
+                this.idx = row.id
+                const item = this.tableData[index]
+                this.addReviewerForm = {
+                    task_period_id: item.task_period_id,
+                    task_id: item.task_id,
+                    asin: item.asin,
+                    keyword: item.keyword,
+                    order_number: item.order_number,
+                    pay_type: item.pay_type,
+                    currency: item.currency,
+                    pay_time: item.pay_time,
+                    pay_price: item.pay_price,
+                    commission: item.commission,
+                    paypal_account: item.paypal_account,
+                    profile_url: item.profile_url,
+                    facebook_url: item.facebook_url,
+                    isPay: String(item.need_refund),
+                    remark: item.remark,
+                },
+                this.fileList = []
+                this.fileList2 = []
+                this.updatereviewerVisible = true
+            },
+            saveReviewer(formName) {
+                let formData = new FormData()
+                this.$refs[formName].validate((valid) => {
+                    if(valid) {
+                        this.submitDisabled = true
+                        formData.append('task_record[asin]', this.addReviewerForm.asin)
+                        formData.append('task_record[keyword]', this.addReviewerForm.keyword)
+                        formData.append('task_record[order_number]', this.addReviewerForm.order_number)
+                        formData.append('task_record[pay_type]', this.addReviewerForm.pay_type)
+                        formData.append('task_record[currency]', this.addReviewerForm.currency)
+                        formData.append('task_record[pay_time]', this.addReviewerForm.pay_time)
+                        formData.append('task_record[pay_price]', this.addReviewerForm.pay_price)
+                        formData.append('task_record[commission]', this.addReviewerForm.commission)
+                        formData.append('task_record[need_refund]', this.addReviewerForm.isPay)
+                        formData.append('task_record[paypal_account]', this.addReviewerForm.paypal_account)
+                        formData.append('task_record[profile_url]', this.addReviewerForm.profile_url)
+                        formData.append('task_record[facebook_url]', this.addReviewerForm.facebook_url)
+                        formData.append('task_record[remark]', this.addReviewerForm.remark)
+                        formData.append('task_record[task_id]', this.addReviewerForm.task_id)
+                        formData.append('task_record[task_period_id]', this.addReviewerForm.task_period_id)
+                        this.fileList.forEach((item) => {
+                            formData.append('picture_review[]', item.raw)
+                        })
+                        this.fileList2.forEach((item) => {
+                            formData.append('picture_refund[]', item.raw)
+                        })
+                        let config = {
+                            headers: {
+                                'Authorization': localStorage.getItem('token')
+                            }
+                        }
+                        this.$axios.patch('/task_records/' + this.idx, formData, config).then((res) => {
+                            if(res.data.code == 200) {
+                                this.$message.success('提交成功！')
+                                this.$refs[formName].resetFields()
+                                this.updatereviewerVisible = false
+                                this.getData()
+                                // this.$router.push('/reviewersmanage')
+                            }
+                        }).catch((res) => {
+                            console.log('err')
+                        }).finally((res) => {
+                            this.submitDisabled = false
+                        })
+                    } else {
+                        this.$message.error("请填写完整信息")
+                        // return false
+                    }
+                })
+            },
+            getStatusName(status) {
+                if(status == 1) {
+                    return "正在进行中"
+                } else if(status == 2) {
+                    return "已评论"
+                } else if(status == 3) {
+                    return "已完成"
+                }else if(status == 4) {
+                    return "已删除"
+                }else if(status == 5) {
+                    return "失败"
+                }else {
+                    return '其他'
+                }
+            },
+        },
+        components: {
+            "infinite-loading": VueInfiniteLoading
         }
     }
 

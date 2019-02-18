@@ -157,6 +157,7 @@ export default new Router({
                 {
                     path: '/reviewersinfomanage',
                     component: resolve => require(['../components/page/ReviewersInfoManage.vue'], resolve),
+                    name: 'Reviewersinfomanage',
                     meta: { title: '测评记录管理' }
                 },
                 {
