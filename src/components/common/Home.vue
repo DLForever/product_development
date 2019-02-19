@@ -1,6 +1,6 @@
 <template>
     <div class="wrapper">
-        <v-head :message_count="message_count" :notifications="notifications" :clearInte="clearInte"></v-head>
+        <v-head :message_count="message_count" :clearInte="clearInte"></v-head>
         <v-sidebar></v-sidebar>
         <div class="content-box" :class="{'content-collapse':collapse}">
             <v-tags></v-tags>
@@ -106,18 +106,19 @@
                             let offsettemp = 100 + 70 * temp_index
                             if(mesId.indexOf(data.id) == -1) {
                                 temp_index++
-                                console.log(temp_index)
-                               this.notifications.push(this.$notify({
-                                    title: '您有新的消息',
-                                    dangerouslyUseHTMLString: true,
-                                    offset: offsettemp,
-                                    message: data.message,
-                                    onClick: this.popMes.bind(null,this.notifications.length,data.id),
-                                    customClass: "testlzh",
-                                    duration: 3000,
-                                    showClose: false
-                                    // onClose: this.popMes.bind(data.id)
-                                })) 
+                                if (temp_index < 10) {
+                                    this.notifications.push(this.$notify({
+                                        title: '您有新的消息',
+                                        dangerouslyUseHTMLString: true,
+                                        offset: offsettemp,
+                                        message: data.message,
+                                        onClick: this.popMes.bind(null,this.notifications.length,data.id),
+                                        customClass: "testlzh",
+                                        duration: 3000,
+                                        showClose: false
+                                        // onClose: this.popMes.bind(data.id)
+                                    })) 
+                                }
                                 mesId.push(data.id)
                                 localStorage.removeItem('notifyid')
                                 localStorage.setItem('notifyid', JSON.stringify(mesId))  

@@ -26,17 +26,27 @@
 							<el-form-item label="店铺" prop="shopname">
 								<el-input v-model.trim="form.shopname"></el-input>
 							</el-form-item>
-							<el-form-item label="关键词" prop="keywords">
-								<el-input v-model.trim="form.keywords"></el-input>
-							</el-form-item>
-							<el-form-item label="关键词位置" prop="adposition">
-								<el-input v-model.trim="form.adposition"></el-input>
-							</el-form-item>
 							<el-form-item label="产品链接" prop="website">
 								<el-input v-model.trim="form.website" placeholder="需加入https://或http://前缀"></el-input>
 							</el-form-item>
+							<el-form-item label="关键词/位置">
+								<table >
+									<tbody v-for="(p,index) in keywordsArr">
+										<td>
+											<el-input style="margin-bottom: 5px;" v-model.trim="p.keywords" placeholder="请输入关键词"></el-input>
+										</td>
+										&nbsp&nbsp
+										<td>
+											<el-input style="margin-bottom: 5px;" v-model.trim="p.keyword_index" placeholder="请输入关键词位置"></el-input>
+										</td>
+										<div v-if="index ==  0" style="margin-left: 10px; margin-top: 10px; font-size: 0px">
+											<i style="margin-right: 5px;  font-size: 15px" class="el-icon-circle-plus" @click="keywordsAdd(index)"></i>
+											<i style="font-size: 15px" class="el-icon-remove" @click="keywordsDel(index)" v-if="keywordsArr.length >1"></i>
+										</div>
+									</tbody>
+								</table>
+							</el-form-item>
 							<el-form-item label="日期/每日次数">
-								<!-- <table class="table text-center"> -->
 								<table >
 									<tbody v-for="(p,index) in date_time">
 										<td>
@@ -180,7 +190,15 @@
 				add_date_time: {
 					date: '',
 					time: 0
-				}
+				},
+				keywordsArr: [{
+					keywords: '',
+					keyword_index: ''
+				}],
+				add_keywords: {
+					keywords: '',
+					keyword_index: ''
+				},
 			}
 		},
 		beforeRouteEnter: (to, from, next) => {
@@ -210,6 +228,14 @@
 				formData.append('file', content.file)
 			},
 			onSubmit(formName) {
+				let tempkeywords = []
+				let tempkeyword_index = []
+				this.keywordsArr.forEach((data) => {
+					if (data.keywords.trim() != '' && data.keyword_index.trim() != '') {
+						tempkeywords.push(data.keywords)
+						tempkeyword_index.push(data.keyword_index)
+					}
+				})
 				// if(this.form.password == '' || this.form.name == '' || this.form.username == '') {
 				// 	this.$message.error('请填写必填信息')
 				// 	return
@@ -230,8 +256,8 @@
 						formData.append('task[url]', this.form.website)
 						formData.append('task[shopname]', this.form.shopname)
 						formData.append('task[price]', this.form.price)
-						formData.append('task[keywords]', this.form.keywords)
-						formData.append('task[keyword_index]', this.form.adposition)
+						formData.append('task[keywords]', String(tempkeywords))
+						formData.append('task[keyword_index]', String(tempkeyword_index))
 						formData.append('task[remark]', this.form.remark)
 						this.date_time.forEach((data) => {
 							formData.append('task[plan_date][]', data.date)
@@ -355,6 +381,16 @@
 			},
 			orderDel(index) {
 				this.date_time.pop()
+			},
+			keywordsAdd() {
+				this.keywordsArr.push(this.add_keywords)
+				this.add_keywords = {
+					keywords: '',
+					keyword_index: ''
+				}
+			},
+			keywordsDel(index) {
+				this.keywordsArr.pop()
 			},
 		}
 	}

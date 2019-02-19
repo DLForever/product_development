@@ -195,6 +195,14 @@
                         {
                             index: 'reviewersmanage',
                             title: '测评任务管理'
+                        },
+                        {
+                            index: 'reviewersinfomanage',
+                            title: '测评记录管理'
+                        },
+                        {
+                            index: 'fansmanage',
+                            title: '粉丝管理'
                         }]
                     },
                     // {

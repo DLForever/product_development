@@ -161,6 +161,11 @@ export default new Router({
                     meta: { title: '测评记录管理' }
                 },
                 {
+                    path: '/fansmanage',
+                    component: resolve => require(['../components/page/FansManage.vue'], resolve),
+                    meta: { title: '粉丝管理' }
+                },
+                {
                     path: '/notifications',
                     component: resolve => require(['../components/page/Tabs.vue'], resolve),
                     meta: { title: '未读消息' }

@@ -27,7 +27,7 @@
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column fixed prop="asin" label="ASIN" show-overflow-tooltip>
+                <el-table-column fixed prop="asin" label="ASIN" width="130" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="keyword" label="关键词" show-overflow-tooltip>
                 </el-table-column>
@@ -37,13 +37,23 @@
                 </el-table-column>
                 <el-table-column prop="currency" label="币种" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="pay_time" label="支付时间" :formatter="formatter_pay_time" width="150">
+                <el-table-column prop="pay_time" label="支付时间" :formatter="formatter_pay_time" width="140">
                 </el-table-column>
                 <el-table-column prop="pay_price" label="支付价格" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="commission" label="佣金" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="need_refund2" label="是否需要返款" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="email" label="截图" width="120">
+                    <template slot-scope="scope">
+                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
+                            <span v-if="scope.row.pictures.length === 0">无</span>
+                            <img style="cursor: pointer;" v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/>
+                            <span v-else>无</span>
+                        </el-badge>
+                        <span v-else>无</span>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="paypal_account" label="paypal账号" show-overflow-tooltip>
                 </el-table-column>
@@ -66,10 +76,10 @@
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="150">
+                <!-- <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="150">
                 </el-table-column>
                 <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="150">
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column label="操作" width="100" fixed="right">
                     <template slot-scope="scope">
                         <el-dropdown>
@@ -78,10 +88,16 @@
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
-                                    <el-button @click="handleDone(scope.$index, scope.row)" type="text">完成</el-button>
+                                    <el-button @click="handleDetails(scope.$index, scope.row)" type="text">详情</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
-                                    <el-button @click="handleFeedback(scope.$index, scope.row)" type="text">失败</el-button>
+                                    <el-button @click="handleDone(scope.$index, scope.row)" type="text">完成评论</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleDoneRefund(scope.$index, scope.row)" type="text">完成返款</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleFeedback(scope.$index, scope.row)" type="text">问题反馈</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="showPictures(scope.$index, scope.row)" type="text">图片</el-button>
@@ -113,13 +129,14 @@
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="退款截图">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
+                <el-form-item label="是否需要返款" prop="isPay">
+                    <el-radio v-model="form.need_refund" label="true">是</el-radio>
+                    <el-radio v-model="form.need_refund" label="false">否</el-radio>
                 </el-form-item>
-                 <el-form-item label="备注">
+                <el-form-item label="返款时间" prop="pay_time">
+                    <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="form.refund_time" type="datetime" placeholder="选择日期" ></el-date-picker>
+                </el-form-item>
+                <el-form-item label="备注">
                     <el-input v-model="form.remark"></el-input>
                 </el-form-item>
             </el-form>
@@ -133,7 +150,7 @@
         <el-dialog title="添加送测信息" :visible.sync="updatereviewerVisible" width="50%">
             <el-form ref="addReviewerForm" :rules="rules" :model="addReviewerForm" label-width="130px">
                 <el-form-item label="ASIN" prop="asin">
-                    <el-input v-model="addReviewerForm.asin"></el-input>
+                    <span>{{addReviewerForm.asin}}</span>
                 </el-form-item>
                 <el-form-item label="关键词" prop="keyword">
                     <el-input v-model="addReviewerForm.keyword"></el-input>
@@ -194,7 +211,13 @@
         <!-- 添加失败反馈信息 -->
         <el-dialog title="失败反馈信息" :visible.sync="feedbackVisible" width="50%">
             <el-form ref="form" :model="form" label-width="100px">
-                 <el-form-item label="问题反馈" required>
+                <el-form-item label="反馈截图">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList3" :on-remove="handleRemove3" :auto-upload="false" :on-change="changeFile3" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="问题反馈" required>
                     <el-input v-model="form.feedback"></el-input>
                 </el-form-item>
             </el-form>
@@ -214,67 +237,85 @@
         </el-dialog>
 
         <!-- 详情提示 -->
-        <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
-            <el-table :data="suppliers_details" border style="width: 100%">
-                <el-table-column prop="name" label="供应商名称" show-overflow-tooltip>
+        <el-dialog title="详情" :visible.sync="detailVisible" width="95%">
+            <el-table :data="review_details" border style="width: 100%">
+                <el-table-column fixed prop="asin" label="ASIN" width="130" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="营业执照">
+                <el-table-column prop="keyword" label="关键词" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="order_number" label="订单号" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="pay_type" label="支付类型" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="currency" label="币种" >
+                </el-table-column>
+                <el-table-column prop="pay_time" label="支付时间" :formatter="formatter_pay_time" width="150">
+                </el-table-column>
+                <el-table-column prop="pay_price" label="支付价格" >
+                </el-table-column>
+                <el-table-column prop="commission" label="佣金">
+                </el-table-column>
+                <el-table-column prop="need_refund2" label="是否需要返款" width="95">
+                </el-table-column>
+                <el-table-column prop="email" label="截图" width="120">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.pictures.length === 0">无</span>
-                        <img class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url"/>
+                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
+                            <span v-if="scope.row.pictures.length === 0">无</span>
+                            <img v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
+                            <span v-else>无</span>
+                        </el-badge>
                         <span v-else>无</span>
-                        <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
                 </el-table-column>
-                <el-table-column prop="phone" label="电话" show-overflow-tooltip>
+                <el-table-column prop="paypal_account" label="paypal账号" width="85">
                 </el-table-column>
-                <el-table-column prop="email" label="邮箱" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="address" label="地址" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="website" label="网址" show-overflow-tooltip>
+                <el-table-column prop="profile_url" label="亚马逊profile url" width="113">
                     <template slot-scope="scope">
-                        <a v-if="scope.row.website != null && scope.row.website != '' && scope.row.website != 'null'" :href="scope.row.website" target="_blank">查看网站</a>
+                        <a v-if="scope.row.profile_url != null && scope.row.profile_url != '' && scope.row.profile_url != 'null'" :href="scope.row.profile_url" target="_blank">查看链接</a>
                     </template>
                 </el-table-column>
-                <el-table-column prop="created_at_format" label="创建时间">
+                <el-table-column prop="facebook_url" label="fackbook url" width="95">
+                    <template slot-scope="scope">
+                        <a v-if="scope.row.facebook_url != null && scope.row.facebook_url != '' && scope.row.facebook_url != 'null'" :href="scope.row.facebook_url" target="_blank">查看链接</a>
+                    </template>
                 </el-table-column>
-                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable>
+                <el-table-column prop="status" label="状态" width="120">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status)}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="feedback" label="反馈" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
+                </el-table-column>
+                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
                 </el-table-column>
             </el-table>
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="测评截图" :visible.sync="productVisible" width="20%" @close="closeProduct">
-            <el-table :data="picturestList" border style="width: 100%">
-                <el-table-column label="评论截图">
-                    <template slot-scope="scope">
-                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
-                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作" width="100">
-                    <template slot-scope="scope">
-                        <el-button type="danger" @click="handleDeletePic(scope.$index, scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
+        <el-dialog title="测评截图" :visible.sync="productVisible" width="40%">
+            <el-carousel height="300px" type="card" v-if="picturestList.length != 0">
+                <span>评论截图</span>
+                <el-carousel-item v-for="(item, index) in picturestList">
+                    <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                </el-carousel-item>
+            </el-carousel>
             <br>
-            <el-table :data="picturestList2" border style="width: 100%">
-                <el-table-column label="退款截图">
-                    <template slot-scope="scope">
-                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
-                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作" width="100">
-                    <template slot-scope="scope">
-                        <el-button type="danger" @click="handleDeletePic(scope.$index, scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
+            <el-carousel height="300px" type="card" v-if="picturestList2.length != 0">
+                <span class="demonstration">退款截图</span>
+                <el-carousel-item v-for="(item, index) in picturestList2">
+                    <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                </el-carousel-item>
+            </el-carousel>
+            <el-carousel height="300px" type="card" v-if="picturestList3.length != 0">
+                <span class="demonstration">反馈截图</span>
+                <el-carousel-item v-for="(item, index) in picturestList3">
+                    <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                </el-carousel-item>
+            </el-carousel>
         </el-dialog>
 
         <!-- 删除产品图片提示 -->
@@ -284,6 +325,25 @@
             <el-button @click="confirmDelProVis = false">取 消</el-button>
             <el-button type="danger" @click="deleteImg">确 定</el-button>
         </span>
+        </el-dialog>
+
+        <!-- 返款弹出框 -->
+        <el-dialog title="返款" :visible.sync="refundVisible" width="50%">
+            <el-form ref="form" :model="form" label-width="100px">
+                <el-form-item label="退款截图">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-input v-model="form.remark"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="refundVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveRefund" :disabled="submitDisabled">确 定</el-button>
+            </span>
         </el-dialog>
     </div>
 </template>
@@ -314,7 +374,9 @@
                     address: '',
                     remark: '',
                     feedback: '',
-                    id: ''
+                    id: '',
+                    need_refund: undefined,
+                    refund_time: ''
                 },
                 idx: -1,
                 productVisible: false,
@@ -331,7 +393,7 @@
                 picture_id: undefined,
                 submitDisabled: false,
                 checkVisible: false,
-                suppliers_details: [],
+                review_details: [],
                 detailVisible: false,
                 fileList: [],
                 picturestList: [],
@@ -433,7 +495,10 @@
                     }],
                 },
                 doneVisible: false,
-                updatereviewerVisible: false
+                updatereviewerVisible: false,
+                refundVisible: false,
+                fileList3: [],
+                picturestList3: []
             }
         },
         created() {
@@ -571,7 +636,7 @@
                 }
                 this.form.remark = ''
                 this.fileList = []
-                this.fileList2 = []
+                // this.fileList2 = []
                 this.doneVisible = true;
             },
             handleDelete(index, row) {
@@ -596,18 +661,17 @@
                 this.submitDisabled = true
                 let formData = new FormData()
                 formData.append('remark', this.form.remark)
+                formData.append('need_refund', this.form.need_refund)
+                formData.append('refund_time', this.form.refund_time)
                 this.fileList.forEach((item) => {
                     formData.append('picture_review[]', item.raw)
-                })
-                this.fileList2.forEach((item) => {
-                    formData.append('picture_refund[]', item.raw)
                 })
                 let config = {
                     headers: {
                         'Authorization': localStorage.getItem('token')
                     }
                 }
-                this.$axios.post('/task_records/' + this.form.id + '/done', formData, config).then((res) => {
+                this.$axios.post('/task_records/' + this.form.id + '/done_review', formData, config).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('完成送测！')
                         this.getData()
@@ -642,18 +706,20 @@
                 this.delVisible = false;
             },
             handleDetails(index, row) {
-                this.$axios.get('/suppliers/' + row.id, {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
-                    if(res.data.code == 200) {
-                        this.suppliers_details = [res.data.data]
-                        this.detailVisible = true
-                    }
-                }).catch((res) => {
+                this.detailVisible = true
+                this.review_details = [row]
+                // this.$axios.get('/suppliers/' + row.id, {
+                //     headers: {
+                //         'Authorization': localStorage.getItem('token')
+                //     }
+                // }).then((res) => {
+                //     if(res.data.code == 200) {
+                //         this.suppliers_details = [res.data.data]
+                //         this.detailVisible = true
+                //     }
+                // }).catch((res) => {
 
-                })
+                // })
             },
             changeFile(file) {
                 this.fileList.push(file)
@@ -667,26 +733,32 @@
             handleRemove2(a, b) {
                 this.fileList2 = b
             },
+            changeFile3(file) {
+                this.fileList3.push(file)
+            },
+            handleRemove3(a, b) {
+                this.fileList3 = b
+            },
             showPictures(index, row) {
+                this.picturestList = []
+                this.picturestList2 = []
+                this.picturestList3 = []
                 this.product_id = row.id
                 const item = this.tableData[index]
                 item.pictures.forEach((data) => {
                     if (data.remark == 'review') {
                         this.picturestList.push(data)
-                    } else {
+                    } else if (data.remark == 'refund'){
                         this.picturestList2.push(data)
+                    } else {
+                        this.picturestList3.push(data)
                     }
                 })
                 this.productVisible = true;
             },
-            closeProduct() {
-                this.productVisible = false
-                this.picturestList = []
-                this.picturestList2 = []
-            },
-            handleDeletePic(index, row) {
-                this.remark = row.remark
-                this.picture_id = row.id
+            handleDeletePic(remark, id, index) {
+                this.remark = remark
+                this.picture_id = id
                 this.idx = index;
                 this.confirmDelProVis = true;
             },
@@ -703,8 +775,10 @@
                     if(res.data.code == 200) {
                         if (this.remark == 'review') {
                             this.picturestList.splice(this.idx, 1)
-                        } else {
+                        } else if (this.remark == 'refund') {
                             this.picturestList2.splice(this.idx, 1)
+                        } else{
+                            this.picturestList3.splice(this.idx, 1)
                         }
                         this.getData()
                         this.$message.success("删除成功")
@@ -722,6 +796,7 @@
             },
             handleFeedback(index, row) {
                 this.form.id = row.id
+                this.form.feedback = ''
                 this.feedbackVisible = true
             },
             saveFeedback() {
@@ -729,10 +804,12 @@
                     this.$message.error('请输入反馈内容')
                     return
                 }
-                let params = {
-                    feedback: this.form.feedback
-                }
-                this.$axios.post('/task_records/' + this.form.id + '/done_failure', params, {
+                let formData = new FormData()
+                formData.append('feedback', this.form.feedback)
+                this.fileList3.forEach((item) => {
+                    formData.append('picture_feedback[]', item.raw)
+                })
+                this.$axios.post('/task_records/' + this.form.id + '/done_failure', formData, {
                      headers: {
                         'Authorization': localStorage.getItem('token')
                     }
@@ -871,6 +948,40 @@
                     }
                 })
             },
+            handleDoneRefund(index, row) {
+                this.idx = index;
+                const item = this.tableData[index];
+                this.form = {
+                    id: item.id,
+                }
+                this.form.remark = ''
+                this.fileList2 = []
+                this.refundVisible = true;
+            },
+            saveRefund() {
+                this.submitDisabled = true
+                let formData = new FormData()
+                formData.append('remark', this.form.remark)
+                this.fileList2.forEach((item) => {
+                    formData.append('picture_refund[]', item.raw)
+                })
+                let config = {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }
+                this.$axios.post('/task_records/' + this.form.id + '/done_refund', formData, config).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('完成返款！')
+                        this.getData()
+                        this.refundVisible = false
+                    }
+                }).catch((res) => {
+                    console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "正在进行中"
@@ -917,8 +1028,8 @@
     }
 
     .img_fnsku {
-        width:6rem;
-        height:6rem;
+        width:15rem;
+        height:15rem;
     }
     .img {
         width:3rem;

@@ -33,19 +33,19 @@
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column prop="brand_name" label="送测人" show-overflow-tooltip>
+                <el-table-column prop="asin" label="ASIN" width="150" fixed show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="asin" label="ASIN" show-overflow-tooltip>
+                <el-table-column prop="country" label="站点" width="50">
                 </el-table-column>
-                <el-table-column prop="country" label="站点" show-overflow-tooltip>
+                <el-table-column prop="username" label="送测人" width="70">
+                </el-table-column>
+                <el-table-column prop="apply_username" label="申请人" width="70">
                 </el-table-column>
                 <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="price" label="价格" show-overflow-tooltip>
+                <el-table-column prop="price" label="价格" width="70">
                 </el-table-column>
                 <el-table-column prop="shopname" label="店铺" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="keyword_index" label="广告位置" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="url" label="url" show-overflow-tooltip>
                     <template slot-scope="scope">
@@ -88,9 +88,6 @@
                                         <!-- <router-link to="./reviewersinfomanage"></router-link> -->
                                     </el-button>
                                 </el-dropdown-item>
-                                <!-- <el-dropdown-item>
-                                    <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp详情</el-button>
-                                </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="showPictures(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp图片</el-button>
                                 </el-dropdown-item>
@@ -113,10 +110,10 @@
         </div>
 
         <!-- 编辑弹出框 -->
-        <el-dialog title="编辑" :visible.sync="editVisible" width="50%" @close="closeEdit">
+        <el-dialog title="编辑" :visible.sync="editVisible" width="50%">
             <el-form ref="form" :model="form" label-width="110px">
                 <el-form-item label="ASIN">
-                    <el-input v-model="form.asin"></el-input>
+                    <span>{{form.asin}}</span>
                 </el-form-item>
                 <el-form-item label="站点">
                     <el-input v-model="form.country"></el-input>
@@ -139,8 +136,7 @@
                 <el-form-item label="关键词位置">
                     <el-input v-model="form.keyword_index"></el-input>
                 </el-form-item>
-                <el-form-item label="日期/每日次数">
-                    <!-- <table class="table text-center"> -->
+                <!-- <el-form-item label="日期/每日次数">
                     <table >
                         <tbody v-for="(p,index) in date_time">
                             <td>
@@ -155,7 +151,7 @@
                             </div>
                         </tbody>
                     </table>
-                </el-form-item>
+                </el-form-item> -->
                  <el-form-item label="备注">
                     <el-input v-model="form.remark"></el-input>
                 </el-form-item>
@@ -182,7 +178,8 @@
         <el-dialog title="添加送测信息" :visible.sync="addreviewerVisible" width="50%">
             <el-form ref="addReviewerForm" :rules="rules" :model="addReviewerForm" label-width="130px">
                 <el-form-item label="ASIN" prop="asin">
-                    <el-input v-model="addReviewerForm.asin"></el-input>
+                    <!-- <el-input v-model="addReviewerForm.asin"></el-input> -->
+                    <span>{{addReviewerForm.asin}}</span>
                 </el-form-item>
                 <el-form-item label="关键词" prop="keyword">
                     <el-input v-model="addReviewerForm.keyword"></el-input>
@@ -197,7 +194,7 @@
                     <el-input v-model="addReviewerForm.currency"></el-input>
                 </el-form-item>
                 <el-form-item label="支付时间" prop="pay_time">
-                    <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="addReviewerForm.pay_time" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"></el-date-picker>
+                    <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="addReviewerForm.pay_time" type="datetime" placeholder="选择日期" ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="支付价格" prop="pay_price">
                     <el-input v-model="addReviewerForm.pay_price"></el-input>
@@ -214,10 +211,10 @@
                 <el-form-item label="facebook url" prop="facebook_url">
                     <el-input v-model="addReviewerForm.facebook_url"></el-input>
                 </el-form-item>
-                <el-form-item label="是否需要返款" prop="isPay">
+                <!-- <el-form-item label="是否需要返款" prop="isPay">
                     <el-radio v-model="addReviewerForm.isPay" label="true">是</el-radio>
                     <el-radio v-model="addReviewerForm.isPay" label="false">否</el-radio>
-                </el-form-item>
+                </el-form-item> -->
                  <el-form-item label="备注">
                     <el-input v-model="addReviewerForm.remark"></el-input>
                 </el-form-item>
@@ -245,14 +242,17 @@
 
         <!-- 详情提示 -->
         <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
+            <el-button type="primary" @click="handleAddPlan">增加任务</el-button>
             <el-button style="float: right;" type="primary" @click="checkSelf">通过审核</el-button>
             <br><br>
             <el-table :data="detailOptions" border style="width: 100%">
-                <el-table-column prop="brand_name" label="送测人" show-overflow-tooltip>
-                </el-table-column>
                 <el-table-column prop="asin" label="ASIN" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="country" label="站点" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="username" label="送测人" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="apply_username" label="申请人" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
@@ -290,22 +290,46 @@
                 </el-table-column>
             </el-table>
             <br>
+            <el-table :data="detailOptions3" border style="width: 100%">
+                <el-table-column prop="keywords" label="关键词" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="keyword_index" label="关键词位置" show-overflow-tooltip>
+                </el-table-column>
+            </el-table>
+            <br>
             <el-table :data="detailOptions2" border style="width: 100%">
                 <el-table-column prop="plan_date" label="计划日期" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="plan_sum" label="计划数量" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="start_sum" label="已进行的数量" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column label="操作" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <el-button @click="handleCreate(scope.$index, scope.row)" type="text">添加送测记录</el-button>
+                        <el-button @click="handleCreate(scope.$index, scope.row)" type="primary">添加送测记录</el-button>
+                        <el-button @click="handleUpdatePlan(scope.$index, scope.row)" type="warning">修改</el-button>
+                        <el-button @click="handleDeletePlan(scope.$index, scope.row)" type="danger">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="图片" :visible.sync="productVisible" width="20%">
-            <el-table :data="picturestList" border style="width: 100%">
+        <el-dialog title="图片" :visible.sync="productVisible" width="40%">
+            <el-carousel height="300px" type="card" v-if="picturestList.length != 0">
+                <span>产品广告位图片</span>
+                <el-carousel-item v-for="(item, index) in picturestList">
+                    <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                </el-carousel-item>
+            </el-carousel>
+            <br>
+            <el-carousel height="300px" type="card" v-if="picturestList2.length != 0">
+                <span class="demonstration">无logo非产品主图</span>
+                <el-carousel-item v-for="(item, index) in picturestList2">
+                    <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                </el-carousel-item>
+            </el-carousel>
+            <!-- <el-table :data="picturestList" border style="width: 100%">
                 <el-table-column prop="sum" label="产品广告位图片">
                     <template slot-scope="scope">
                         <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
@@ -331,7 +355,7 @@
                         <el-button type="danger" @click="handleDeletePic(scope.$index, scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
-            </el-table>
+            </el-table> -->
         </el-dialog>
 
         <!-- 删除产品图片提示 -->
@@ -357,6 +381,55 @@
             <el-button @click="distributeVisible = false">取 消</el-button>
             <el-button type="primary" @click="distributenProduct" :disabled="submitDisabled">确 定</el-button>
         </span>
+        </el-dialog>
+
+        <!-- 修改计划 -->
+        <el-dialog title="修改计划" :visible.sync="updateplanVisible" width="50%">
+            <el-form ref="form" :model="form" label-width="110px">
+                <el-form-item label="日期/每日次数">
+                    <el-input-number style="margin-bottom: 5px;" v-model="plan_sum" :min="0" label="描述文字"></el-input-number>
+                    <!-- <table >
+                        <tbody v-for="(p,index) in date_time">
+                            <td>
+                                <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="p.plan_date" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"></el-date-picker>
+                            </td>
+                            <td>
+                                <el-input-number style="margin-bottom: 5px;" v-model="p.plan_sum" :min="0" label="描述文字"></el-input-number>
+                            </td>
+                        </tbody>
+                    </table> -->
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="updateplanVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveupdateplan" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 更新计划 -->
+        <el-dialog title="增加计划" :visible.sync="addplanVisible" width="50%">
+            <el-form ref="form" :model="form" label-width="110px">
+                <el-form-item label="日期/每日次数">
+                    <table >
+                        <tbody v-for="(p,index) in date_time">
+                            <td>
+                                <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="p.plan_date" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"></el-date-picker>
+                            </td>
+                            <td>
+                                <el-input-number style="margin-bottom: 5px;" v-model="p.plan_sum" :min="0" label="数量"></el-input-number>
+                            </td>
+                            <!-- <div v-if="index ==  0" style="margin-left: 10px; margin-top: 10px; font-size: 0px">
+                                <i style="margin-right: 5px;  font-size: 15px" class="el-icon-circle-plus" @click="orderAdd(index)"></i>
+                                <i style="font-size: 15px" class="el-icon-remove" @click="orderDel(index)" v-if="date_time.length >1"></i>
+                            </div> -->
+                        </tbody>
+                    </table>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="addplanVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveaddplan" :disabled="submitDisabled">确 定</el-button>
+            </span>
         </el-dialog>
     </div>
 </template>
@@ -521,7 +594,12 @@
                 dis_user_total: 0,
                 query3: undefined,
                 loading3: false,
-                distributeVisible: false
+                distributeVisible: false,
+                updateplanVisible: false,
+                addplanVisible: false,
+                plan_sum: 0,
+                task_period_id: '',
+                detailOptions3: []
             }
         },
         created() {
@@ -656,7 +734,6 @@
                     this.date_time = []
                     this.date_time = item.task_periods.concat()
                 }
-                console.log(item.task_periods)
                 this.fileList = []
                 this.fileList2 = []
                 this.editVisible = true;
@@ -741,8 +818,15 @@
                 this.delVisible = false;
             },
             handleDetails(index, row) {
+                this.detailOptions3 = []
+                let tempkeywords = row.keywords.split(',')
+                let tempkeywordindex = row.keyword_index.split(',')
+                tempkeywords.forEach((data, index) => {
+                    this.detailOptions3.push({keywords: data, keyword_index: tempkeywordindex[index]})
+                })
                 this.task_id = row.id
-                this.detailOptions = [this.tableData[index]]
+                this.addReviewerForm.asin = row.asin
+                this.detailOptions = [row]
                 this.detailOptions2 = this.tableData[index].task_periods
                 this.detailVisible = true
             },
@@ -777,9 +861,9 @@
                 })
                 this.productVisible = true;
             },
-            handleDeletePic(index, row) {
-                this.remark = row.remark
-                this.picture_id = row.id
+            handleDeletePic(remark, id, index) {
+                this.remark = remark
+                this.picture_id = id
                 this.idx = index;
                 this.confirmDelProVis = true;
             },
@@ -831,7 +915,7 @@
                         formData.append('task_record[pay_time]', this.addReviewerForm.pay_time)
                         formData.append('task_record[pay_price]', this.addReviewerForm.pay_price)
                         formData.append('task_record[commission]', this.addReviewerForm.commission)
-                        formData.append('task_record[need_refund]', this.addReviewerForm.isPay)
+                        // formData.append('task_record[need_refund]', this.addReviewerForm.isPay)
                         formData.append('task_record[paypal_account]', this.addReviewerForm.paypal_account)
                         formData.append('task_record[profile_url]', this.addReviewerForm.profile_url)
                         formData.append('task_record[facebook_url]', this.addReviewerForm.facebook_url)
@@ -847,7 +931,9 @@
                             if(res.data.code == 200) {
                                 this.$message.success('提交成功！')
                                 this.$refs[formName].resetFields()
+                                this.getData()
                                 this.addreviewerVisible = false
+                                this.detailVisible = false
                                 // this.$router.push('/reviewersmanage')
                             }
                         }).catch((res) => {
@@ -976,10 +1062,6 @@
             orderDel(index) {
                 this.date_time.pop()
             },
-            closeEdit() {
-                this.editVisible = false
-                this.getData()
-            },
             checkSelf() {
                 this.$axios.post('/tasks/' + this.task_id + '/check','',{
                      headers: {
@@ -1082,6 +1164,97 @@
                     this.remoteMethod3("")
                 }
             },
+            handleUpdatePlan(index, row) {
+                this.plan_sum = row.plan_sum
+                this.task_period_id = row.id
+                // this.date_time = []
+                // this.date_time = JSON.parse(JSON.stringify([row]))
+                this.updateplanVisible = true;
+            },
+            saveupdateplan() {
+                this.submitDisabled = true
+                let params = {
+                    task_period_id: this.task_period_id,
+                    plan_sum: this.plan_sum
+                }
+                this.$axios.post('/tasks/' + this.task_id + '/update_period', params,{
+                     headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.getData()
+                        this.$message.success("更新成功")
+                        this.updateplanVisible = false
+                        this.detailVisible = false
+                    }
+                }).catch((res) => {
+
+                }).finally(() => {
+                    this.submitDisabled = false
+                })
+            },
+            handleAddPlan() {
+                this.date_time = [{
+                    plan_date: '',
+                    plan_sum: 0
+                }]
+                // this.date_time = JSON.parse(JSON.stringify(row.task_periods))
+                this.addplanVisible = true;
+            },
+            saveaddplan() {
+                this.submitDisabled = true
+                let params = {
+                    plan_date: this.date_time[0].plan_date,
+                    plan_sum: this.date_time[0].plan_sum
+                }
+                this.$axios.post('/tasks/' + this.task_id + '/create_period', params,{
+                     headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.getData()
+                        this.$message.success("增加成功")
+                        this.addplanVisible = false
+                        this.detailVisible = false
+                    }
+                }).catch((res) => {
+
+                }).finally(() => {
+                    this.submitDisabled = false
+                })
+            },
+            closePlan() {
+                // this.editVisible = false
+                this.getData()
+            },
+            handleDeletePlan(index, row) {
+                this.$confirm('此操作将永久删除该任务, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'danger'
+                }).then(() => {
+                    let params = {
+                        task_period_id: row.id
+                    }
+                    this.$axios.post('/tasks/' + this.task_id + '/delete_period', params, {
+                         headers: {
+                            'Authorization': localStorage.getItem('token')
+                        }
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.detailOptions2.splice(index, 1);
+                            this.getData()
+                            this.$message.success("删除成功")
+                        }
+                    }).catch(() => {
+                        
+                    })
+                }).catch(() => {
+                    this.$message.info('已取消删除')
+                })
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "已提交申请"
@@ -1132,8 +1305,8 @@
     }
 
     .img_fnsku {
-        width:6rem;
-        height:6rem;
+        width:15rem;
+        height:15rem;
     }
     .img {
         width:3rem;
