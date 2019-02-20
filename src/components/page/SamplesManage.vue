@@ -310,7 +310,7 @@
         <!-- 查看产品图片 -->
         <el-dialog title="样品图片" :visible.sync="productVisible" width="40%">
             <el-carousel height="300px" type="card" v-if="picturesProductList.length != 0">
-                <el-carousel-item v-for="(item, index) in picturesProductList">
+                <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
                     <img @click="handleDeletePro(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>

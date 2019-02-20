@@ -302,14 +302,14 @@
         <el-dialog title="图片" :visible.sync="productVisible" width="40%">
             <el-carousel height="300px" type="card" v-if="picturesProductList.length != 0">
                 <span>产品图片</span>
-                <el-carousel-item v-for="(item, index) in picturesProductList">
+                <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
                     <img @click="handleDeletePro(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
             <br>
             <el-carousel height="300px" type="card" v-if="picturesSubjectsList.length != 0">
                 <span class="demonstration">主体图片</span>
-                <el-carousel-item v-for="(item, index) in picturesSubjectsList">
+                <el-carousel-item v-for="(item, index) in picturesSubjectsList" :key="index">
                     <img @click="handleDeleteSubjectPic(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>

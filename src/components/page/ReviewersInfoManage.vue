@@ -331,20 +331,20 @@
         <el-dialog title="测评截图" :visible.sync="productVisible" width="40%">
             <el-carousel height="300px" type="card" v-if="picturestList.length != 0">
                 <span>评论截图</span>
-                <el-carousel-item v-for="(item, index) in picturestList">
+                <el-carousel-item v-for="(item, index) in picturestList" :key="index">
                     <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
             <br>
             <el-carousel height="300px" type="card" v-if="picturestList2.length != 0">
                 <span class="demonstration">退款截图</span>
-                <el-carousel-item v-for="(item, index) in picturestList2">
+                <el-carousel-item v-for="(item, index) in picturestList2" :key="index">
                     <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
             <el-carousel height="300px" type="card" v-if="picturestList3.length != 0">
                 <span class="demonstration">反馈截图</span>
-                <el-carousel-item v-for="(item, index) in picturestList3">
+                <el-carousel-item v-for="(item, index) in picturestList3" :key="index">
                     <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>

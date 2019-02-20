@@ -342,14 +342,14 @@
         <el-dialog title="图片" :visible.sync="productVisible" width="40%">
             <el-carousel height="300px" type="card" v-if="picturestList.length != 0">
                 <span>产品广告位图片</span>
-                <el-carousel-item v-for="(item, index) in picturestList">
+                <el-carousel-item v-for="(item, index) in picturestList" :key="index">
                     <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
             <br>
             <el-carousel height="300px" type="card" v-if="picturestList2.length != 0">
                 <span class="demonstration">无logo非产品主图</span>
-                <el-carousel-item v-for="(item, index) in picturestList2">
+                <el-carousel-item v-for="(item, index) in picturestList2" :key="index">
                     <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
