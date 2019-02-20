@@ -7,12 +7,20 @@
             </el-breadcrumb>
         </div>
         <div class="container">
+            <el-button type="primary" @click="exportReviewers">导出记录</el-button>
+            <br><br>
             <div class="handle-box">
                 <div class="fnsku_filter">
-                    <!-- 开发人员:
-                    <el-input style="width:150px" placeholder="请输入开发人员" v-model.trim="search_shopname"></el-input> -->
+                    日期:
+                    <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
+                    粉丝号:
+                    <el-input style="width:150px" placeholder="请输入粉丝号" v-model.trim="search_fan"></el-input>
+                    ASIN:
+                    <el-input style="width:150px" placeholder="请输入ASIN" v-model.trim="search_asin"></el-input>
+                    订单号:
+                    <el-input style="width:150px" placeholder="请输入订单号" v-model.trim="search_number"></el-input>
                     送测人员:
-                    <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
+                    <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择送测人" class="handle-select mr10">
                         <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
                     </el-select>
@@ -37,13 +45,17 @@
                 </el-table-column>
                 <el-table-column prop="currency" label="币种" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="pay_time" label="支付时间" :formatter="formatter_pay_time" width="140">
-                </el-table-column>
                 <el-table-column prop="pay_price" label="支付价格" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="commission" label="佣金" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="charge" label="手续费" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column prop="need_refund2" label="是否需要返款" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <el-tag type="warning" v-if="scope.row.need_refund2 == '是'">是</el-tag>
+                        <el-tag type="success" v-else-if="scope.row.need_refund2 == '否'">否</el-tag>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="email" label="截图" width="120">
                     <template slot-scope="scope">
@@ -97,11 +109,14 @@
                                     <el-button @click="handleDoneRefund(scope.$index, scope.row)" type="text">完成返款</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
-                                    <el-button @click="handleFeedback(scope.$index, scope.row)" type="text">问题反馈</el-button>
+                                    <el-button @click="handleAddRefund(scope.$index, scope.row)" type="text">添加返款</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
-                                    <el-button @click="showPictures(scope.$index, scope.row)" type="text">图片</el-button>
+                                    <el-button @click="handleFeedback(scope.$index, scope.row)" type="text">问题反馈</el-button>
                                 </el-dropdown-item>
+                                <!-- <el-dropdown-item>
+                                    <el-button @click="showPictures(scope.$index, scope.row)" type="text">图片</el-button>
+                                </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">编辑</el-button>
                                 </el-dropdown-item>
@@ -168,16 +183,16 @@
                     <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="addReviewerForm.pay_time" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="支付价格" prop="pay_price">
-                    <el-input v-model="addReviewerForm.pay_price"></el-input>
+                    <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.pay_price" :min="0" :step="10" @change="totalPrice"></el-input-number>
                 </el-form-item>
                 <el-form-item label="佣金" prop="commission">
-                    <el-input v-model="addReviewerForm.commission"></el-input>
+                    <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.commission" :min="0" @change="totalPrice"></el-input-number>
+                </el-form-item>
+                <el-form-item label="手续费" prop="poundage">
+                    <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.poundage" :min="0" @change="totalPrice"></el-input-number>
                 </el-form-item>
                 <el-form-item label="paypal账号" prop="paypal_account">
                     <el-input v-model="addReviewerForm.paypal_account"></el-input>
-                </el-form-item>
-                <el-form-item label="亚马逊profile url" prop="profile_url">
-                    <el-input v-model="addReviewerForm.profile_url"></el-input>
                 </el-form-item>
                 <el-form-item label="facebook url" prop="facebook_url">
                     <el-input v-model="addReviewerForm.facebook_url"></el-input>
@@ -185,6 +200,9 @@
                 <el-form-item label="是否需要返款" prop="isPay">
                     <el-radio v-model="addReviewerForm.isPay" label="true">是</el-radio>
                     <el-radio v-model="addReviewerForm.isPay" label="false">否</el-radio>
+                </el-form-item>
+                <el-form-item label="亚马逊profile url">
+                    <el-input v-model="addReviewerForm.profile_url"></el-input>
                 </el-form-item>
                  <el-form-item label="备注">
                     <el-input v-model="addReviewerForm.remark"></el-input>
@@ -200,6 +218,9 @@
                         <i class="el-icon-upload"></i>
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     </el-upload>
+                </el-form-item>
+                <el-form-item label="总费用">
+                    <el-button type="warning">{{sumPrice}}</el-button>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
@@ -255,7 +276,18 @@
                 </el-table-column>
                 <el-table-column prop="commission" label="佣金">
                 </el-table-column>
+                <el-table-column prop="charge" label="手续费" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="sumPrice" label="总费用" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <el-button type="warning">{{scope.row.sumPrice}}</el-button>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="need_refund2" label="是否需要返款" width="95">
+                    <template slot-scope="scope">
+                        <el-tag type="warning" v-if="scope.row.need_refund2 == '是'">是</el-tag>
+                        <el-tag type="success" v-else-if="scope.row.need_refund2 == '否'">否</el-tag>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="email" label="截图" width="120">
                     <template slot-scope="scope">
@@ -345,6 +377,27 @@
                 <el-button type="primary" @click="saveRefund" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
+        <!-- 添加返款弹出框 -->
+        <el-dialog title="添加返款" :visible.sync="addrefundVisible" width="50%">
+            <el-form ref="form" :model="form" label-width="100px">
+                <el-form-item label="退款截图">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList4" :on-remove="handleRemove4" :auto-upload="false" :on-change="changeFile4" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="addrefundVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveaddRefund" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 下载提示 -->
+        <el-dialog title="下载" :visible.sync="exportVisible" width="35%" @close="closeExport">
+            <el-button type="primary"><a style="color:#fff;" :href="$axios.defaults.baseURL + '/task_records/export_url?ids=' + exportIds + '&token=' + export_token">下载excel文件</a></el-button>
+        </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -375,7 +428,7 @@
                     remark: '',
                     feedback: '',
                     id: '',
-                    need_refund: undefined,
+                    need_refund: '',
                     refund_time: ''
                 },
                 idx: -1,
@@ -422,15 +475,14 @@
                     pay_type: '',
                     currency: '',
                     pay_time: '',
-                    pay_price: '',
-                    commission: '',
+                    pay_price: 0,
+                    commission: 0,
                     paypal_account: '',
                     profile_url: '',
                     facebook_url: '',
-                    isPay: undefined,
+                    isPay: '',
                     remark: '',
-                    task_period_id: '',
-                    task_id: ''
+                    poundage: 0
                 },
                 rules: {
                     keyword: [{
@@ -478,9 +530,9 @@
                         message: '请输入paypal账号',
                         trigger: 'blur'
                     }],
-                    profile_url: [{
+                    poundage: [{
                         required: true,
-                        message: '请输入亚马逊profile url',
+                        message: '请输入手续费',
                         trigger: 'blur'
                     }],
                     facebook_url: [{
@@ -498,7 +550,44 @@
                 updatereviewerVisible: false,
                 refundVisible: false,
                 fileList3: [],
-                picturestList3: []
+                picturestList3: [],
+                search_fan: '',
+                search_number: '',
+                search_asin: '',
+                addrefundVisible: false,
+                fileList4: [],
+                sumPrice: 0,
+                pickerOptions2: {
+                shortcuts: [{
+                  text: '最近一周',
+                  onClick(picker) {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                    picker.$emit('pick', [start, end]);
+                  }
+                }, {
+                  text: '最近一个月',
+                  onClick(picker) {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                    picker.$emit('pick', [start, end]);
+                  }
+                }, {
+                  text: '最近三个月',
+                  onClick(picker) {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                    picker.$emit('pick', [start, end]);
+                  }
+                }]
+              },
+              date_filter: [],
+              export_token: '',
+              exportIds: [],
+              exportVisible: false,
             }
         },
         created() {
@@ -545,10 +634,17 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
+                this.export_token = localStorage.getItem('token')
                 if (!this.$route.params.task_id) {
                     this.$route.params.task_id = ''
                 }
-                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id, {
+                let date_begin_temp = this.date_filter[0]
+                let date_end_temp = this.date_filter[1]
+                if(this.date_filter.length == 0) {
+                    date_begin_temp = ''
+                    date_end_temp = ''
+                }
+                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -559,6 +655,7 @@
                             } else if(String(data.need_refund) == 'false'){
                                 data.need_refund2 = '否'
                             }
+                            data.sumPrice = Number(data.charge) + Number(data.commission) + Number(data.pay_price)
                             data.img_count = data.pictures.length
                         })
                         this.tableData = res.data.data
@@ -575,7 +672,13 @@
                 if (!this.$route.params.task_id) {
                     this.$route.params.task_id = ''
                 }
-                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id, {
+                let date_begin_temp = this.date_filter[0]
+                let date_end_temp = this.date_filter[1]
+                if(this.date_filter.length == 0) {
+                    date_begin_temp = ''
+                    date_end_temp = ''
+                }
+                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -603,6 +706,10 @@
                 this.cur_page = 1
                 this.statusSelect = ''
                 this.user_id_filter = ''
+                this.search_number = ''
+                this.search_asin = ''
+                this.search_fan = ''
+                this.date_filter = []
                 this.getData()
             },
             formatter_created_at(row, column) {
@@ -627,7 +734,6 @@
                 this.idx = row.id
                 this.checkVisible = true
             },
-            
             handleDone(index, row) {
                 this.idx = index;
                 const item = this.tableData[index];
@@ -658,6 +764,10 @@
             },
             // 保存编辑
             saveDone() {
+                if (this.form.need_refund == '' || this.form.need_refund == undefined) {
+                    this.$message.error('请选择是否需要返款')
+                    return
+                }
                 this.submitDisabled = true
                 let formData = new FormData()
                 formData.append('remark', this.form.remark)
@@ -673,7 +783,7 @@
                 }
                 this.$axios.post('/task_records/' + this.form.id + '/done_review', formData, config).then((res) => {
                     if(res.data.code == 200) {
-                        this.$message.success('完成送测！')
+                        this.$message.success('完成评论！')
                         this.getData()
                         this.doneVisible = false
                     }
@@ -738,6 +848,12 @@
             },
             handleRemove3(a, b) {
                 this.fileList3 = b
+            },
+            changeFile4(file) {
+                this.fileList4.push(file)
+            },
+            handleRemove4(a, b) {
+                this.fileList4 = b
             },
             showPictures(index, row) {
                 this.picturestList = []
@@ -893,12 +1009,18 @@
                     facebook_url: item.facebook_url,
                     isPay: String(item.need_refund),
                     remark: item.remark,
+                    poundage: item.charge
                 },
+                this.sumPrice = Number(this.addReviewerForm.pay_price) + Number(this.addReviewerForm.commission) + Number(this.addReviewerForm.poundage)
                 this.fileList = []
                 this.fileList2 = []
                 this.updatereviewerVisible = true
             },
             saveReviewer(formName) {
+                if (this.addReviewerForm.isPay == 'null') {
+                    this.$message.error('请选择是否需要返款')
+                    return
+                }
                 let formData = new FormData()
                 this.$refs[formName].validate((valid) => {
                     if(valid) {
@@ -911,6 +1033,7 @@
                         formData.append('task_record[pay_time]', this.addReviewerForm.pay_time)
                         formData.append('task_record[pay_price]', this.addReviewerForm.pay_price)
                         formData.append('task_record[commission]', this.addReviewerForm.commission)
+                        formData.append('task_record[charge]', this.addReviewerForm.poundage)
                         formData.append('task_record[need_refund]', this.addReviewerForm.isPay)
                         formData.append('task_record[paypal_account]', this.addReviewerForm.paypal_account)
                         formData.append('task_record[profile_url]', this.addReviewerForm.profile_url)
@@ -981,6 +1104,55 @@
                 }).finally((res) => {
                     this.submitDisabled = false
                 })
+            },
+            handleAddRefund(index, row) {
+                this.form = {
+                    id: row.id,
+                }
+                this.fileList4 = []
+                this.addrefundVisible = true;
+            },
+            saveaddRefund() {
+                this.submitDisabled = true
+                let formData = new FormData()
+                this.fileList4.forEach((item) => {
+                    formData.append('picture_refund[]', item.raw)
+                })
+                let config = {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }
+                this.$axios.post('/task_records/' + this.form.id + '/update_picture', formData, config).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('完成添加返款！')
+                        this.getData()
+                        this.addrefundVisible = false
+                    }
+                }).catch((res) => {
+                    console.log('err')
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
+            totalPrice() {
+                this.sumPrice = this.addReviewerForm.pay_price + this.addReviewerForm.commission + this.addReviewerForm.poundage
+            },
+            exportReviewers() {
+                if(this.multipleSelection.length == 0) {
+                    this.$message.error('请至少选择一条数据')
+                    return
+                }
+                this.multipleSelection.forEach((data) => {
+                    this.exportIds.push(data.id)
+                })
+                this.export_token = localStorage.getItem('token')
+                this.exportVisible = true
+            },
+            closeExport() {
+                this.exportVisible = false
+                this.exportIds = []
+                this.$refs.multipleTable.clearSelection()
             },
             getStatusName(status) {
                 if(status == 1) {

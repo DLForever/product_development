@@ -104,9 +104,9 @@
                                 操作<i class="el-icon-arrow-down el-icon--right"></i>
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item>
+                                <!-- <el-dropdown-item>
                                     <el-button @click="showPictures(scope.$index, scope.row)" type="text">&nbsp查看图片</el-button>
-                                </el-dropdown-item>
+                                </el-dropdown-item> -->
                                 <!-- <el-dropdown-item>
                                     <el-button @click="showSubjectPictures(scope.$index, scope.row)" type="text">&nbsp主体图片</el-button>
                                 </el-dropdown-item> -->

@@ -36,11 +36,11 @@
                 </el-table-column>
                 <el-table-column  prop="name" label="样品名称" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="图片" show-overflow-tooltip>
+                <el-table-column label="图片" width="120">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0">无</span>
-                            <img class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
+                            <img style="cursor: pointer;" class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"@click="showProduct(scope.$index, scope.row)"/>
                             <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
                         </el-badge>
                         <span v-else>无</span>
@@ -93,9 +93,9 @@
                                 <el-dropdown-item>
                                     <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp情</el-button>
                                 </el-dropdown-item>
-                                <el-dropdown-item>
+                                <!-- <el-dropdown-item>
                                     <el-button @click="showProduct(scope.$index, scope.row)" type="text">&nbsp样品图片</el-button>
-                                </el-dropdown-item>
+                                </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="handleStock(scope.$index, scope.row)" type="text">添加库存</el-button>
                                 </el-dropdown-item>
@@ -308,37 +308,12 @@
             </el-table>
         </el-dialog>
         <!-- 查看产品图片 -->
-        <el-dialog title="产品图片" :visible.sync="productVisible" width="20%">
-            <el-table :data="picturesProductList" border style="width: 100%">
-                <el-table-column prop="sum" label="产品图片">
-                    <template slot-scope="scope">
-                        <!-- <span>{{scope.row.url}}</span> -->
-                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
-                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
-                        <!-- <span v-else>无</span> -->
-                    </template>
-                    <!-- <template slot-scope="scope">
-                        <img class="img_fnsku" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url" />                  
-                    </template> -->
-                </el-table-column>
-                <el-table-column label="操作" width="100">
-                    <template slot-scope="scope">
-                        <el-button type="danger" @click="handleDeletePro(scope.$index, scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-            
-            <!-- <el-carousel :interval="4000" type="card" height="200px" v-if="img_product">
-                <el-carousel-item v-for="item in form.pictures">
-                    <img :src="$axios.defaults.baseURL+item.url.url" />
+        <el-dialog title="样品图片" :visible.sync="productVisible" width="40%">
+            <el-carousel height="300px" type="card" v-if="picturesProductList.length != 0">
+                <el-carousel-item v-for="(item, index) in picturesProductList">
+                    <img @click="handleDeletePro(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
-            <div v-if="pdf_product" v-for="item in form.pictures">
-                <a target="_blank" :href="$axios.defaults.baseURL + ':3000' +item.url.url">{{'查看' + item.id + '.pdf'}}</a>
-            </div> -->
-            <!-- <span slot="footer" class="dialog-footer"> -->
-            <!--<el-button @click="showImg = false">取 消</el-button>-->
-            <!-- <el-button type="primary" @click="productVisible = false">确 定</el-button> -->
         </span>
         </el-dialog>
         <!-- 删除产品图片提示 -->
@@ -994,8 +969,8 @@
                 })
                 this.productVisible = true;
             },
-            handleDeletePro(index, row) {
-                this.picture_id = row.id
+            handleDeletePro(id, index) {
+                this.picture_id = id
                 this.idx = index;
                 this.confirmDelProVis = true;
             },
@@ -1122,8 +1097,8 @@
     }
 
     .img_fnsku {
-        width:6rem;
-        height:6rem;
+        width:15rem;
+        height:15rem;
     }
 
     .img {

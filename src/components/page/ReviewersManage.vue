@@ -88,9 +88,9 @@
                                         <!-- <router-link to="./reviewersinfomanage"></router-link> -->
                                     </el-button>
                                 </el-dropdown-item>
-                                <el-dropdown-item>
+                                <!-- <el-dropdown-item>
                                     <el-button @click="showPictures(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp图片</el-button>
-                                </el-dropdown-item>
+                                </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp编辑</el-button>
                                 </el-dropdown-item>
@@ -130,12 +130,31 @@
                 <el-form-item label="店铺">
                     <el-input v-model="form.shopname"></el-input>
                 </el-form-item>
-                <el-form-item label="关键词">
+
+                <el-form-item label="关键词/位置">
+                    <table >
+                        <tbody v-for="(p,index) in keywordsArr">
+                            <td>
+                                <el-input style="margin-bottom: 5px;" v-model.trim="p.keywords" placeholder="请输入关键词"></el-input>
+                            </td>
+                            &nbsp&nbsp
+                            <td>
+                                <el-input style="margin-bottom: 5px;" v-model.trim="p.keyword_index" placeholder="请输入关键词位置"></el-input>
+                            </td>
+                            <div v-if="index ==  0" style="margin-left: 10px; margin-top: 10px; font-size: 0px">
+                                <i style="margin-right: 5px;  font-size: 15px" class="el-icon-circle-plus" @click="keywordsAdd(index)"></i>
+                                <i style="font-size: 15px" class="el-icon-remove" @click="keywordsDel(index)" v-if="keywordsArr.length >1"></i>
+                            </div>
+                        </tbody>
+                    </table>
+                </el-form-item>
+
+                <!-- <el-form-item label="关键词">
                     <el-input v-model="form.keywords"></el-input>
                 </el-form-item>
                 <el-form-item label="关键词位置">
                     <el-input v-model="form.keyword_index"></el-input>
-                </el-form-item>
+                </el-form-item> -->
                 <!-- <el-form-item label="日期/每日次数">
                     <table >
                         <tbody v-for="(p,index) in date_time">
@@ -197,16 +216,16 @@
                     <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="addReviewerForm.pay_time" type="datetime" placeholder="选择日期" ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="支付价格" prop="pay_price">
-                    <el-input v-model="addReviewerForm.pay_price"></el-input>
+                    <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.pay_price" :min="0" :step="10" @change="totalPrice"></el-input-number>
                 </el-form-item>
                 <el-form-item label="佣金" prop="commission">
-                    <el-input v-model="addReviewerForm.commission"></el-input>
+                    <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.commission" :min="0" @change="totalPrice"></el-input-number>
+                </el-form-item>
+                <el-form-item label="手续费" prop="poundage">
+                    <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.poundage" :min="0" @change="totalPrice"></el-input-number>
                 </el-form-item>
                 <el-form-item label="paypal账号" prop="paypal_account">
                     <el-input v-model="addReviewerForm.paypal_account"></el-input>
-                </el-form-item>
-                <el-form-item label="亚马逊profile url" prop="profile_url">
-                    <el-input v-model="addReviewerForm.profile_url"></el-input>
                 </el-form-item>
                 <el-form-item label="facebook url" prop="facebook_url">
                     <el-input v-model="addReviewerForm.facebook_url"></el-input>
@@ -215,8 +234,15 @@
                     <el-radio v-model="addReviewerForm.isPay" label="true">是</el-radio>
                     <el-radio v-model="addReviewerForm.isPay" label="false">否</el-radio>
                 </el-form-item> -->
-                 <el-form-item label="备注">
+                <el-form-item label="亚马逊profile url">
+                    <el-input v-model="addReviewerForm.profile_url"></el-input>
+                </el-form-item>
+                <el-form-item label="备注">
                     <el-input v-model="addReviewerForm.remark"></el-input>
+                </el-form-item>
+                <el-form-item label="总费用">
+                    <el-button type="warning">{{sumPrice}}</el-button>
+                    <!-- <span>{{sumPrice}} 元</span> -->
                 </el-form-item>
                 <!-- <el-form-item label="图片">
                     <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
@@ -259,8 +285,6 @@
                 <el-table-column prop="price" label="价格" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="shopname" label="店铺" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="keyword_index" label="广告位置" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="url" label="url" show-overflow-tooltip>
                     <template slot-scope="scope">
@@ -329,33 +353,6 @@
                     <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
-            <!-- <el-table :data="picturestList" border style="width: 100%">
-                <el-table-column prop="sum" label="产品广告位图片">
-                    <template slot-scope="scope">
-                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
-                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作" width="100">
-                    <template slot-scope="scope">
-                        <el-button type="danger" @click="handleDeletePic(scope.$index, scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-            <br>
-            <el-table :data="picturestList2" border style="width: 100%">
-                <el-table-column prop="sum" label="无logo非产品主图">
-                    <template slot-scope="scope">
-                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
-                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作" width="100">
-                    <template slot-scope="scope">
-                        <el-button type="danger" @click="handleDeletePic(scope.$index, scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table> -->
         </el-dialog>
 
         <!-- 删除产品图片提示 -->
@@ -517,13 +514,14 @@
                     pay_type: '',
                     currency: '',
                     pay_time: '',
-                    pay_price: '',
-                    commission: '',
+                    pay_price: 0,
+                    commission: 0,
                     paypal_account: '',
                     profile_url: '',
                     facebook_url: '',
                     isPay: undefined,
                     remark: '',
+                    poundage: 0
                 },
                 rules: {
                     keyword: [{
@@ -571,9 +569,9 @@
                         message: '请输入paypal账号',
                         trigger: 'blur'
                     }],
-                    profile_url: [{
+                    poundage: [{
                         required: true,
-                        message: '请输入亚马逊profile url',
+                        message: '请输入手续费',
                         trigger: 'blur'
                     }],
                     facebook_url: [{
@@ -599,7 +597,17 @@
                 addplanVisible: false,
                 plan_sum: 0,
                 task_period_id: '',
-                detailOptions3: []
+                detailOptions3: [],
+                keywordsArr: [{
+                    keywords: '',
+                    keyword_index: ''
+                }],
+                add_keywords: {
+                    keywords: '',
+                    keyword_index: ''
+                },
+                sumPrice: 0,
+                
             }
         },
         created() {
@@ -614,7 +622,7 @@
                     let is_del = false;
                     return d
                 })
-            }
+            },
         },
         filters: {
             //类型转换
@@ -712,10 +720,7 @@
                 this.checkVisible = true
             },
             handleEdit(index, row) {
-                this.date_time = [{
-                    plan_date: '',
-                    plan_sum: 0
-                }]
+                this.keywordsArr = []
                 this.idx = index;
                 const item = this.tableData[index];
                 this.form = {
@@ -730,9 +735,17 @@
                     keyword_index: item.keyword_index,
                     remark: item.remark
                 }
-                if (item.task_periods.length != 0) {
-                    this.date_time = []
-                    this.date_time = item.task_periods.concat()
+                let tempkeywords = item.keywords.split(',')
+                let tempkeywordindex = item.keyword_index.split(',')
+                if(tempkeywords.length != 0) {
+                    tempkeywords.forEach((data, index) => {
+                        this.keywordsArr.push({keywords: data, keyword_index: tempkeywordindex[index]})
+                    })
+                }else {
+                    this.keywordsArr = [{
+                        keywords: '',
+                        keyword_index: ''
+                    }]
                 }
                 this.fileList = []
                 this.fileList2 = []
@@ -757,6 +770,14 @@
             },
             // 保存编辑
             saveEdit() {
+                let tempkeywords = []
+                let tempkeyword_index = []
+                this.keywordsArr.forEach((data) => {
+                    if (data.keywords.trim() != '' && data.keyword_index.trim() != '') {
+                        tempkeywords.push(data.keywords)
+                        tempkeyword_index.push(data.keyword_index)
+                    }
+                })
                 this.submitDisabled = true
                 let formData = new FormData()
                 formData.append('task[asin]', this.form.asin)
@@ -765,8 +786,8 @@
                 formData.append('task[url]', this.form.url)
                 formData.append('task[shopname]', this.form.shopname)
                 formData.append('task[price]', this.form.price)
-                formData.append('task[keywords]', this.form.keywords)
-                formData.append('task[keyword_index]', this.form.keyword_index)
+                formData.append('task[keywords]', String(tempkeywords))
+                formData.append('task[keyword_index]', String(tempkeyword_index))
                 formData.append('task[remark]', this.form.remark)
                 this.date_time.forEach((data) => {
                     formData.append('task[plan_date][]', data.plan_date)
@@ -915,7 +936,7 @@
                         formData.append('task_record[pay_time]', this.addReviewerForm.pay_time)
                         formData.append('task_record[pay_price]', this.addReviewerForm.pay_price)
                         formData.append('task_record[commission]', this.addReviewerForm.commission)
-                        // formData.append('task_record[need_refund]', this.addReviewerForm.isPay)
+                        formData.append('task_record[charge]', this.addReviewerForm.poundage)
                         formData.append('task_record[paypal_account]', this.addReviewerForm.paypal_account)
                         formData.append('task_record[profile_url]', this.addReviewerForm.profile_url)
                         formData.append('task_record[facebook_url]', this.addReviewerForm.facebook_url)
@@ -1079,7 +1100,7 @@
             },
             confirmDistribute() {
                 if(this.multipleSelection.length == 0) {
-                    this.$message.error('请选择至少一个产品')
+                    this.$message.error('请选择至少一个任务')
                     return
                 }
                 this.distributeUser = ''
@@ -1255,6 +1276,20 @@
                     this.$message.info('已取消删除')
                 })
             },
+            keywordsAdd() {
+                this.keywordsArr.push(this.add_keywords)
+                this.add_keywords = {
+                    keywords: '',
+                    keyword_index: ''
+                }
+            },
+            keywordsDel(index) {
+                this.keywordsArr.pop()
+            },
+            totalPrice() {
+                this.sumPrice = this.addReviewerForm.pay_price + this.addReviewerForm.commission + this.addReviewerForm.poundage
+            },
+            
             getStatusName(status) {
                 if(status == 1) {
                     return "已提交申请"

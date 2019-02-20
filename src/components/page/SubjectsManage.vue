@@ -63,9 +63,9 @@
                                 <el-dropdown-item>
                                     <el-button @click="showSubjects(scope.$index, scope.row)" type="text">查看详情</el-button>
                                 </el-dropdown-item>
-                                <el-dropdown-item>
+                                <!-- <el-dropdown-item>
                                     <el-button @click="showProduct(scope.$index, scope.row)" type="text">主体图片</el-button>
-                                </el-dropdown-item>
+                                </el-dropdown-item> -->
                                 <!-- <el-dropdown-item>
                                     <el-button @click="showProduct(scope.$index, scope.row)" type="text">&nbsp产品图片</el-button>
                                 </el-dropdown-item> -->
@@ -161,9 +161,8 @@
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="产品图片" :visible.sync="productVisible" width="40%">
+        <el-dialog title="主体图片" :visible.sync="productVisible" width="40%">
             <el-carousel height="300px" type="card" v-if="picturesProductList.length != 0">
-                <span>产品图片</span>
                 <el-carousel-item v-for="(item, index) in picturesProductList">
                     <img @click="handleDeletePro(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
@@ -171,7 +170,7 @@
         </el-dialog>
 
         <!-- 删除产品图片提示 -->
-        <el-dialog title="删除产品图片" :visible.sync="confirmDelProVis" width="35%">
+        <el-dialog title="删除主体图片" :visible.sync="confirmDelProVis" width="35%">
             <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
             <span slot="footer" class="dialog-footer">
             <el-button @click="confirmDelProVis = false">取 消</el-button>
@@ -762,7 +761,7 @@
                         this.picturesProductList.splice(this.idx, 1);
                         this.getData()
                         this.$message.success("删除成功")
-                        this.productVisible = false
+                        // this.productVisible = false
                         this.confirmDelProVis = false
                     }
                 }).catch((res) => {

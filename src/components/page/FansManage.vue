@@ -8,12 +8,13 @@
         </div>
         <div class="container">
             <div class="handle-box">
-                <!-- <div class="fnsku_filter">
-                    关键词:
-                    <el-input style="width:150px" placeholder="请输入关键词" v-model.trim="search_keyword"></el-input>
+                <el-button type="primary" @click="exportFans">导出粉丝</el-button>
+                <div class="fnsku_filter">
+                    粉丝号:
+                    <el-input style="width:150px" placeholder="请输入粉丝号" v-model.trim="search_fan"></el-input>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
-                </div> -->
+                </div>
             </div>
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
@@ -195,6 +196,12 @@
             <el-button type="danger" @click="deleteImg">确 定</el-button>
         </span>
         </el-dialog>
+
+        <!-- 下载提示 -->
+        <el-dialog title="下载" :visible.sync="exportVisible" width="35%" @close="closeExport">
+            <el-button type="primary"><a style="color:#fff;" :href="$axios.defaults.baseURL + '/fans/export_url?ids=' + exportIds + '&token=' + export_token">下载excel文件</a></el-button>
+        </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -242,8 +249,11 @@
                 fileList: [],
                 picturestList: [],
                 productVisible: false,
-                search_keyword: '',
-                task_records: []
+                search_fan: '',
+                task_records: [],
+                export_token: '',
+                exportIds: [],
+                exportVisible: false
             }
         },
         created() {
@@ -290,7 +300,8 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
-                this.$axios.get( '/fans?page='+this.cur_page, {
+                this.export_token = localStorage.getItem('token')
+                this.$axios.get( '/fans?page='+this.cur_page + '&query=' + this.search_fan, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -306,7 +317,7 @@
             filter_product() {
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/fans?page='+this.cur_page, {
+                this.$axios.get( '/fans?page='+this.cur_page + '&query=' + this.search_fan, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -324,7 +335,7 @@
             clear_filter() {
                 this.paginationShow = false
                 this.cur_page = 1
-                this.search_keyword = ''
+                this.search_fan = ''
                 this.getData()
             },
             formatter_created_at(row, column) {
@@ -446,6 +457,11 @@
                         this.task_records = res.data.data.task_records
                         this.task_records.forEach((data) => {
                             data.img_count = data.pictures.length
+                            if (String(data.need_refund) == 'true') {
+                                data.need_refund2 = '是'
+                            } else if(String(data.need_refund) == 'false'){
+                                data.need_refund2 = '否'
+                            }
                         })
                         this.detailVisible = true
                     }
@@ -501,6 +517,22 @@
             },
             formatter_updated_at(row, column) {
                 return row.updated_at.substr(0, 19);
+            },
+            exportFans() {
+                if(this.multipleSelection.length == 0) {
+                    this.$message.error('请至少选择一条数据')
+                    return
+                }
+                this.multipleSelection.forEach((data) => {
+                    this.exportIds.push(data.id)
+                })
+                this.export_token = localStorage.getItem('token')
+                this.exportVisible = true
+            },
+            closeExport() {
+                this.exportVisible = false
+                this.exportIds = []
+                this.$refs.multipleTable.clearSelection()
             },
             getStatusName(status) {
                 if(status == 1) {

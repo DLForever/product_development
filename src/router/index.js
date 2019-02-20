@@ -86,7 +86,7 @@ export default new Router({
                 },
                 {
                     path: '/applysampleoutsManage',
-                    component: resolve => require(['../components/page/ApplySampleoutsManage.vue'], resolve),
+                    component: resolve => require(['../components/page/ApplySampleOutsManage.vue'], resolve),
                     meta: { title: '申请借样' }
                 },
                 {

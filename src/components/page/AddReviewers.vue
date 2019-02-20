@@ -208,6 +208,9 @@
 		created() {
             // this.getData();
         },
+        props:{
+			getMessageCount:Function
+		},
 		methods: {
 			getData() {
                 if (process.env.NODE_ENV === 'development') {
@@ -280,6 +283,7 @@
 								this.$message.success('提交成功！')
 								this.$refs['form'].resetFields()
 								this.$router.push('/reviewersmanage')
+								this.getMessageCount()
 							}
 						}).catch((res) => {
 							console.log('err')
