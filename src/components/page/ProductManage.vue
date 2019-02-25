@@ -74,7 +74,8 @@
                 </el-table-column>
                 <el-table-column prop="package_weight" label="包装重量" width="70">
                 </el-table-column> -->
-                
+                <el-table-column prop="created_at_format" label="创建时间" sortable width="140">
+                </el-table-column>
                 <el-table-column prop="desc_url" label="描述URL" width="80">
                     <template slot-scope="scope">
                         <a v-if="scope.row.desc_url != null && scope.row.desc_url != '' && scope.row.desc_url != 'null'" :href="scope.row.desc_url" target="_blank">查看描述</a>
@@ -294,15 +295,15 @@
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="图片" :visible.sync="productVisible" width="40%">
-            <el-carousel height="300px" type="card" v-if="picturesProductList.length != 0">
+        <el-dialog title="图片" :visible.sync="productVisible" width="70%">
+            <el-carousel height="600px" type="card" v-if="picturesProductList.length != 0">
                 <span>产品图片</span>
                 <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
                     <img @click="handleDeletePro(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
             <br>
-            <el-carousel height="300px" type="card" v-if="picturesSubjectsList.length != 0">
+            <el-carousel height="600px" type="card" v-if="picturesSubjectsList.length != 0">
                 <span class="demonstration">主体图片</span>
                 <el-carousel-item v-for="(item, index) in picturesSubjectsList" :key="index">
                     <img @click="handleDeleteSubjectPic(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
@@ -1578,8 +1579,8 @@
     }
 
     .img_fnsku {
-        width:15rem;
-        height:15rem;
+        width:40rem;
+        height:40rem;
     }
     .img {
         width:3rem;

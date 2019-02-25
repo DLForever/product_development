@@ -161,8 +161,8 @@
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="主体图片" :visible.sync="productVisible" width="40%">
-            <el-carousel height="300px" type="card" v-if="picturesProductList.length != 0">
+        <el-dialog title="主体图片" :visible.sync="productVisible" width="80%">
+            <el-carousel height="700px" type="card" v-if="picturesProductList.length != 0">
                 <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
                     <img @click="handleDeletePro(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
@@ -1027,8 +1027,8 @@
     }
 
     .img_fnsku {
-        width:15rem;
-        height:15rem;
+        width:45rem;
+        height:45rem;
     }
 
     .item {

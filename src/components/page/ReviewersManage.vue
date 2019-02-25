@@ -325,14 +325,23 @@
                 <el-table-column prop="plan_date" label="计划日期" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="plan_sum" label="计划数量" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <template v-if="scope.row.edit">
+                            <el-input-number style="margin-bottom: 5px;" v-model="scope.row.plan_sum" :min="0" label="描述文字"></el-input-number>
+                            <el-button class="cancel-btn" size="small" icon="el-icon-refresh" type="warning" @click="cancelEdit(scope.row)">取消</el-button>
+                        </template>
+                        <span v-else>{{scope.row.plan_sum}}</span>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="start_sum" label="已进行的数量" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column label="操作" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <el-button @click="handleCreate(scope.$index, scope.row)" type="primary">添加送测记录</el-button>
-                        <el-button @click="handleUpdatePlan(scope.$index, scope.row)" type="warning">修改</el-button>
+                        <el-button v-if="scope.row.edit" @click="saveupdateplan(scope.row)" icon="el-icon-circle-check-outline" type="success">确认</el-button>
+                        <el-button v-else type="warning" size="small" icon="el-icon-edit" @click="scope.row.edit=!scope.row.edit">编辑</el-button>
                         <el-button @click="handleDeletePlan(scope.$index, scope.row)" type="danger">删除</el-button>
+                        <span>{{scope.row.edit}}</span>
                     </template>
                 </el-table-column>
             </el-table>
@@ -661,6 +670,10 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             data.img_count = data.pictures.length
+                            data.task_periods.forEach((data2) => {
+                                data2.originalSum = data2.plan_sum
+                                data2.edit = false
+                            })
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -848,7 +861,11 @@
                 this.task_id = row.id
                 this.addReviewerForm.asin = row.asin
                 this.detailOptions = [row]
-                this.detailOptions2 = this.tableData[index].task_periods
+                // row.task_periods.forEach((data) => {
+                //     data.edit = false
+                //     data.originalSum = data.plan_sum
+                // })
+                this.detailOptions2 = row.task_periods
                 this.detailVisible = true
             },
             changeFile(file) {
@@ -1192,11 +1209,11 @@
                 // this.date_time = JSON.parse(JSON.stringify([row]))
                 this.updateplanVisible = true;
             },
-            saveupdateplan() {
+            saveupdateplan(row) {
                 this.submitDisabled = true
                 let params = {
-                    task_period_id: this.task_period_id,
-                    plan_sum: this.plan_sum
+                    task_period_id: row.id,
+                    plan_sum: row.plan_sum
                 }
                 this.$axios.post('/tasks/' + this.task_id + '/update_period', params,{
                      headers: {
@@ -1205,9 +1222,11 @@
                 }).then((res) => {
                     if(res.data.code == 200) {
                         this.getData()
+                        row.originalSum = row.plan_sum
                         this.$message.success("更新成功")
-                        this.updateplanVisible = false
-                        this.detailVisible = false
+                        row.edit = false
+                        // this.updateplanVisible = false
+                        // this.detailVisible = false
                     }
                 }).catch((res) => {
 
@@ -1289,7 +1308,10 @@
             totalPrice() {
                 this.sumPrice = this.addReviewerForm.pay_price + this.addReviewerForm.commission + this.addReviewerForm.poundage
             },
-            
+            cancelEdit(row) {
+                row.plan_sum = row.originalSum
+                row.edit = false
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "已提交申请"

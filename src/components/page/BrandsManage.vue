@@ -20,7 +20,18 @@
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column prop="email" label="公司LOGO" width="120">
+                <el-table-column label="图片" width="120">
+                    <template slot-scope="scope">
+                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
+                            <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
+                            <img style="cursor: pointer;" v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/>
+                            <img style="cursor: pointer;" v-else-if="scope.row.subject_pictures[0] != undefined && scope.row.subject_pictures[0].url.thumb.url != null && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/>
+                            <span v-else>无</span>
+                        </el-badge>
+                        <span v-else>无</span>
+                    </template>
+                </el-table-column>
+                <!-- <el-table-column prop="email" label="公司LOGO" width="120">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0">无</span>
@@ -29,7 +40,7 @@
                         </el-badge>
                         <span v-else>无</span>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column prop="brand_name" label="知识产权名称" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="product_category" label="知识产权类目" show-overflow-tooltip>
@@ -149,25 +160,26 @@
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="知识产权图片" :visible.sync="productVisible" width="20%" @close="closeProduct">
-            <el-table :data="picturestList" border style="width: 100%">
+        <el-dialog title="知识产权图片" :visible.sync="productVisible" width="70%" @close="closeProduct">
+            <el-carousel height="700px" type="card" v-if="picturestList.length != 0">
+                <!-- <span>产品图片</span> -->
+                <el-carousel-item v-for="(item, index) in picturestList" :key="index">
+                    <img @click="handleDeletePic(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                </el-carousel-item>
+            </el-carousel>
+            <!-- <el-table :data="picturestList" border style="width: 100%">
                 <el-table-column prop="sum" label="图片">
                     <template slot-scope="scope">
-                        <!-- <span>{{scope.row.url}}</span> -->
                         <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
                         <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
-                        <!-- <span v-else>无</span> -->
                     </template>
-                    <!-- <template slot-scope="scope">
-                        <img class="img_fnsku" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url" />                  
-                    </template> -->
                 </el-table-column>
                 <el-table-column label="操作" width="100">
                     <template slot-scope="scope">
                         <el-button type="danger" @click="handleDeletePic(scope.$index, scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
-            </el-table>
+            </el-table> -->
         </el-dialog>
 
         <!-- 删除产品图片提示 -->
@@ -437,8 +449,8 @@
                 this.productVisible = false
                 this.picturestList = []
             },
-            handleDeletePic(index, row) {
-                this.picture_id = row.id
+            handleDeletePic(id, index) {
+                this.picture_id = id
                 this.idx = index;
                 this.confirmDelProVis = true;
             },
@@ -496,8 +508,8 @@
     }
 
     .img_fnsku {
-        width:6rem;
-        height:6rem;
+        width:40rem;
+        height:40rem;
     }
     .img {
         width:3rem;

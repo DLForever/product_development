@@ -51,6 +51,8 @@
                 </el-table-column>
                 <el-table-column prop="charge" label="手续费" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="sumPrice" label="总费用" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column prop="need_refund2" label="是否需要返款" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <el-tag type="warning" v-if="scope.row.need_refund2 == '是'">是</el-tag>
@@ -655,7 +657,7 @@
                             } else if(String(data.need_refund) == 'false'){
                                 data.need_refund2 = '否'
                             }
-                            data.sumPrice = Number(data.charge) + Number(data.commission) + Number(data.pay_price)
+                            data.sumPrice = parseFloat((Number(data.charge) + Number(data.commission) + Number(data.pay_price)).toPrecision(12))
                             data.img_count = data.pictures.length
                         })
                         this.tableData = res.data.data
@@ -689,6 +691,7 @@
                             } else if(String(data.need_refund) == 'false'){
                                 data.need_refund2 = '否'
                             }
+                            data.sumPrice = parseFloat((Number(data.charge) + Number(data.commission) + Number(data.pay_price)).toPrecision(12))
                             data.img_count = data.pictures.length
                         })
                         this.tableData = res.data.data
