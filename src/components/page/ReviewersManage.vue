@@ -2,7 +2,7 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-lx-global"></i> 测评管理</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-lx-goodsfill"></i> 测评管理</el-breadcrumb-item>
                 <el-breadcrumb-item>测评任务管理</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -341,25 +341,24 @@
                         <el-button v-if="scope.row.edit" @click="saveupdateplan(scope.row)" icon="el-icon-circle-check-outline" type="success">确认</el-button>
                         <el-button v-else type="warning" size="small" icon="el-icon-edit" @click="scope.row.edit=!scope.row.edit">编辑</el-button>
                         <el-button @click="handleDeletePlan(scope.$index, scope.row)" type="danger">删除</el-button>
-                        <span>{{scope.row.edit}}</span>
                     </template>
                 </el-table-column>
             </el-table>
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="图片" :visible.sync="productVisible" width="40%">
-            <el-carousel height="300px" type="card" v-if="picturestList.length != 0">
+        <el-dialog title="图片" :visible.sync="productVisible" width="70%">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList.length != 0">
                 <span>产品广告位图片</span>
                 <el-carousel-item v-for="(item, index) in picturestList" :key="index">
-                    <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeletePic(item.remark, item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
             <br>
-            <el-carousel height="300px" type="card" v-if="picturestList2.length != 0">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList2.length != 0">
                 <span class="demonstration">无logo非产品主图</span>
                 <el-carousel-item v-for="(item, index) in picturestList2" :key="index">
-                    <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeletePic(item.remark, item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
         </el-dialog>
@@ -1190,7 +1189,7 @@
             onInfinite_dis_user(obj) {
                 if((this.dis_user_page * 20) < this.dis_user_total) {
                     this.dis_user_page += 1
-                    this.remoteMethod2(this.query3, obj.loaded)
+                    this.remoteMethod3(this.query3, obj.loaded)
                     //                  this.getUser(obj.loaded)
                 } else {
                     obj.complete()
@@ -1362,8 +1361,8 @@
     }
 
     .img_fnsku {
-        width:15rem;
-        height:15rem;
+        width:40rem;
+        height:40rem;
     }
     .img {
         width:3rem;
@@ -1373,5 +1372,14 @@
     .item {
       margin-top: 10px;
       margin-right: 40px;
+    }
+    .el-carousel__item.is-animating{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+    .img_carousel {
+        max-width: 40rem;
     }
 </style>

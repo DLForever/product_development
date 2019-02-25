@@ -65,9 +65,9 @@
                                 操作<i class="el-icon-arrow-down el-icon--right"></i>
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item>
+                                <!-- <el-dropdown-item>
                                     <el-button @click="showPictures(scope.$index, scope.row)" type="text">图片</el-button>
-                                </el-dropdown-item>
+                                </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">编辑</el-button>
                                 </el-dropdown-item>
@@ -161,10 +161,10 @@
 
         <!-- 查看产品图片 -->
         <el-dialog title="知识产权图片" :visible.sync="productVisible" width="70%" @close="closeProduct">
-            <el-carousel height="700px" type="card" v-if="picturestList.length != 0">
+            <el-carousel height="700px" arrow="always" :autoplay="false" v-if="picturestList.length != 0">
                 <!-- <span>产品图片</span> -->
                 <el-carousel-item v-for="(item, index) in picturestList" :key="index">
-                    <img @click="handleDeletePic(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeletePic(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
             <!-- <el-table :data="picturestList" border style="width: 100%">
@@ -508,8 +508,8 @@
     }
 
     .img_fnsku {
-        width:40rem;
-        height:40rem;
+        /*width:42rem;
+        height:40rem;*/
     }
     .img {
         width:3rem;
@@ -519,5 +519,14 @@
     .item {
       margin-top: 10px;
       margin-right: 40px;
+    }
+    .el-carousel__item.is-animating{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+    .img_carousel {
+        max-width: 40rem;
     }
 </style>

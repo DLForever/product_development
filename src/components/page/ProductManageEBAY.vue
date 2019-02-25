@@ -302,17 +302,17 @@
 
         <!-- 查看产品图片 -->
         <el-dialog title="图片" :visible.sync="productVisible" width="70%">
-            <el-carousel height="600px" type="card" v-if="picturesProductList.length != 0">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturesProductList.length != 0">
                 <span>产品图片</span>
                 <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
-                    <img @click="handleDeletePro(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeletePro(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
             <br>
-            <el-carousel height="600px" type="card" v-if="picturesSubjectsList.length != 0">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturesSubjectsList.length != 0">
                 <span class="demonstration">主体图片</span>
                 <el-carousel-item v-for="(item, index) in picturesSubjectsList" :key="index">
-                    <img @click="handleDeleteSubjectPic(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeleteSubjectPic(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
         </el-dialog>
@@ -1698,5 +1698,14 @@
     }
     .link-type:hover {
         color: rgb(32, 160, 255);
+    }
+    .el-carousel__item.is-animating{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+    .img_carousel {
+        max-width: 40rem;
     }
 </style>

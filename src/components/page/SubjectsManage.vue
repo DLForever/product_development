@@ -162,9 +162,9 @@
 
         <!-- 查看产品图片 -->
         <el-dialog title="主体图片" :visible.sync="productVisible" width="80%">
-            <el-carousel height="700px" type="card" v-if="picturesProductList.length != 0">
+            <el-carousel height="700px" arrow="always" :autoplay="false" v-if="picturesProductList.length != 0">
                 <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
-                    <img @click="handleDeletePro(item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeletePro(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
         </el-dialog>
@@ -1034,5 +1034,14 @@
     .item {
       margin-top: 10px;
       margin-right: 40px;
+    }
+    .el-carousel__item.is-animating{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+    .img_carousel {
+        max-width: 40rem;
     }
 </style>

@@ -2,7 +2,7 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-lx-global"></i> 测评管理</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-lx-goodsfill"></i> 测评管理</el-breadcrumb-item>
                 <el-breadcrumb-item>测评任务管理</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -330,24 +330,24 @@
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="测评截图" :visible.sync="productVisible" width="40%">
-            <el-carousel height="300px" type="card" v-if="picturestList.length != 0">
+        <el-dialog title="测评截图" :visible.sync="productVisible" width="70%">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList.length != 0">
                 <span>评论截图</span>
                 <el-carousel-item v-for="(item, index) in picturestList" :key="index">
-                    <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeletePic(item.remark, item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
             <br>
-            <el-carousel height="300px" type="card" v-if="picturestList2.length != 0">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList2.length != 0">
                 <span class="demonstration">退款截图</span>
                 <el-carousel-item v-for="(item, index) in picturestList2" :key="index">
-                    <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeletePic(item.remark, item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
-            <el-carousel height="300px" type="card" v-if="picturestList3.length != 0">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList3.length != 0">
                 <span class="demonstration">反馈截图</span>
                 <el-carousel-item v-for="(item, index) in picturestList3" :key="index">
-                    <img @click="handleDeletePic(item.remark, item.id, index)" class="img_fnsku" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeletePic(item.remark, item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
         </el-dialog>
@@ -1012,9 +1012,9 @@
                     facebook_url: item.facebook_url,
                     isPay: String(item.need_refund),
                     remark: item.remark,
-                    poundage: item.charge
+                    poundage: item.charge,
                 },
-                this.sumPrice = Number(this.addReviewerForm.pay_price) + Number(this.addReviewerForm.commission) + Number(this.addReviewerForm.poundage)
+                this.sumPrice = parseFloat((Number(this.addReviewerForm.pay_price) + Number(this.addReviewerForm.commission) + Number(this.addReviewerForm.poundage)).toPrecision(12))
                 this.fileList = []
                 this.fileList2 = []
                 this.updatereviewerVisible = true
@@ -1139,7 +1139,7 @@
                 })
             },
             totalPrice() {
-                this.sumPrice = this.addReviewerForm.pay_price + this.addReviewerForm.commission + this.addReviewerForm.poundage
+                this.sumPrice = parseFloat((this.addReviewerForm.pay_price + this.addReviewerForm.commission + this.addReviewerForm.poundage).toPrecision(12))
             },
             exportReviewers() {
                 if(this.multipleSelection.length == 0) {
@@ -1203,8 +1203,8 @@
     }
 
     .img_fnsku {
-        width:15rem;
-        height:15rem;
+        width:40rem;
+        height:40rem;
     }
     .img {
         width:3rem;
@@ -1214,5 +1214,14 @@
     .item {
       margin-top: 10px;
       margin-right: 40px;
+    }
+    .el-carousel__item.is-animating{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+    .img_carousel {
+        max-width: 40rem;
     }
 </style>
