@@ -469,6 +469,10 @@
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
             </el-table>
+            <div class="pagination">
+                <el-pagination v-if="paginationShow2" @current-change="handleCurrentChange2" :page-size="pagesize" layout="prev, pager, next" :total="totals2">
+                </el-pagination>
+            </div>
             <!-- </div> -->
         </el-dialog>
         <!-- 添加图片 -->
@@ -647,7 +651,10 @@
               user_options3: [],
               dis_user_total2: 0,
               dis_user_page2: 1,
-              operate_user_id: ''
+              operate_user_id: '',
+              cur_page2: 1,
+              totals2: 0,
+              paginationShow2: true
             }
         },
         created() {
@@ -692,6 +699,10 @@
             handleCurrentChange(val) {
                 this.cur_page = val;
                 this.getData();
+            },
+            handleCurrentChange2(val) {
+                this.cur_page2 = val;
+                this.showChangeDetails();
             },
             // 获取 easy-mock 的模拟数据
             getData() {
@@ -1469,9 +1480,13 @@
             showChangeProduct(index, row) {
                 this.export_token = localStorage.getItem('token')
                 this.subject_name = row.sku.substring(0, row.sku.length-2)
-                // this.subject_id = row.sku.substring(0, row.sku.length-2) + '_' + row.product_subject_id + '.zip'
                 this.subject_id = row.product_subject_id
-                this.$axios.get('/products?product_subject_id=' + row.product_subject_id, {
+                this.cur_page2 = 1
+                this.paginationShow2 = false
+                this.showChangeDetails()
+            },
+            showChangeDetails() {
+                this.$axios.get('/products?product_subject_id=' + this.subject_id + '&page=' + this.cur_page2, {
                     headers: {
                         'Authorization': localStorage.getItem('token')
                     }
@@ -1481,21 +1496,15 @@
                             data.size = data.length + '*' + data.width + '*' + data.height
                             data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                             data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
-                            if(data.wish && data.ebay){
-                                data.platform = 'wish+ebay'
-                            }else if(data.wish){
-                                data.platform = 'wish'
-                            }else if(data.ebay){
-                                data.platform = 'ebay'
-                            }else{
-                                data.platform = ''
-                            }
                         })
                         this.products_change_details = res.data.data
+                        this.totals2 = res.data.count
                         this.change_detailsVisible = true
                     }
                 }).catch((res) => {
 
+                }).finally(() => {
+                    this.paginationShow2 = true
                 })
             },
             getCatetory() {

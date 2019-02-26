@@ -411,7 +411,6 @@
                 </el-table-column>
                 <el-table-column prop="box_sum" label="单箱数量(g)" width="90">
                 </el-table-column>
-                
                 <el-table-column prop="desc" label="描述" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
@@ -471,12 +470,16 @@
                 </el-table-column>
                 <el-table-column prop="desc" label="描述" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="created_at_formatter" label="创建时间" width="140">
+                <el-table-column prop="created_at_format" label="创建时间" width="140">
                 </el-table-column>
                 <!-- <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
                 </el-table-column> -->
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
             </el-table>
+            <div class="pagination">
+                <el-pagination v-if="paginationShow2" @current-change="handleCurrentChange2" :page-size="pagesize" layout="prev, pager, next" :total="totals2">
+                </el-pagination>
+            </div>
             <!-- </div> -->
         </el-dialog>
         <!-- 添加图片 -->
@@ -634,6 +637,9 @@
               confirmDelSubjectPicVis: false,
               statusOptions: [{value: 2, label: '未上架'}, {value: 4, label: 'wish上架'}, {value: 5, label: 'ebay上架'}, {value: 6, label: 'W+E上架'}, {value: 7, label: 'amazon上架'}, {value: 8, label: 'W+A上架'}, {value: 9, label: 'E+A上架'}, {value: 10, label: 'W+E+A上架'}],
               statusSelect: '',
+              cur_page2: 1,
+              totals2: 0,
+              paginationShow2: true
             }
         },
         created() {
@@ -678,6 +684,10 @@
             handleCurrentChange(val) {
                 this.cur_page = val;
                 this.getData();
+            },
+            handleCurrentChange2(val) {
+                this.cur_page2 = val;
+                this.showChangeDetails();
             },
             // 获取 easy-mock 的模拟数据
             getData() {
@@ -1206,7 +1216,7 @@
             },
             handleDetails(index, row) {
                 this.product_id = row.id
-                this.$axios.get('/products/' + row.id, {
+                this.$axios.get('/products/' + this.product_id, {
                     headers: {
                         'Authorization': localStorage.getItem('token')
                     }
@@ -1223,7 +1233,6 @@
                 }).catch((res) => {
 
                 })
-                
             },
             onInfinite_suppliers(obj) {
                 if((this.supplier_page * 20) < this.supplier_total) {
@@ -1352,9 +1361,13 @@
             showChangeProduct(index, row) {
                 this.export_token = localStorage.getItem('token')
                 this.subject_name = row.sku.substring(0, row.sku.length-2)
-                // this.subject_id = row.sku.substring(0, row.sku.length-2) + '_' + row.product_subject_id + '.zip'
                 this.subject_id = row.product_subject_id
-                this.$axios.get('/products?product_subject_id=' + row.product_subject_id, {
+                this.cur_page2 = 1
+                this.paginationShow2 = false
+                this.showChangeDetails()
+            },
+            showChangeDetails() {
+                this.$axios.get('/products?product_subject_id=' + this.subject_id + '&page=' + this.cur_page2, {
                     headers: {
                         'Authorization': localStorage.getItem('token')
                     }
@@ -1364,21 +1377,15 @@
                             data.size = data.length + '*' + data.width + '*' + data.height
                             data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                             data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
-                            // if(data.wish && data.ebay){
-                            //     data.platform = 'wish+ebay'
-                            // }else if(data.wish){
-                            //     data.platform = 'wish'
-                            // }else if(data.ebay){
-                            //     data.platform = 'ebay'
-                            // }else{
-                            //     data.platform = ''
-                            // }
                         })
                         this.products_change_details = res.data.data
+                        this.totals2 = res.data.count
                         this.change_detailsVisible = true
                     }
                 }).catch((res) => {
 
+                }).finally(() => {
+                    this.paginationShow2 = true
                 })
             },
             getCatetory() {
