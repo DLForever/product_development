@@ -71,41 +71,26 @@
                 </el-table-column>
                 <el-table-column prop="name" label="产品名称" width="230" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="category_name" label="分类" width="250" show-overflow-tooltip>
+                <el-table-column prop="category_name" label="分类" width="180" show-overflow-tooltip>
                 </el-table-column>
-                <!-- <el-table-column prop="user" label="开发人员" show-overflow-tooltip>
-                </el-table-column> -->
-                <!-- <el-table-column prop="size" label="尺寸(长*宽*高)" width="100">
-                </el-table-column>
-                <el-table-column prop="weight" label="重量" width="60">
-                </el-table-column>
-                <el-table-column prop="package_size" label="包装尺寸(长*宽*高)" width="130">
-                </el-table-column>
-                <el-table-column prop="package_weight" label="包装重量" width="70">
-                </el-table-column> -->
-                <el-table-column prop="created_at_format" label="创建时间" sortable width="140">
-                </el-table-column>
-                <el-table-column prop="desc_url" label="描述URL" width="80">
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.desc_url != null && scope.row.desc_url != '' && scope.row.desc_url != 'null'" :href="scope.row.desc_url" target="_blank">查看描述</a>
-                    </template>
+                <el-table-column prop="created_at_format" label="创建时间" sortable width="135">
                 </el-table-column>
                 <el-table-column prop="origin_url" label="来源URL" width="80">
                     <template slot-scope="scope">
                         <a v-if="scope.row.origin_url != null && scope.row.origin_url != '' && scope.row.origin_url != 'null'" :href="scope.row.origin_url" target="_blank">查看来源</a>
                     </template>
                 </el-table-column>
-                <!-- <el-table-column prop="picture_url" label="图片URL" width="80">
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.picture_url != null && scope.row.picture_url != '' && scope.row.picture_url != 'null'" :href="scope.row.picture_url" target="_blank">查看图片</a>
-                    </template>
-                </el-table-column> -->
                 <el-table-column prop="status" label="状态" width="120">
                     <template slot-scope="scope">
                         <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status)}}</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="desc_url" label="描述URL" width="80">
+                    <template slot-scope="scope">
+                        <a v-if="scope.row.desc_url != null && scope.row.desc_url != '' && scope.row.desc_url != 'null'" :href="scope.row.desc_url" target="_blank">查看描述</a>
+                    </template>
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">

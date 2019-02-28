@@ -268,7 +268,13 @@
 
         <!-- 详情提示 -->
         <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
-            <el-button type="primary" @click="handleAddPlan">增加任务</el-button>
+            <el-button :disabled="submitDisabled" v-if="isaddPlan" type="success" size="small" icon="el-icon-circle-check-outline" @click="saveaddplan">确认</el-button>
+            <el-button v-else type="primary" @click="isaddPlan=!isaddPlan">增加任务</el-button>
+            <template v-if="isaddPlan">
+                <el-button type="warning" icon="el-icon-refresh" @click="cancelAddPlan">取消</el-button>
+                <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="plan_date" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"></el-date-picker>
+                <el-input-number style="margin-bottom: 5px;" v-model="plan_sum" :min="0" label="数量"></el-input-number>
+            </template>
             <el-button style="float: right;" type="primary" @click="checkSelf">通过审核</el-button>
             <br><br>
             <el-table :data="detailOptions" border style="width: 100%">
@@ -327,7 +333,7 @@
                 <el-table-column prop="plan_sum" label="计划数量" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <template v-if="scope.row.edit">
-                            <el-input-number style="margin-bottom: 5px;" v-model="scope.row.plan_sum" :min="0" label="描述文字"></el-input-number>
+                            <el-input-number style="margin-bottom: 5px;" v-model="scope.row.plan_sum" :min="0"></el-input-number>
                             <el-button class="cancel-btn" size="small" icon="el-icon-refresh" type="warning" @click="cancelEdit(scope.row)">取消</el-button>
                         </template>
                         <span v-else>{{scope.row.plan_sum}}</span>
@@ -337,10 +343,10 @@
                 </el-table-column>
                 <el-table-column label="操作" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <el-button @click="handleCreate(scope.$index, scope.row)" type="primary">添加送测记录</el-button>
-                        <el-button v-if="scope.row.edit" @click="saveupdateplan(scope.row)" icon="el-icon-circle-check-outline" type="success">确认</el-button>
-                        <el-button v-else type="warning" size="small" icon="el-icon-edit" @click="scope.row.edit=!scope.row.edit">编辑</el-button>
-                        <el-button @click="handleDeletePlan(scope.$index, scope.row)" type="danger">删除</el-button>
+                        <el-button v-if="!scope.row.edit" @click="handleCreate(scope.$index, scope.row)" :disabled="scope.row.noshow" type="primary">添加送测记录</el-button>
+                        <el-button v-if="scope.row.edit" @click="saveupdateplan(scope.row)" :disabled="scope.row.noshow" icon="el-icon-circle-check-outline" type="success">确认</el-button>
+                        <el-button v-else type="warning" size="small" icon="el-icon-edit" :disabled="scope.row.noshow" @click="scope.row.edit=!scope.row.edit">编辑</el-button>
+                        <el-button v-if="!scope.row.edit" @click="handleDeletePlan(scope.$index, scope.row)" :disabled="scope.row.noshow" type="danger">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -615,7 +621,9 @@
                     keyword_index: ''
                 },
                 sumPrice: 0,
-                
+                plan_sum: 0,
+                plan_date: '',
+                isaddPlan: false
             }
         },
         created() {
@@ -672,6 +680,7 @@
                             data.task_periods.forEach((data2) => {
                                 data2.originalSum = data2.plan_sum
                                 data2.edit = false
+                                data2.noshow = false
                             })
                         })
                         this.tableData = res.data.data
@@ -692,6 +701,11 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             data.img_count = data.pictures.length
+                            data.task_periods.forEach((data2) => {
+                                data2.originalSum = data2.plan_sum
+                                data2.edit = false
+                                data2.noshow = false
+                            })
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -1244,8 +1258,8 @@
             saveaddplan() {
                 this.submitDisabled = true
                 let params = {
-                    plan_date: this.date_time[0].plan_date,
-                    plan_sum: this.date_time[0].plan_sum
+                    plan_date: this.plan_date,
+                    plan_sum: this.plan_sum
                 }
                 this.$axios.post('/tasks/' + this.task_id + '/create_period', params,{
                      headers: {
@@ -1255,8 +1269,10 @@
                     if(res.data.code == 200) {
                         this.getData()
                         this.$message.success("增加成功")
-                        this.addplanVisible = false
-                        this.detailVisible = false
+                        this.isaddPlan = false
+                        this.detailOptions2.push({ plan_sum: this.plan_sum, plan_date: this.plan_date, start_sum: 0, noshow: true})
+                        this.plan_sum = 0
+                        this.plan_date = ''
                     }
                 }).catch((res) => {
 
@@ -1310,6 +1326,11 @@
             cancelEdit(row) {
                 row.plan_sum = row.originalSum
                 row.edit = false
+            },
+            cancelAddPlan() {
+                this.isaddPlan = false
+                this.plan_sum = 0
+                this.plan_date = ''
             },
             getStatusName(status) {
                 if(status == 1) {

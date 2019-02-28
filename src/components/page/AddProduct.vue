@@ -119,7 +119,7 @@
 						</el-form>
 					</div>
 				</el-tab-pane> -->
-				<el-tab-pane label="批量上传" name="second">
+				<el-tab-pane label="批量上传产品" name="second">
 					<template v-if="message === 'second'">
 						<el-form ref="form" :model="form" label-width="100px">
 							<el-form-item label="批量上传产品">
@@ -293,6 +293,25 @@
 						</el-form>
 					</div>
 				</el-tab-pane>
+				<el-tab-pane label="批量上传变体" name="fourth">
+					<template v-if="message === 'fourth'">
+						<el-form ref="form" :model="form" label-width="100px">
+							<el-form-item label="批量上传变体">
+								<el-upload class="upload-demo" drag action="" :on-exceed="exceed" :file-list="changeList" :on-remove="handleRemoveChange" :auto-upload="false" :on-change="changeProduct" :before-upload="beforeAvatarUpload" :limit="1">
+									<i class="el-icon-upload"></i>
+									<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+									<div class="el-upload__tip" slot="tip">只能上传xls/xlsx格式文件</div>
+								</el-upload>
+								<a :href="$axios.defaults.baseURL +'/batch_attr_template.xls'">模板下载</a>
+							</el-form-item>
+						</el-form>
+						<el-form ref="form" :model="form" label-width="100px">
+							<el-form-item>
+								<el-button type="primary" @click="uploadChangeproduct">上传文件</el-button>
+							</el-form-item>
+						</el-form>
+					</template>
+				</el-tab-pane>
 			</el-tabs>
 		</div>
 	</div>
@@ -439,7 +458,8 @@
 					vals: ''
 				},
 				subject_fileList: [],
-				suppliers_temp: []
+				suppliers_temp: [],
+				changeList: []
 			}
 		},
 		beforeRouteEnter: (to, from, next) => {
@@ -740,6 +760,12 @@
 			handleRemoveBatch(a, b) {
 				this.batchProduct = b
 			},
+			changeProduct(file) {
+				this.changeList.push(file)
+			},
+			handleRemoveChange(a, b) {
+				this.changeList = b
+			},
 			exceed() {
 				this.$message.error("对不起，超过个数限制")
 			},
@@ -897,7 +923,7 @@
 								'Authorization': localStorage.getItem('token')
 							}
 						}
-						this.$axios.post('/products/add_attr', formData, config).then((res) => {
+						this.$axios.post('/products/batch_attr', formData, config).then((res) => {
 							if(res.data.code == 200) {
 								this.$message.success('提交成功！');
 								this.$refs['subject_form'].resetFields()
@@ -937,6 +963,42 @@
 			},
 			subject_handleRemove(a, b) {
 				this.subject_fileList = b
+			},
+			uploadChangeproduct() {
+				if(this.changeList.length == 0) {
+					this.$message.error("请选择xlsx文件")
+					return
+				}
+				const extension = this.changeList[0].name.split('.')[1] === 'xls'
+				const extension2 = this.changeList[0].name.split('.')[1] === 'xlsx'
+				const isLt2M = this.changeList[0].size / 1024 / 1024 < 10
+				if(!extension & !extension2) {
+					console.log('上传模板只能是 xls、xlsx格式！')
+					this.$message.error('请上传 xls、xlsx格式的文件')
+					return
+				}
+				if(!isLt2M) {
+					console.log('上传模板大小不能超过10MB！')
+					return
+				}
+				
+				let formData = new FormData()
+				let config = {
+					headers: {
+						'Authorization': localStorage.getItem('token')
+					}
+				}
+				this.changeList.forEach((item) => {
+					formData.append('file', item.raw)
+				})
+				this.$axios.post('/products/batch', formData, config).then((res) => {
+					if(res.data.code == 200) {
+						this.$message.success("提交成功")
+						this.changeList = []
+					}
+				}).catch((res) => {
+					this.$message.error("失败，请核对无误后联系管理员")
+				})
 			},
 		},
 		components: {

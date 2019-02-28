@@ -80,7 +80,7 @@
                         title: '产品管理',
                         subs: [{
                             index: 'addProduct',
-                            title: '新建产品'
+                            title: '新建产品/变体'
                         },
                         {
                             index: '6',

@@ -37,6 +37,8 @@
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column fixed prop="asin" label="ASIN" width="130" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="plan_date" label="计划日期" width="90">
+                </el-table-column>
                 <el-table-column prop="keyword" label="关键词" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="order_number" label="订单号" show-overflow-tooltip>
@@ -263,6 +265,8 @@
         <el-dialog title="详情" :visible.sync="detailVisible" width="95%">
             <el-table :data="review_details" border style="width: 100%">
                 <el-table-column fixed prop="asin" label="ASIN" width="130" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="plan_date" label="计划日期" width="90">
                 </el-table-column>
                 <el-table-column prop="keyword" label="关键词" show-overflow-tooltip>
                 </el-table-column>
