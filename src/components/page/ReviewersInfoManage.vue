@@ -172,16 +172,24 @@
                     <span>{{addReviewerForm.asin}}</span>
                 </el-form-item>
                 <el-form-item label="关键词" prop="keyword">
-                    <el-input v-model="addReviewerForm.keyword"></el-input>
+                    <span>{{addReviewerForm.keyword}}</span>
+                    <!-- <el-input v-model="addReviewerForm.keyword"></el-input> -->
+                    <!-- <el-select v-model="addReviewerForm.keyword">
+                        <el-option v-for="item in keyword_options" :key="item" :label="item" :value="item"></el-option>
+                    </el-select> -->
                 </el-form-item>
                 <el-form-item label="订单号" prop="order_number">
                     <el-input v-model="addReviewerForm.order_number"></el-input>
                 </el-form-item>
                 <el-form-item label="支付类型" prop="pay_type">
-                    <el-input v-model="addReviewerForm.pay_type"></el-input>
+                    <el-select v-model="addReviewerForm.pay_type">
+                        <el-option v-for="item in paytype_options" :key="item" :label="item" :value="item"></el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="币种" prop="currency">
-                    <el-input v-model="addReviewerForm.currency"></el-input>
+                    <el-select v-model="addReviewerForm.currency">
+                        <el-option v-for="item in currency_options" :key="item" :label="item" :value="item"></el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="支付时间" prop="pay_time">
                     <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="addReviewerForm.pay_time" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"></el-date-picker>
@@ -192,9 +200,9 @@
                 <el-form-item label="佣金" prop="commission">
                     <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.commission" :min="0" @change="totalPrice"></el-input-number>
                 </el-form-item>
-                <el-form-item label="手续费" prop="poundage">
+                <!-- <el-form-item label="手续费" prop="poundage">
                     <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.poundage" :min="0" @change="totalPrice"></el-input-number>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="paypal账号" prop="paypal_account">
                     <el-input v-model="addReviewerForm.paypal_account"></el-input>
                 </el-form-item>
@@ -366,14 +374,16 @@
         </el-dialog>
 
         <!-- 返款弹出框 -->
-        <el-dialog title="返款" :visible.sync="refundVisible" width="50%">
+        <el-dialog title="返款" :visible.sync="refundVisible" width="60%" @close="closeRefund">
+            <mavon-editor ref="md" @imgAdd="$imgAdd" @imgDel="$imgDel" style="min-height: 100px"/>
+            <br><br>
             <el-form ref="form" :model="form" label-width="100px">
-                <el-form-item label="退款截图">
+                <!-- <el-form-item label="退款截图">
                     <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
                         <i class="el-icon-upload"></i>
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     </el-upload>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="备注">
                     <el-input v-model="form.remark"></el-input>
                 </el-form-item>
@@ -384,15 +394,16 @@
             </span>
         </el-dialog>
         <!-- 添加返款弹出框 -->
-        <el-dialog title="添加返款" :visible.sync="addrefundVisible" width="50%">
-            <el-form ref="form" :model="form" label-width="100px">
+        <el-dialog title="添加返款" :visible.sync="addrefundVisible" width="60%" @close="closeRefund2">
+            <mavon-editor ref="md2" @imgAdd="$imgAdd" @imgDel="$imgDel" style="min-height: 100px"/>
+            <!-- <el-form ref="form" :model="form" label-width="100px">
                 <el-form-item label="退款截图">
                     <el-upload class="upload-demo" drag action="" :file-list="fileList4" :on-remove="handleRemove4" :auto-upload="false" :on-change="changeFile4" :limit="5" multiple>
                         <i class="el-icon-upload"></i>
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     </el-upload>
                 </el-form-item>
-            </el-form>
+            </el-form> -->
             <span slot="footer" class="dialog-footer">
                 <el-button @click="addrefundVisible = false">取 消</el-button>
                 <el-button type="primary" @click="saveaddRefund" :disabled="submitDisabled">确 定</el-button>
@@ -409,6 +420,8 @@
 
 <script>
     import VueInfiniteLoading from "vue-infinite-loading"
+    import { mavonEditor } from 'mavon-editor'
+    import 'mavon-editor/dist/css/index.css'
     export default {
 //      name: 'product_manage',
         data() {
@@ -594,6 +607,9 @@
               export_token: '',
               exportIds: [],
               exportVisible: false,
+              paytype_options: ['PayPal', '微信'],
+              currency_options: ['美金', '英镑', '欧元', '日元'],
+              keyword_options: []
             }
         },
         created() {
@@ -1000,6 +1016,7 @@
             handleEdit(index, row) {
                 this.idx = row.id
                 const item = this.tableData[index]
+                // this.keyword_options = row.keyword.split(',')
                 this.addReviewerForm = {
                     task_period_id: item.task_period_id,
                     task_id: item.task_id,
@@ -1093,7 +1110,7 @@
                 let formData = new FormData()
                 formData.append('remark', this.form.remark)
                 this.fileList2.forEach((item) => {
-                    formData.append('picture_refund[]', item.raw)
+                    formData.append('picture_refund[]', item.file)
                 })
                 let config = {
                     headers: {
@@ -1112,18 +1129,26 @@
                     this.submitDisabled = false
                 })
             },
+            closeRefund() {
+                this.$refs.md.removeLine()
+                this.$refs.md.$refs.toolbar_left.img_file = []
+            },
+            closeRefund2() {
+                this.$refs.md2.removeLine()
+                this.$refs.md2.$refs.toolbar_left.img_file = []
+            },
             handleAddRefund(index, row) {
                 this.form = {
                     id: row.id,
                 }
-                this.fileList4 = []
+                this.fileList2 = []
                 this.addrefundVisible = true;
             },
             saveaddRefund() {
                 this.submitDisabled = true
                 let formData = new FormData()
-                this.fileList4.forEach((item) => {
-                    formData.append('picture_refund[]', item.raw)
+                this.fileList2.forEach((item) => {
+                    formData.append('picture_refund[]', item.file)
                 })
                 let config = {
                     headers: {
@@ -1134,6 +1159,7 @@
                     if(res.data.code == 200) {
                         this.$message.success('完成添加返款！')
                         this.getData()
+                        this.$refs.md2.removeLine()
                         this.addrefundVisible = false
                     }
                 }).catch((res) => {
@@ -1161,6 +1187,16 @@
                 this.exportIds = []
                 this.$refs.multipleTable.clearSelection()
             },
+            $imgAdd(pos, $file){
+                this.fileList2.push({file: $file, index: pos})
+            },
+            $imgDel(pos) {
+                this.fileList2.forEach((data ,index) => {
+                    if(data.index == pos[1]) {
+                        this.fileList.splice(index, 1)
+                    }
+                })
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "正在进行中"
@@ -1178,7 +1214,8 @@
             },
         },
         components: {
-            "infinite-loading": VueInfiniteLoading
+            "infinite-loading": VueInfiniteLoading,
+            mavonEditor
         }
     }
 

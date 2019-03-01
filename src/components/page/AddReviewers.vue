@@ -15,7 +15,9 @@
 								<el-input v-model.trim="form.asin"></el-input>
 							</el-form-item>
 							<el-form-item label="站点" prop="site">
-								<el-input v-model.trim="form.site"></el-input>
+								<el-select v-model="form.site">
+									<el-option v-for="item in site_options" :key="item" :label="item" :value="item"></el-option>
+								</el-select>
 							</el-form-item>
 							<el-form-item label="产品名称" prop="name">
 								<el-input v-model.trim="form.name"></el-input>
@@ -199,6 +201,7 @@
 					keywords: '',
 					keyword_index: ''
 				},
+				site_options: ['US', 'UK', 'DE', 'JP']
 			}
 		},
 		beforeRouteEnter: (to, from, next) => {

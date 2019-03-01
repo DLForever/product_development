@@ -923,7 +923,7 @@
 								'Authorization': localStorage.getItem('token')
 							}
 						}
-						this.$axios.post('/products/batch_attr', formData, config).then((res) => {
+						this.$axios.post('/products/batch', formData, config).then((res) => {
 							if(res.data.code == 200) {
 								this.$message.success('提交成功！');
 								this.$refs['subject_form'].resetFields()
@@ -991,7 +991,7 @@
 				this.changeList.forEach((item) => {
 					formData.append('file', item.raw)
 				})
-				this.$axios.post('/products/batch', formData, config).then((res) => {
+				this.$axios.post('/products/batch_attr', formData, config).then((res) => {
 					if(res.data.code == 200) {
 						this.$message.success("提交成功")
 						this.changeList = []

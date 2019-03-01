@@ -116,7 +116,9 @@
                     <span>{{form.asin}}</span>
                 </el-form-item>
                 <el-form-item label="站点">
-                    <el-input v-model="form.country"></el-input>
+                    <el-select v-model="form.country">
+                        <el-option v-for="item in site_options" :key="item" :label="item" :value="item"></el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="名称">
                     <el-input v-model="form.name"></el-input>
@@ -201,16 +203,22 @@
                     <span>{{addReviewerForm.asin}}</span>
                 </el-form-item>
                 <el-form-item label="关键词" prop="keyword">
-                    <el-input v-model="addReviewerForm.keyword"></el-input>
+                    <el-select v-model="addReviewerForm.keyword">
+                        <el-option v-for="item in keyword_options" :key="item" :label="item" :value="item"></el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="订单号" prop="order_number">
                     <el-input v-model="addReviewerForm.order_number"></el-input>
                 </el-form-item>
                 <el-form-item label="支付类型" prop="pay_type">
-                    <el-input v-model="addReviewerForm.pay_type"></el-input>
+                    <el-select v-model="addReviewerForm.pay_type">
+                        <el-option v-for="item in paytype_options" :key="item" :label="item" :value="item"></el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="币种" prop="currency">
-                    <el-input v-model="addReviewerForm.currency"></el-input>
+                    <el-select v-model="addReviewerForm.currency">
+                        <el-option v-for="item in currency_options" :key="item" :label="item" :value="item"></el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="支付时间" prop="pay_time">
                     <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="addReviewerForm.pay_time" type="datetime" placeholder="选择日期" ></el-date-picker>
@@ -221,9 +229,9 @@
                 <el-form-item label="佣金" prop="commission">
                     <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.commission" :min="0" @change="totalPrice"></el-input-number>
                 </el-form-item>
-                <el-form-item label="手续费" prop="poundage">
+                <!-- <el-form-item label="手续费" prop="poundage">
                     <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.poundage" :min="0" @change="totalPrice"></el-input-number>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="paypal账号" prop="paypal_account">
                     <el-input v-model="addReviewerForm.paypal_account"></el-input>
                 </el-form-item>
@@ -623,7 +631,11 @@
                 sumPrice: 0,
                 plan_sum: 0,
                 plan_date: '',
-                isaddPlan: false
+                isaddPlan: false,
+                site_options: ['US', 'UK', 'DE', 'JP'],
+                paytype_options: ['PayPal', '微信'],
+                currency_options: ['美金', '英镑', '欧元', '日元'],
+                keyword_options: []
             }
         },
         created() {
@@ -871,6 +883,7 @@
                 tempkeywords.forEach((data, index) => {
                     this.detailOptions3.push({keywords: data, keyword_index: tempkeywordindex[index]})
                 })
+                this.keyword_options = row.keywords.split(',')
                 this.task_id = row.id
                 this.addReviewerForm.asin = row.asin
                 this.detailOptions = [row]
@@ -966,7 +979,7 @@
                         formData.append('task_record[pay_time]', this.addReviewerForm.pay_time)
                         formData.append('task_record[pay_price]', this.addReviewerForm.pay_price)
                         formData.append('task_record[commission]', this.addReviewerForm.commission)
-                        formData.append('task_record[charge]', this.addReviewerForm.poundage)
+                        // formData.append('task_record[charge]', this.addReviewerForm.poundage)
                         formData.append('task_record[paypal_account]', this.addReviewerForm.paypal_account)
                         formData.append('task_record[profile_url]', this.addReviewerForm.profile_url)
                         formData.append('task_record[facebook_url]', this.addReviewerForm.facebook_url)

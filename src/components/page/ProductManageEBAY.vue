@@ -416,9 +416,9 @@
             <br><br>
             <el-table :data="products_change_details" border style="width: 100%">
                 <!-- <el-table-column type="selection" width="55"></el-table-column> -->
-                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                <el-table-column prop="sku" label="SKU" width="90" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
+                <el-table-column prop="name" label="产品名称" width="150" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
                 </el-table-column>
