@@ -248,10 +248,9 @@
                 <el-form-item label="备注">
                     <el-input v-model="addReviewerForm.remark"></el-input>
                 </el-form-item>
-                <el-form-item label="总费用">
+                <!-- <el-form-item label="总费用">
                     <el-button type="warning">{{sumPrice}}</el-button>
-                    <!-- <span>{{sumPrice}} 元</span> -->
-                </el-form-item>
+                </el-form-item> -->
                 <!-- <el-form-item label="图片">
                     <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
                         <i class="el-icon-upload"></i>
@@ -1334,7 +1333,7 @@
                 this.keywordsArr.pop()
             },
             totalPrice() {
-                this.sumPrice = this.addReviewerForm.pay_price + this.addReviewerForm.commission + this.addReviewerForm.poundage
+                // this.sumPrice = this.addReviewerForm.pay_price + this.addReviewerForm.commission + this.addReviewerForm.poundage
             },
             cancelEdit(row) {
                 row.plan_sum = row.originalSum

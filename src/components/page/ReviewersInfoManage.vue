@@ -231,9 +231,9 @@
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="总费用">
+                <!-- <el-form-item label="总费用">
                     <el-button type="warning">{{sumPrice}}</el-button>
-                </el-form-item>
+                </el-form-item> -->
             </el-form>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="updatereviewerVisible = false">取 消</el-button>
@@ -1169,7 +1169,7 @@
                 })
             },
             totalPrice() {
-                this.sumPrice = parseFloat((this.addReviewerForm.pay_price + this.addReviewerForm.commission + this.addReviewerForm.poundage).toPrecision(12))
+                // this.sumPrice = parseFloat((this.addReviewerForm.pay_price + this.addReviewerForm.commission + this.addReviewerForm.poundage).toPrecision(12))
             },
             exportReviewers() {
                 if(this.multipleSelection.length == 0) {
