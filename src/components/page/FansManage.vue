@@ -126,6 +126,13 @@
                 </el-table-column>
                 <el-table-column prop="commission" label="佣金">
                 </el-table-column>
+                <el-table-column prop="charge" label="手续费" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="sumPrice" label="总费用" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <el-button type="warning">{{scope.row.sumPrice}}</el-button>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="need_refund2" label="是否需要返款" width="95">
                 </el-table-column>
                 <el-table-column prop="email" label="截图" width="120">
@@ -138,7 +145,9 @@
                         <span v-else>无</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="paypal_account" label="paypal账号" width="85">
+                <el-table-column prop="refund_time" label="返款时间" :formatter="formatter_refund_time" width="140">
+                </el-table-column>
+                <el-table-column prop="paypal_account" label="paypal账号" width="85" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="profile_url" label="亚马逊profile url" width="113">
                     <template slot-scope="scope">
@@ -457,6 +466,7 @@
                         this.task_records = res.data.data.task_records
                         this.task_records.forEach((data) => {
                             data.img_count = data.pictures.length
+                            data.sumPrice = parseFloat((Number(data.charge) + Number(data.commission) + Number(data.pay_price)).toPrecision(12))
                             if (String(data.need_refund) == 'true') {
                                 data.need_refund2 = '是'
                             } else if(String(data.need_refund) == 'false'){
@@ -517,6 +527,13 @@
             },
             formatter_updated_at(row, column) {
                 return row.updated_at.substr(0, 19);
+            },
+            formatter_refund_time(row, column) {
+                if (row.refund_time != null) {
+                    return row.refund_time.substr(0, 19);
+                }else {
+                    return
+                }
             },
             exportFans() {
                 if(this.multipleSelection.length == 0) {

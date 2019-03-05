@@ -61,6 +61,8 @@
                         <el-tag type="success" v-else-if="scope.row.need_refund2 == '否'">否</el-tag>
                     </template>
                 </el-table-column>
+                <el-table-column prop="refund_time" label="返款时间" :formatter="formatter_refund_time" width="140">
+                </el-table-column>
                 <el-table-column prop="email" label="截图" width="120">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
@@ -70,6 +72,13 @@
                         </el-badge>
                         <span v-else>无</span>
                     </template>
+                </el-table-column>
+                <el-table-column prop="status" label="状态" width="120">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status)}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="paypal_account" label="paypal账号" show-overflow-tooltip>
                 </el-table-column>
@@ -83,14 +92,7 @@
                         <a v-if="scope.row.facebook_url != null && scope.row.facebook_url != '' && scope.row.facebook_url != 'null'" :href="scope.row.facebook_url" target="_blank">查看链接</a>
                     </template>
                 </el-table-column>
-                <el-table-column prop="status" label="状态" width="120">
-                    <template slot-scope="scope">
-                        <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status)}}</el-tag>
-                    </template>
-                </el-table-column>
                 <el-table-column prop="feedback" label="反馈" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
                 <!-- <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="150">
                 </el-table-column>
@@ -302,6 +304,8 @@
                         <el-tag type="warning" v-if="scope.row.need_refund2 == '是'">是</el-tag>
                         <el-tag type="success" v-else-if="scope.row.need_refund2 == '否'">否</el-tag>
                     </template>
+                </el-table-column>
+                <el-table-column prop="refund_time" label="返款时间" :formatter="formatter_refund_time" width="140">
                 </el-table-column>
                 <el-table-column prop="email" label="截图" width="120">
                     <template slot-scope="scope">
@@ -743,6 +747,13 @@
 			},
             formatter_pay_time(row, column) {
                 return row.pay_time.substr(0, 19);
+            },
+            formatter_refund_time(row, column) {
+                if (row.refund_time != null) {
+                    return row.refund_time.substr(0, 19);
+                }else {
+                    return
+                }
             },
             search() {
                 this.is_search = true;
