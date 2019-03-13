@@ -9,32 +9,45 @@
         <div class="container">
             <div class="handle-box">
                 <el-button type="primary" @click="handleApply">申请查看详情</el-button>
+                <el-button type="default" @click="exportProduct">导出</el-button>
+                <div style="float: right;">
+                    <el-select v-model="search_selects" multiple placeholder="展示其他搜索栏目" @change="showSearch">
+                        <el-option v-for="item in search_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
+                    <el-button @click="clear_filter" type="default">重置</el-button>
+                    <el-button @click="filter_product" type="primary">查询</el-button>
+                </div>
                 <div class="fnsku_filter">
-                    日期:
-                    <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
-                    分类:
-                    <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" change-on-select @change="getCatetory" class="handle-select mr10"></el-cascader>
+                    <template v-if="search_show[1].dateDis">
+                        <!-- 日期: -->
+                        <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
+                    </template>
+                    <template v-if="search_show[2].classifyDis">
+                        分类:
+                        <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" change-on-select @change="getCatetory" class="handle-select mr10"></el-cascader>
+                    </template>
                     开发人员:
                     <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
                         <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
                     </el-select>
-                    供应商:
-                    <el-select v-model="supplier_id_filter" placeholder="选择供应商" @visible-change="supplierselectVisble" class="handle-select mr10">
-                        <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
-                    </el-select>
+                    <template v-if="search_show[0].supplierDis">
+                        供应商:
+                        <el-select v-model="supplier_id_filter" placeholder="选择供应商" @visible-change="supplierselectVisble" class="handle-select mr10">
+                            <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                            <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
+                        </el-select>
+                    </template>
                     SKU:
-                    <el-input style="width:150px" v-model="filter_sku" placeholder="请输入SKU"></el-input>
+                    <el-input style="width:150px" v-model.trim="filter_sku" placeholder="请输入SKU"></el-input>
                     状态:
                     <el-select v-model="statusSelect" placeholder="请选择" class="handle-select mr10">
                         <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
                     </el-select>
-                    <el-button @click="clear_filter" type="default">重置</el-button>
-                    <el-button @click="filter_product" type="primary">查询</el-button>
+                    产品名称:
+                    <el-input style="width:150px;" v-model.trim="filter_name" placeholder="请输入产品名称"></el-input>
                 </div>
             </div>
-            <el-button type="default" @click="exportProduct">导出</el-button>
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
@@ -206,6 +219,11 @@
                 </el-form-item>
                 <el-form-item label="材质">
                     <el-input v-model.trim="form.texture"></el-input>
+                </el-form-item>
+                <el-form-item label="产品特性">
+                    <el-select v-model="form.feature">
+                        <el-option v-for="item in feature_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="外箱规格">
                     <template slot-scope="scope">
@@ -389,6 +407,12 @@
                 </el-table-column>
                 <el-table-column prop="texture" label="材质" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="feature" label="产品特性" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <!-- <span>{{getFeatureName(scope.row.feature)}}</span> -->
+                        <el-tag :type="scope.row.feature | statusFilter">{{getFeatureName(scope.row.feature)}}</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="box_size" label="外箱尺寸(长*宽*高cm)" width="180">
                 </el-table-column>
                 <el-table-column prop="box_weight" label="单箱实重(g)" width="90" show-overflow-tooltip>
@@ -445,6 +469,12 @@
                 <el-table-column prop="model_number" label="型号"  show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="texture" label="材质" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="feature" label="产品特性" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <!-- <span>{{getFeatureName(scope.row.feature)}}</span> -->
+                        <el-tag :type="scope.row.feature | statusFilter">{{getFeatureName(scope.row.feature)}}</el-tag>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="box_size" label="外箱尺寸(长*宽*高cm)" width="160">
                 </el-table-column>
@@ -623,7 +653,13 @@
               statusSelect: '',
               cur_page2: 1,
               totals2: 0,
-              paginationShow2: true
+              paginationShow2: true,
+              filter_name: '',
+              feature_options: [{value: 0, label: '无'}, {value: 1, label: '含电'}, {value: 2, label: '液体'}, {value: 3, label: '粉末'}],
+              search_options: [{value: 'supplierDis', label: '供应商'}, {value: 'dateDis', label: '日期'}, {value: 'classifyDis', label: '分类'}],
+              search_selects: [],
+              search_show: [{'supplierDis' : false}, {'dateDis' : false}, {'classifyDis' : false}],
+              search_show2: ['supplierDis', 'dateDis', 'classifyDis']
             }
         },
         created() {
@@ -639,7 +675,7 @@
                 const statusMap = {
                     1: 'danger',
                     2: 'warning',
-                    3: 'danger',
+                    3: 'success',
                     4: 'success',
                     5: 'primary',
                     6: 'success',
@@ -690,7 +726,7 @@
                     date_end_temp = ''
                 }
                 // this.$axios.get( '/products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku, {
-                this.$axios.get( '/products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&page_size=' + this.pagesize + '&status=' + this.statusSelect, {
+                this.$axios.get( '/products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&page_size=' + this.pagesize + '&status=' + this.statusSelect + '&name=' + this.filter_name, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -731,7 +767,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&page_size=' + this.pagesize + '&status=' + this.statusSelect, {
+                this.$axios.get( '/products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&page_size=' + this.pagesize + '&status=' + this.statusSelect + '&name=' + this.filter_name, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -768,6 +804,7 @@
                 this.date_filter = []
                 this.filter_sku = ''
                 this.statusSelect = ''
+                this.filter_name = ''
                 this.getData()
             },
             getSuppliers() {
@@ -899,6 +936,7 @@
                             box_weight: res.data.data.box_weight,
                             box_sum: res.data.data.box_sum,
                             english_name: res.data.data.english_name,
+                            feature: res.data.data.feature
                         }
                         this.idx = index;
                         this.editVisible = true;
@@ -977,6 +1015,7 @@
                 formData.append('product[english_name]', this.form.english_name)
                 formData.append('product[wish]', this.form.wish)
                 formData.append('product[ebay]', this.form.ebay)
+                formData.append('product[feature]', this.form.feature)
                 // this.supplier_id.forEach((data) => {
                 //     formData.append('product[supplier_id][]', data)
                 // })
@@ -1516,6 +1555,21 @@
             },
             imageLoaded() {
             },
+            showSearch() {
+                this.search_selects.forEach((data) => {
+                    let tempIndex = this.search_show2.findIndex(x => x == data)
+                    if (tempIndex != -1) {
+                        this.search_show[tempIndex][data] = true
+                    }
+                })
+                let tempSelects = this.search_show2.filter(x => !this.search_selects.includes(x))
+                tempSelects.forEach((data) => {
+                    let tempIndex2 = this.search_show2.findIndex(x => x == data)
+                    if (tempIndex2 != -1) {
+                        this.search_show[tempIndex2][data] = false
+                    }
+                })
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "未审核"
@@ -1538,6 +1592,19 @@
                 }else if(status == 10) {
                     return "W+E+A上架"
                 } else {
+                    return '其他'
+                }
+            },
+            getFeatureName(feature) {
+                if(Number(feature) == 0) {
+                    return '无'
+                }else if(Number(feature) == 1) {
+                    return '含电'
+                }else if(Number(feature) == 2) {
+                    return '液体'
+                }else if(Number(feature) == 3) {
+                    return '粉末'
+                }else {
                     return '其他'
                 }
             }
@@ -1568,7 +1635,9 @@
     }
 
     .fnsku_filter {
+        clear: both;
         float: right;
+        margin: 10px 0px 20px;
     }
 
     .img_fnsku {

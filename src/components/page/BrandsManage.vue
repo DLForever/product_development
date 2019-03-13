@@ -20,7 +20,7 @@
             <br><br>
             <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column label="图片" width="120">
+                <el-table-column label="图片" width="120" :render-header="pictureTooltip">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
@@ -41,18 +41,18 @@
                         <span v-else>无</span>
                     </template>
                 </el-table-column> -->
-                <el-table-column prop="brand_name" label="知识产权名称" show-overflow-tooltip>
+                <el-table-column prop="brand_name" label="知识产权名称" :render-header="nameTooltip" show-overflow-tooltip>
+                </el-table-column> 
+                <el-table-column prop="product_category" label="知识产权类目" :render-header="categoryTooltip" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="product_category" label="知识产权类目" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="brand_type" label="知识产权类型" show-overflow-tooltip>
+                <el-table-column prop="brand_type" label="知识产权类型" :render-header="typeTooltip" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="website" label="官网链接" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <a v-if="scope.row.website != null && scope.row.website != '' && scope.row.website != 'null'" :href="scope.row.website" target="_blank">查看网站</a>
                     </template>
                 </el-table-column>
-                <el-table-column prop="remark" label="备注" show-overflow-tooltip>
+                <el-table-column prop="remark" label="备注" :render-header="remarkTooltip" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="150">
                 </el-table-column>
@@ -479,6 +479,77 @@
             },
             formatter_updated_at(row, column) {
                 return row.updated_at.substr(0, 19);
+            },
+            pictureTooltip(h, {column}) {
+                return (
+                    <el-tooltip class="tooltip"
+                    effect="dark"
+                    placement="top">
+                    <ul slot="content">
+                      <li>LOGO图片、侵权产品图片、同属产品图片、商标图片等于知识产权相关图片</li>
+                    </ul>
+                    <div>图片
+                    <i class="el-icon-question"></i>
+                    </div>
+                    </el-tooltip>
+                    )
+            },
+            typeTooltip(h, {column}) {
+                return (
+                    <el-tooltip class="tooltip"
+                    effect="dark"
+                    placement="top">
+                    <ul slot="content">
+                      <li>知识产权名称类型</li>
+                    </ul>
+                    <div>知识产权类型
+                    <i class="el-icon-question"></i>
+                    </div>
+                    </el-tooltip>
+                    )
+            },
+            nameTooltip(h, {column}) {
+                return (
+                    <el-tooltip class="tooltip"
+                    effect="dark"
+                    placement="top">
+                    <ul slot="content">
+                      <li>品牌名称、专利名称、所属公司名称等
+知识产权类目：属于哪种形式的知识产权，例如图片</li>
+                    </ul>
+                    <div>知识产权类型
+                    <i class="el-icon-question"></i>
+                    </div>
+                    </el-tooltip>
+                    )
+            },
+            categoryTooltip(h, {column}) {
+                return (
+                    <el-tooltip class="tooltip"
+                    effect="dark"
+                    placement="top">
+                    <ul slot="content">
+                      <li>属于哪种形式的知识产权，例如图片，LOGO，外观专利，设计专利等</li>
+                    </ul>
+                    <div>知识产权类目
+                    <i class="el-icon-question"></i>
+                    </div>
+                    </el-tooltip>
+                    )
+            },
+            remarkTooltip(h, {column}) {
+                return (
+                    <el-tooltip class="tooltip"
+                    effect="dark"
+                    placement="top">
+                    <ul slot="content">
+                      <li>该知识产权涉及的产品品类、相关信息等</li>
+                    </ul>
+                    <div>备注
+                    <i class="el-icon-question"></i>
+                    </div>
+                    </el-tooltip>
+                    )
             },
         }
     }

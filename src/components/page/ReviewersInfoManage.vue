@@ -7,29 +7,50 @@
             </el-breadcrumb>
         </div>
         <div class="container">
-            <el-button type="primary" @click="exportReviewers">导出记录</el-button>
-            <br><br>
             <div class="handle-box">
+                <el-button type="primary" @click="exportReviewers">导出记录</el-button>
+                <span style="margin-left: 20px;" v-if="multipleSelection.length != 0">共选择了{{multipleSelection.length}} 条数据</span>
+                <div style="float: right;">
+                    <template v-if="search_show[0].dateDis">
+                        <!-- 日期: -->
+                        <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
+                    </template>
+                    <el-select v-model="search_selects" multiple placeholder="展示其他搜索栏目" @change="showSearch">
+                        <el-option v-for="item in search_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
+                    <el-button @click="clear_filter" type="default">重置</el-button>
+                    <el-button @click="filter_product" type="primary">查询</el-button>
+                </div>
                 <div class="fnsku_filter">
-                    日期:
-                    <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
-                    粉丝号:
-                    <el-input style="width:150px" placeholder="请输入粉丝号" v-model.trim="search_fan"></el-input>
+                    <template v-if="search_show[1].fanDis">
+                        粉丝号:
+                        <el-input style="width:150px" placeholder="请输入粉丝号" v-model.trim="search_fan"></el-input>
+                    </template>
+                    产品名称:
+                    <el-input style="width:150px;" v-model.trim="filter_name" placeholder="请输入产品名称"></el-input>
+                    <template v-if="search_show[2].shopDis">
+                        店铺:
+                        <el-input style="width:130px;" v-model.trim="filter_shopname" placeholder="请输入店铺名称"></el-input>
+                    </template>
+                    站点:
+                    <el-select v-model="site_filter" class="handle-select mr10">
+                        <el-option v-for="item in site_options" :key="item" :label="item" :value="item"></el-option>
+                    </el-select>
                     ASIN:
                     <el-input style="width:150px" placeholder="请输入ASIN" v-model.trim="search_asin"></el-input>
                     订单号:
                     <el-input style="width:150px" placeholder="请输入订单号" v-model.trim="search_number"></el-input>
-                    送测人员:
-                    <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择送测人" class="handle-select mr10">
-                        <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
-                    </el-select>
+                    <template v-if="search_show[3].userDis">
+                        送测人员:
+                        <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择送测人" class="handle-select mr10">
+                            <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                            <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
+                        </el-select>
+                    </template>
                     状态:
                     <el-select v-model="statusSelect" placeholder="请选择" class="handle-select mr10">
                         <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
                     </el-select>
-                    <el-button @click="clear_filter" type="default">重置</el-button>
-                    <el-button @click="filter_product" type="primary">查询</el-button>
                 </div>
             </div>
             <br><br>
@@ -60,6 +81,8 @@
                         <el-tag type="warning" v-if="scope.row.need_refund2 == '是'">是</el-tag>
                         <el-tag type="success" v-else-if="scope.row.need_refund2 == '否'">否</el-tag>
                     </template>
+                </el-table-column>
+                <el-table-column prop="pay_time" label="支付时间" :formatter="formatter_pay_time" width="150">
                 </el-table-column>
                 <el-table-column prop="refund_time" label="返款时间" :formatter="formatter_refund_time" width="140">
                 </el-table-column>
@@ -613,7 +636,15 @@
               exportVisible: false,
               paytype_options: ['PayPal', '微信'],
               currency_options: ['美金', '英镑', '欧元', '日元'],
-              keyword_options: []
+              keyword_options: [],
+              search_options: [{value: 'fanDis', label: '粉丝号'}, {value: 'shopDis', label: '店铺名'}, {value: 'userDis', label: '送测人'}, {value: 'dateDis', label: '日期'}],
+              search_selects: [],
+              search_show: [{'dateDis' : false}, {'fanDis' : false}, {'shopDis' : false}, {'userDis' : false}],
+              search_show2: ['dateDis', 'fanDis', 'shopDis', 'userDis'],
+              site_options: ['US', 'UK', 'DE', 'JP'],
+              site_filter: '',
+              filter_name: '',
+              filter_shopname: ''
             }
         },
         created() {
@@ -670,7 +701,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp, {
+                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&country=' + this.site_filter + '&shopname=' + this.filter_shopname + '&product_name=' + this.filter_name, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -704,7 +735,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp, {
+                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&country=' + this.site_filter + '&shopname=' + this.filter_shopname + '&product_name=' + this.filter_name, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -737,6 +768,9 @@
                 this.search_asin = ''
                 this.search_fan = ''
                 this.date_filter = []
+                this.site_filter = ''
+                this.filter_name = ''
+                this.filter_shopname = ''
                 this.getData()
             },
             formatter_created_at(row, column) {
@@ -1208,6 +1242,21 @@
                     }
                 })
             },
+            showSearch() {
+                this.search_selects.forEach((data) => {
+                    let tempIndex = this.search_show2.findIndex(x => x == data)
+                    if (tempIndex != -1) {
+                        this.search_show[tempIndex][data] = true
+                    }
+                })
+                let tempSelects = this.search_show2.filter(x => !this.search_selects.includes(x))
+                tempSelects.forEach((data) => {
+                    let tempIndex2 = this.search_show2.findIndex(x => x == data)
+                    if (tempIndex2 != -1) {
+                        this.search_show[tempIndex2][data] = false
+                    }
+                })
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "正在进行中"
@@ -1251,7 +1300,9 @@
     }
 
     .fnsku_filter {
+        clear: both;
         float: right;
+        margin: 10px 0px 20px;
     }
 
     .img_fnsku {

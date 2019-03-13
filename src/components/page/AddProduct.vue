@@ -232,12 +232,16 @@
 							<el-form-item label="包装重量(g)">
 								<el-input v-model.trim="subject_form.package_weight"></el-input>
 							</el-form-item>
-
 							<el-form-item label="型号">
 								<el-input v-model.trim="subject_form.model_number"></el-input>
 							</el-form-item>
 							<el-form-item label="材质">
 								<el-input v-model.trim="subject_form.texture"></el-input>
+							</el-form-item>
+							<el-form-item label="产品特性">
+								<el-select v-model="subject_form.feature">
+									<el-option v-for="item in feature_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+								</el-select>
 							</el-form-item>
 							<el-form-item label="外箱规格">
 								<template slot-scope="scope">
@@ -372,7 +376,8 @@
 					supplier_id: '',
 					platform: [],
 					isWish: false,
-					iseBay: false
+					iseBay: false,
+					feature: ''
 				},
 				rules: {
 					sourceurl: [{
@@ -459,7 +464,8 @@
 				},
 				subject_fileList: [],
 				suppliers_temp: [],
-				changeList: []
+				changeList: [],
+				feature_options: [{value: 0, label: '无'}, {value: 1, label: '含电'}, {value: 2, label: '液体'}, {value: 3, label: '粉末'}]
 			}
 		},
 		beforeRouteEnter: (to, from, next) => {
@@ -923,7 +929,7 @@
 								'Authorization': localStorage.getItem('token')
 							}
 						}
-						this.$axios.post('/products/batch', formData, config).then((res) => {
+						this.$axios.post('/products/add_attr', formData, config).then((res) => {
 							if(res.data.code == 200) {
 								this.$message.success('提交成功！');
 								this.$refs['subject_form'].resetFields()

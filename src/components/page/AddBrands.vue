@@ -12,32 +12,80 @@
 					<div class="form-box">
 						<el-form ref="form" :rules="rules" :model="form" label-width="110px">
 							<el-form-item label="知识产权名称" prop="brand_name">
-								<el-input v-model.trim="form.brand_name"></el-input>
+								<template slot-scope="scope">
+									<el-col :span="23">
+										<el-input v-model.trim="form.brand_name"></el-input>
+									</el-col>
+									<el-col :span="1">
+										<el-tooltip class="item" effect="dark" content="品牌名称、专利名称、所属公司名称等" placement="right-start">
+											<i class="el-icon-question" style="margin-left: 10px;"></i>
+										</el-tooltip>
+									</el-col>
+								</template>
 							</el-form-item>
 							<el-form-item label="知识产权类目" prop="product_category">
-								<el-input v-model.trim="form.product_category"></el-input>
+								<template slot-scope="scope">
+									<el-col :span="23">
+										<el-input v-model.trim="form.product_category"></el-input>
+									</el-col>
+									<el-col :span="1">
+										<el-tooltip class="item" effect="dark" content="属于哪种形式的知识产权，例如图片，LOGO，外观专利，设计专利等" placement="right-start">
+											<i class="el-icon-question" style="margin-left: 10px;"></i>
+										</el-tooltip>
+									</el-col>
+								</template>
 							</el-form-item>
 							<el-form-item label="知识产权类型" prop="brand_type">
-								<el-input v-model.trim="form.brand_type"></el-input>
+								<template slot-scope="scope">
+									<el-col :span="23">
+										<el-input v-model.trim="form.brand_type"></el-input>
+									</el-col>
+									<el-col :span="1">
+										<el-tooltip class="item" effect="dark" content="知识产权名称类型" placement="right-start">
+											<i class="el-icon-question" style="margin-left: 10px;"></i>
+										</el-tooltip>
+									</el-col>
+								</template>
 							</el-form-item>
 							<el-form-item label="官网链接" prop="name">
-								<el-input v-model.trim="form.website" placeholder="需加入https://或http://前缀"></el-input>
+								<template slot-scope="scope">
+									<el-col :span="23">
+										<el-input v-model.trim="form.website" placeholder="需加入https://或http://前缀"></el-input>
+									</el-col>
+								</template>
 							</el-form-item>
 							<el-form-item label="备注">
-								<el-input v-model.trim="form.remark"></el-input>
+								<template slot-scope="scope">
+									<el-col :span="23">
+										<el-input v-model.trim="form.remark"></el-input>
+									</el-col>
+									<el-col :span="1">
+										<el-tooltip class="item" effect="dark" content="该知识产权涉及的产品品类、相关信息等" placement="right-start">
+											<i class="el-icon-question" style="margin-left: 10px;"></i>
+										</el-tooltip>
+									</el-col>
+								</template>
 							</el-form-item>
 							<el-form-item label="知识产权LOGO">
-								<el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
-									<i class="el-icon-upload"></i>
-									<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-								</el-upload>
+								<template slot-scope="scope">
+									<el-col :span="23">
+										<el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
+											<i class="el-icon-upload"></i>
+											<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+										</el-upload>
+									</el-col>
+									<el-col :span="1">
+										<el-tooltip class="item" effect="dark" content="LOGO图片、侵权产品图片、同属产品图片、商标图片等于知识产权相关图片" placement="right-start">
+											<i class="el-icon-question" style="margin-left: 10px;"></i>
+										</el-tooltip>
+									</el-col>
+								</template>
 							</el-form-item>
 							<el-form-item>
 								<el-button type="primary" @click="onSubmit('form')" :disabled="submitDisabled">新建</el-button>
 							</el-form-item>
 						</el-form>
 					</div>
-
 				</el-tab-pane>
 				<!-- <el-tab-pane label="批量上传" name="second">
 					<template v-if="message === 'second'">

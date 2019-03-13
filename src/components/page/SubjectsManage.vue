@@ -47,6 +47,8 @@
                 </el-table-column>
                 <el-table-column prop="category_name" label="分类" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="desc" label="描述" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable>
                 </el-table-column>
                 <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable>
@@ -210,6 +212,12 @@
                 </el-table-column>
                 <el-table-column prop="texture" label="材质" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="feature" label="产品特性" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <!-- <span>{{getFeatureName(scope.row.feature)}}</span> -->
+                        <el-tag :type="scope.row.feature | statusFilter">{{getFeatureName(scope.row.feature)}}</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="box_size" label="外箱尺寸(长*宽*高cm)" width="160">
                 </el-table-column>
                 <el-table-column prop="box_weight" label="单箱实重(g)" width="100" show-overflow-tooltip>
@@ -248,8 +256,11 @@
                 <el-form-item label="价格">
                     <el-input v-model.trim="subject_price" placeholder="请输入价格"></el-input>
                 </el-form-item>
+                <el-form-item label="描述">
+                    <el-input v-model.trim="desc" placeholder="请输入描述内容"></el-input>
+                </el-form-item>
                 <el-form-item>
-                    <div class="el-upload__tip">温馨提示:   将应用于主体下的所有变体</div>
+                    <div class="el-upload__tip">温馨提示:   修改名称和价格将应用于主体下的所有变体</div>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
@@ -369,7 +380,8 @@
               query: undefined,
               loading: false,
               user_id_filter: '',
-              name_filter: ''
+              name_filter: '',
+              desc: ''
             }
         },
         created() {
@@ -379,6 +391,21 @@
         },
         watch: {
         	"$route": "getData"
+        },
+        filters: {
+            //类型转换
+            statusFilter(status) {
+                const statusMap = {
+                    1: 'danger',
+                    2: 'warning',
+                    3: 'success',
+                    4: 'success',
+                    5: 'primary',
+                    6: 'success',
+                    10: 'success',
+                }
+                return statusMap[status]
+            },
         },
         computed: {
             data() {
@@ -916,17 +943,19 @@
                 this.subject_id = row.id
                 this.subject_name = ''
                 this.subject_price = ''
+                this.desc = row.desc
                 this.editNameVisible = true
             },
             saveEditSubjectName() {
-                if(this.subject_name == '' && this.subject_price == '') {
+                if(this.subject_name == '' && this.subject_price == '' && this.desc == '') {
                     this.$message.error('请至少修改一项')
                     return false
                 }
                 this.submitDisabled = true
                 let params = {
                     name: this.subject_name,
-                    price: this.subject_price
+                    price: this.subject_price,
+                    desc: this.desc
                 }
                 this.$axios.post('/product_subjects/' + this.subject_id + '/update_info', params, {
                     headers: {
@@ -996,6 +1025,19 @@
                     })
                 }
             },
+            getFeatureName(feature) {
+                if(Number(feature) == 0) {
+                    return '无'
+                }else if(Number(feature) == 1) {
+                    return '含电'
+                }else if(Number(feature) == 2) {
+                    return '液体'
+                }else if(Number(feature) == 3) {
+                    return '粉末'
+                }else {
+                    return '其他'
+                }
+            }
         },
         components: {
             "infinite-loading": VueInfiniteLoading
