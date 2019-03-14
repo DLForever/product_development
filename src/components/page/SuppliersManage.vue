@@ -116,8 +116,16 @@
                 </el-table-column>
                 <el-table-column label="营业执照">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.pictures.length === 0">无</span>
-                        <img class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url"/>
+                        <span v-if="scope.row.business_pic.length === 0">无</span>
+                        <img style="cursor: pointer;" v-else-if="scope.row.business_pic[0] != undefined && !(scope.row.business_pic[0].url.thumb.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.business_pic[0].url.thumb.url" @click="showPictures(scope.$index, scope.row, 'business')"/>
+                        <span v-else>无</span>
+                        <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
+                    </template>
+                </el-table-column>
+                <el-table-column label="证书">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.cert_pic.length === 0">无</span>
+                        <img style="cursor: pointer;" v-else-if="scope.row.cert_pic[0] != undefined && !(scope.row.cert_pic[0].url.thumb.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.cert_pic[0].url.thumb.url" @click="showPictures(scope.$index, scope.row, 'cert')"/>
                         <span v-else>无</span>
                         <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
@@ -140,6 +148,15 @@
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
             </el-table>
+        </el-dialog>
+
+        <!-- 查看营业执照 -->
+        <el-dialog title="图片" :visible.sync="picturesVisible" width="70%">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList.length != 0">
+                <el-carousel-item v-for="(item, index) in picturestList" :key="index">
+                    <img class="img_carousel" @click="handleDeletePic(item.remark, item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
+                </el-carousel-item>
+            </el-carousel>
         </el-dialog>
     </div>
 </template>
@@ -171,8 +188,6 @@
                     address: '',
                 },
                 idx: -1,
-                productVisible: false,
-                packageVisible: false,
                 img_product: 1,
                 pdf_product: 0,
                 img_package: 1,
@@ -186,7 +201,9 @@
                 submitDisabled: false,
                 checkVisible: false,
                 suppliers_details: [],
-                detailVisible: false
+                detailVisible: false,
+                picturesVisible: false,
+                picturestList: [],
             }
         },
         created() {
@@ -371,13 +388,59 @@
                     }
                 }).then((res) => {
                     if(res.data.code == 200) {
+                        res.data.data.business_pic = []
+                        res.data.data.cert_pic = []
+                        res.data.data.pictures.forEach((data) => {
+                            if(data.remark == 'business') {
+                                res.data.data.business_pic.push(data)
+                            } else {
+                                res.data.data.cert_pic.push(data)
+                            }
+                        })
                         this.suppliers_details = [res.data.data]
                         this.detailVisible = true
                     }
                 }).catch((res) => {
 
                 })
-                
+            },
+            showPictures(index, row, remark) {
+                this.picturestList = []
+                this.product_id = row.id
+                const item = row
+                if (remark == 'business') {
+                    this.picturestList = row.business_pic
+                } else {
+                    this.picturestList = row.cert_pic
+                }
+                this.picturesVisible = true;
+            },
+            handleDeletePic(remark, id, index) {
+                this.$confirm('此操作将永久删除该图片, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'danger'
+                }).then(() => {
+                    let params = {
+                        img_id: id
+                    }
+                    this.$axios.post('/suppliers/' + this.product_id + '/delete_img', params, {
+                         headers: {
+                            'Authorization': localStorage.getItem('token')
+                        }
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.picturestList.splice(index, 1)
+                            this.getData()
+                            this.$message.success("删除成功")
+                        }
+                    }).catch((res) => {
+                        console.log(res)
+                    })
+                }).catch((res) => {
+                    console.log(res)
+                    this.$message.info('已取消删除')
+                })
             },
         }
     }
@@ -413,5 +476,14 @@
     .img {
         width:3rem;
         height:3rem;
+    }
+    .el-carousel__item.is-animating{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+    .img_carousel {
+        max-width: 40rem;
     }
 </style>

@@ -118,7 +118,10 @@
                                     <el-button @click="handleEditSuppliers(scope.$index, scope.row)" type="text">修改供应商</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
-                                    <el-button @click="handleAddPictures(scope.$index, scope.row)" type="text">&nbsp添加图片</el-button>
+                                    <el-button @click="handleAddPictures(scope.$index, scope.row)" type="text">&nbsp&nbsp添加图片</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleAddDesign(scope.$index, scope.row)" type="text">添加制图计划</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleDelete(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp删&nbsp&nbsp除</el-button>
@@ -150,12 +153,6 @@
                     <el-checkbox label="wish" v-model="form.wish" border></el-checkbox>
                     <el-checkbox label="eBay" v-model="form.ebay" border></el-checkbox>
                 </el-form-item>
-                <!-- <el-form-item label="供应商">
-                    <el-select v-model="supplier_id" multiple placeholder="请选择">
-                        <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
-                    </el-select>
-                </el-form-item> -->
                 <el-form-item label="英文名">
                     <el-input v-model="form.english_name"></el-input>
                 </el-form-item>
@@ -213,7 +210,6 @@
                 <el-form-item label="包装重量(g)">
                     <el-input v-model="form.package_weight"></el-input>
                 </el-form-item>
-
                 <el-form-item label="型号">
                     <el-input v-model.trim="form.model_number"></el-input>
                 </el-form-item>
@@ -252,7 +248,6 @@
                 <el-form-item label="单箱数量">
                     <el-input v-model.trim="form.box_sum"></el-input>
                 </el-form-item>
-
                 <el-form-item label="产品描述">
                     <el-input v-model="form.desc"></el-input>
                 </el-form-item>
@@ -526,6 +521,37 @@
                 <el-button type="primary" @click="saveEditSuppliers" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
+
+        <!-- 添加制图计划弹出框 -->
+        <el-dialog title="添加制图计划" :visible.sync="designVisible" width="50%">
+            <el-form ref="designForm" :model="designForm" label-width="100px">
+                <el-form-item label="制图要求">
+                    <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 10}" placeholder="请输入制图要求" v-model="designForm.demand"></el-input>
+                </el-form-item>
+                <el-form-item label="样品">
+                    <el-select v-model="designForm.sampleSelect" filterable remote :loading="loading2" @visible-change="selectVisble2" :remote-method="remoteMethod2" placeholder="选择样品" class="handle-select mr10">
+                        <el-option v-for="item in sample_Options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_sample" ref="infiniteLoading3"></infinite-loading>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="样品情况">
+                    <el-input v-model="designForm.sampleInfo"></el-input>
+                </el-form-item>
+                <el-form-item label="参考链接">
+                    <el-input v-model="designForm.referUrl" placeholder="需加入https://或http://前缀"></el-input>
+                </el-form-item>
+                <el-form-item label="图片">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="designVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveDesign" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -622,44 +648,56 @@
                   }
                 }]
               },
-              date_filter: [],
-              supplier_options_edit: [],
-              supplier_page_edit: 1,
-              supplier_total_edit: 0,
-              categories_options: [],
-              products_change_details: [],
-              filter_sku: '',
-              query: undefined,
-              loading: false,
-              multipleSelection2: [],
-              confirmDelChangePro: false,
-              change_detailsVisible: false,
-              options_len1: [],
-              options_len2: [],
-              options_len3: [],
-              options_len4: [],
-              options3: [],
-              subject_id: '',
-              subject_name: '',
-              addPictureVisible: false,
-              supplier_id: [],
-              suppliers_temp: [],
-              editVisibleSuppliers: false,
-              supplier_ids: [],
-              picturesSubjectsList: [],
-              subjectPicturesVisible: false,
-              confirmDelSubjectPicVis: false,
-              statusOptions: [{value: 2, label: '未上架'}, {value: 4, label: 'wish上架'}, {value: 5, label: 'ebay上架'}, {value: 6, label: 'W+E上架'}, {value: 7, label: 'amazon上架'}, {value: 8, label: 'W+A上架'}, {value: 9, label: 'E+A上架'}, {value: 10, label: 'W+E+A上架'}],
-              statusSelect: '',
-              cur_page2: 1,
-              totals2: 0,
-              paginationShow2: true,
-              filter_name: '',
-              feature_options: [{value: 0, label: '无'}, {value: 1, label: '含电'}, {value: 2, label: '液体'}, {value: 3, label: '粉末'}],
-              search_options: [{value: 'supplierDis', label: '供应商'}, {value: 'dateDis', label: '日期'}, {value: 'classifyDis', label: '分类'}],
-              search_selects: [],
-              search_show: [{'supplierDis' : false}, {'dateDis' : false}, {'classifyDis' : false}],
-              search_show2: ['supplierDis', 'dateDis', 'classifyDis']
+                date_filter: [],
+                supplier_options_edit: [],
+                supplier_page_edit: 1,
+                supplier_total_edit: 0,
+                categories_options: [],
+                products_change_details: [],
+                filter_sku: '',
+                query: undefined,
+                loading: false,
+                multipleSelection2: [],
+                confirmDelChangePro: false,
+                change_detailsVisible: false,
+                options_len1: [],
+                options_len2: [],
+                options_len3: [],
+                options_len4: [],
+                options3: [],
+                subject_id: '',
+                subject_name: '',
+                addPictureVisible: false,
+                supplier_id: [],
+                suppliers_temp: [],
+                editVisibleSuppliers: false,
+                supplier_ids: [],
+                picturesSubjectsList: [],
+                subjectPicturesVisible: false,
+                confirmDelSubjectPicVis: false,
+                statusOptions: [{value: 2, label: '未上架'}, {value: 4, label: 'wish上架'}, {value: 5, label: 'ebay上架'}, {value: 6, label: 'W+E上架'}, {value: 7, label: 'amazon上架'}, {value: 8, label: 'W+A上架'}, {value: 9, label: 'E+A上架'}, {value: 10, label: 'W+E+A上架'}],
+                statusSelect: '',
+                cur_page2: 1,
+                totals2: 0,
+                paginationShow2: true,
+                filter_name: '',
+                feature_options: [{value: 0, label: '无'}, {value: 1, label: '含电'}, {value: 2, label: '液体'}, {value: 3, label: '粉末'}],
+                search_options: [{value: 'supplierDis', label: '供应商'}, {value: 'dateDis', label: '日期'}, {value: 'classifyDis', label: '分类'}],
+                search_selects: [],
+                search_show: [{'supplierDis' : false}, {'dateDis' : false}, {'classifyDis' : false}],
+                search_show2: ['supplierDis', 'dateDis', 'classifyDis'],
+                designVisible: false,
+                designForm: {
+                    demand: '',
+                    sampleInfo: '',
+                    referUrl: '',
+                    sampleSelect: '',
+                },
+                loading2: false,
+                query2: false,
+                sample_Options: [],
+                sample_page: 1,
+                sample_total: 0
             }
         },
         created() {
@@ -1074,16 +1112,16 @@
             	{
             		headers: {'Authorization': localStorage.getItem('token')}
             	}
-            ).then((res) => {
-            	if(res.data.code == 200){
-            		this.tableData.splice(this.idx, 1)
-            		this.getData()
-            		this.$message.success("删除成功")           		
-            	}
-            }).catch((res) => {
-            	this.$message.error("删除失败")
-            })
-                this.delVisible = false;
+                ).then((res) => {
+                	if(res.data.code == 200){
+                		this.tableData.splice(this.idx, 1)
+                		this.getData()
+                		this.$message.success("删除成功")
+                        this.delVisible = false;
+                	}
+                }).catch((res) => {
+                	this.$message.error("删除失败")
+                })
             },
             showPictures(index, row) {
                 this.picturesProductList = []
@@ -1569,6 +1607,107 @@
                         this.search_show[tempIndex2][data] = false
                     }
                 })
+            },
+            handleAddDesign(index, row) {
+                this.designForm.id = row.id
+                this.designForm.demand = ''
+                this.designForm.sampleInfo = ''
+                this.designForm.sampleSelect = ''
+                this.designForm.referUrl = ''
+                this.designForm.remark = ''
+                this.fileList2 = []
+                this.designVisible = true
+            },
+            saveDesign() {
+                let temp = 0
+                this.fileList2.forEach((item) => {
+                    if(!(item.raw.type.match(/image/))){
+                        temp = 1
+                    }
+                })
+                if(temp) {
+                    this.$message.error('请上传正确的图片格式!')
+                    return
+                }
+                this.submitDisabled = true
+                let params = {
+                    remark: this.form.remark,
+                }
+                let formData = new FormData()
+                formData.append('product_subject_id', this.designForm.id)
+                formData.append('remark', this.designForm.demand)
+                formData.append('sample_remark', this.designForm.sampleInfo)
+                formData.append('ref_url', this.designForm.referUrl)
+                formData.append('sample_id', this.designForm.sampleSelect)
+                this.fileList2.forEach((item) => {
+                    formData.append('pictures[]', item.raw)
+                })
+                let config = {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }
+                this.$axios.post('/picture_tasks', formData, config).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('添加成功！')
+                        this.getData()
+                        this.designVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
+            onInfinite_sample(obj) {
+                if((this.sample_page * 20) < this.sample_total) {
+                    this.sample_page += 1
+                    // this.getUsers(obj.loaded)
+                    this.remoteMethod2(this.query2,obj.loaded)
+                } else {
+                    obj.complete()
+                }
+            },
+            selectVisble2(visible) {
+                if(visible) {
+                    this.query2 = undefined
+                    this.remoteMethod2("")
+                }
+            },
+            remoteMethod2(query, callback = undefined) {
+                if(query != "" || this.query2 != "" || callback) {
+                    let reload = false
+                    if(this.query2 != query) {
+                        this.loading2 = true
+                        this.sample_page = 1
+                        this.query2 = query
+                        reload = true
+                        if(this.$refs.infiniteLoading3.isComplete) {
+                            this.$refs.infiniteLoading3.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/samples/?page=" + this.sample_page + '&name=' + query.trim(), {
+                        headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading2 = false
+                            let temp_options = []
+                            if(reload) {
+                                this.sample_Options = temp_options.concat(res.data.data)
+                            } else {
+                                this.sample_Options = this.sample_Options.concat(res.data.data)
+                            }
+                            this.sample_total = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
             },
             getStatusName(status) {
                 if(status == 1) {

@@ -185,7 +185,7 @@
                         }]
                     },
                     {
-                        icon: 'el-icon-lx-goodsfill',
+                        icon: 'el-icon-lx-goods',
                         index: '9',
                         title: '测评管理',
                         subs: [{
@@ -204,6 +204,16 @@
                             index: 'fansmanage',
                             title: '粉丝管理'
                         }]
+                    },
+                    {
+                        icon: 'el-icon-lx-pic',
+                        index: '10',
+                        title: '制图管理',
+                        subs: [
+                        {
+                            index: 'designmanage',
+                            title: '制图任务管理'
+                        },]
                     },
                     // {
                     //     icon: 'el-icon-lx-calendar',

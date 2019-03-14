@@ -35,6 +35,12 @@
 									<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
 								</el-upload>
 							</el-form-item>
+							<el-form-item label="证书">
+								<el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
+									<i class="el-icon-upload"></i>
+									<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+								</el-upload>
+							</el-form-item>
 							<el-form-item>
 								<el-button type="primary" @click="onSubmit('form')" :disabled="submitDisabled">新建</el-button>
 							</el-form-item>
@@ -77,7 +83,8 @@
 					remark: '',
 					phone: '',
 					address: '',
-					website: ''
+					website: '',
+					email: ''
 				},
 				rules: {
 					name: [{
@@ -162,6 +169,9 @@
 						this.fileList.forEach((item) => {
 							formData.append('supplier[pictures][]', item.raw)
 						})
+						this.fileList2.forEach((item) => {
+							formData.append('supplier[cert_pictures][]', item.raw)
+						})
 						let config = {
 							headers: {
 								'Authorization': localStorage.getItem('token')
@@ -243,6 +253,12 @@
 			},
 			handleRemove(a, b) {
 				this.fileList = b
+			},
+			changeFile2(file) {
+				this.fileList2.push(file)
+			},
+			handleRemove2(a, b) {
+				this.fileList2 = b
 			},
 			changeImgs(file) {
 				this.batchImg.push(file)

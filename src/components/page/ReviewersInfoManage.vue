@@ -496,7 +496,6 @@
                 detailVisible: false,
                 fileList: [],
                 picturestList: [],
-                productVisible: false,
                 search_keyword: '',
                 feedbackVisible: false,
                 status: '',

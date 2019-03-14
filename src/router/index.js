@@ -166,6 +166,11 @@ export default new Router({
                     meta: { title: '粉丝管理' }
                 },
                 {
+                    path: '/designmanage',
+                    component: resolve => require(['../components/page/DesignManage.vue'], resolve),
+                    meta: { title: '制图管理' }
+                },
+                {
                     path: '/notifications',
                     component: resolve => require(['../components/page/Tabs.vue'], resolve),
                     meta: { title: '未读消息' }

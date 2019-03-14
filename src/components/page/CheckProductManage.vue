@@ -75,9 +75,9 @@
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">编辑</el-button>
                                 </el-dropdown-item>
-                                <!-- <el-dropdown-item>
-                                    <el-button @click="check(scope.$index, scope.row)" type="text">审核</el-button>
-                                </el-dropdown-item> -->
+                                <el-dropdown-item>
+                                    <el-button @click="handleDelete(scope.$index, scope.row)" type="text">删除</el-button>
+                                </el-dropdown-item>
                                 <!-- <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">编辑</el-button>
                                 </el-dropdown-item> -->
@@ -651,8 +651,29 @@
                 })
             },
             handleDelete(index, row) {
-                this.idx = index;
-                this.delVisible = true;
+                this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'danger'
+                }).then(() => {
+                    // let params = {
+                    //     id: row.id
+                    // }
+                    this.$axios.delete('/products/' + row.id, {
+                         headers: {
+                            'Authorization': localStorage.getItem('token')
+                        }
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.getData()
+                            this.$message.success("删除成功")
+                        }
+                    }).catch(() => {
+                        
+                    })
+                }).catch(() => {
+                    this.$message.info('已取消删除')
+                })
             },
             delAll() {
                 const length = this.multipleSelection.length;
