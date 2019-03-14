@@ -86,9 +86,10 @@
                     },
                 }).then((res) => {
                     if(res.data.code == 200) {
-                        for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
-                            this.getMessageCount(i+1)
-                        }
+                        this.getMessageCount(1)
+                        // for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
+                        //     this.getMessageCount(i+1)
+                        // }
                     }
                 })
             },
