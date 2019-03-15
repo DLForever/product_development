@@ -50,7 +50,10 @@
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column prop="product_name" label="产品名称" width="150" fixed show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="sku" label="SKU" width="130" show-overflow-tooltip>
+                <el-table-column fixed prop="sku" label="SKU" width="130" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <span class="link-type" @click="showChangeProduct(scope.$index, scope.row)">{{scope.row.sku.substring(0, scope.row.sku.length-2)}}</span>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="username" label="制图人" width="70">
                 </el-table-column>
@@ -71,7 +74,7 @@
                         <a v-if="scope.row.ref_url != null && scope.row.ref_url != '' && scope.row.ref_url != 'null'" :href="scope.row.ref_url" target="_blank">查看链接</a>
                     </template>
                 </el-table-column>
-                <el-table-column prop="email" label="图片" width="120">
+                <el-table-column label="参考图片" width="120">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0">无</span>
@@ -318,6 +321,65 @@
                 <el-button type="primary" @click="saveApply" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
+        <!-- 变体详情提示 -->
+        <el-dialog title="详情" :visible.sync="change_detailsVisible" width="90%">
+            <!-- <div v-if="products_change_details.length != 0"> -->
+            <el-button type="primary">
+                <a style="color:#fff;" :href="$axios.defaults.baseURL + '/product_subjects/' + subject_id + '?token=' + export_token">导出图片</a>
+            </el-button>
+            <br><br>
+            <el-table :data="products_change_details" border style="width: 100%">
+                <!-- <el-table-column type="selection" width="55"></el-table-column> -->
+                <el-table-column prop="sku" label="SKU" width="90" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="name" label="产品名称" width="150" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="price" label="采购价">
+                </el-table-column>
+                <el-table-column prop="size" label="尺寸(长*宽*高cm)" width="120">
+                </el-table-column>
+                <el-table-column prop="weight" label="重量(g)">
+                </el-table-column>
+                <el-table-column prop="package_size" label="包装尺寸(长*宽*高cm)" width="140">
+                </el-table-column>
+                <el-table-column prop="package_weight" label="包装重量(g)" width="90">
+                </el-table-column>
+                <el-table-column prop="model_number" label="型号"  show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="texture" label="材质" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="feature" label="产品特性" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <!-- <span>{{getFeatureName(scope.row.feature)}}</span> -->
+                        <el-tag :type="scope.row.feature | statusFilter">{{getFeatureName(scope.row.feature)}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="box_size" label="外箱尺寸(长*宽*高cm)" width="160">
+                </el-table-column>
+                <el-table-column prop="box_weight" label="单箱实重(g)" width="100" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="box_sum" label="单箱数量(g)" width="100">
+                </el-table-column>
+                <el-table-column prop="desc" label="描述" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="created_at_format" label="创建时间" width="140">
+                </el-table-column>
+                <!-- <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
+                </el-table-column> -->
+                <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
+            </el-table>
+            <div class="pagination">
+                <el-pagination v-if="paginationShow2" @current-change="handleCurrentChange2" :page-size="pagesize" layout="prev, pager, next" :total="totals2">
+                </el-pagination>
+            </div>
+            <!-- </div> -->
+        </el-dialog>
     </div>
 </template>
 
@@ -462,7 +524,15 @@
                 loading4: false,
                 query4: false,
                 sample_page: 1,
-                sample_total: 0
+                sample_total: 0,
+                sample_id: '',
+                paginationShow2: false,
+                export_token: '',
+                subject_name: '',
+                subject_id: '',
+                cur_page2: 1,
+                change_detailsVisible: false,
+                products_change_details: []
             }
         },
         created() {
@@ -502,6 +572,10 @@
             handleCurrentChange(val) {
                 this.cur_page = val;
                 this.getData();
+            },
+            handleCurrentChange2(val) {
+                this.cur_page2 = val;
+                this.showChangeDetails();
             },
             // 获取 easy-mock 的模拟数据
             getData() {
@@ -867,7 +941,7 @@
                 if((this.user_page2 * 20) < this.user_total2) {
                     this.user_page2 += 1
                     // this.getUsers(obj.loaded)
-                    this.remoteMethod(this.query2,obj.loaded)
+                    this.remoteMethod2(this.query2,obj.loaded)
                 } else {
                     obj.complete()
                 }
@@ -1176,8 +1250,7 @@
                 })
             },
             handleApply(index, row) {
-                if(row.sample_id == null) 
-                this.idx = row.sample_id
+                this.sample_id = row.sample_id
                 this.apply_stocksum = ''
                 this.apply_stockremark = ''
                 this.out_type = 0
@@ -1190,7 +1263,7 @@
                 }
                 this.submitDisabled = true
                 let params = {
-                    id: this.idx,
+                    id: this.sample_id,
                     sum: this.apply_stocksum,
                     out_type: 1,
                     remark: this.apply_stockremark
@@ -1259,6 +1332,36 @@
                     })
                 }
             },
+            showChangeProduct(index, row) {
+                this.export_token = localStorage.getItem('token')
+                this.subject_name = row.sku.substring(0, row.sku.length-2)
+                this.subject_id = row.product_subject_id
+                this.cur_page2 = 1
+                this.paginationShow2 = false
+                this.showChangeDetails()
+            },
+            showChangeDetails() {
+                this.$axios.get('/products?product_subject_id=' + this.subject_id + '&page=' + this.cur_page2, {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        res.data.data.forEach((data) => {
+                            data.size = data.length + '*' + data.width + '*' + data.height
+                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                            data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
+                        })
+                        this.products_change_details = res.data.data
+                        this.totals2 = res.data.count
+                        this.change_detailsVisible = true
+                    }
+                }).catch((res) => {
+
+                }).finally(() => {
+                    this.paginationShow2 = true
+                })
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "正在申请"
@@ -1274,6 +1377,19 @@
                     return "执行者删除审核"
                 }else if(status == 7) {
                     return "已删除"
+                }else {
+                    return '其他'
+                }
+            },
+            getFeatureName(feature) {
+                if(Number(feature) == 0) {
+                    return '无'
+                }else if(Number(feature) == 1) {
+                    return '含电'
+                }else if(Number(feature) == 2) {
+                    return '液体'
+                }else if(Number(feature) == 3) {
+                    return '粉末'
                 }else {
                     return '其他'
                 }
@@ -1336,5 +1452,8 @@
     .link-type:focus {
       color: #337ab7;
       cursor: pointer;
+    }
+    .link-type:hover {
+        color: rgb(32, 160, 255);
     }
 </style>

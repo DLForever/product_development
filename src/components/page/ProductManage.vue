@@ -528,6 +528,9 @@
                 <el-form-item label="制图要求">
                     <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 10}" placeholder="请输入制图要求" v-model="designForm.demand"></el-input>
                 </el-form-item>
+                <el-form-item label="预计完成时间" prop="plan_date">
+                    <el-date-picker v-model="designForm.plan_date" type="datetime" placeholder="选择日期" ></el-date-picker>
+                </el-form-item>
                 <el-form-item label="样品">
                     <el-select v-model="designForm.sampleSelect" filterable remote :loading="loading2" @visible-change="selectVisble2" :remote-method="remoteMethod2" placeholder="选择样品" class="handle-select mr10">
                         <el-option v-for="item in sample_Options" :key="item.id" :label="item.name" :value="item.id"></el-option>
@@ -692,6 +695,7 @@
                     sampleInfo: '',
                     referUrl: '',
                     sampleSelect: '',
+                    plan_date: ''
                 },
                 loading2: false,
                 query2: false,
@@ -1639,6 +1643,7 @@
                 formData.append('sample_remark', this.designForm.sampleInfo)
                 formData.append('ref_url', this.designForm.referUrl)
                 formData.append('sample_id', this.designForm.sampleSelect)
+                formData.append('plan_date', this.designForm.plan_date)
                 this.fileList2.forEach((item) => {
                     formData.append('pictures[]', item.raw)
                 })
