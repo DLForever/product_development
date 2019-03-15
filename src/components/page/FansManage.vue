@@ -58,28 +58,19 @@
 
         <!-- 编辑弹出框 -->
         <el-dialog title="编辑" :visible.sync="editVisible" width="50%">
-            <el-form ref="form" :model="form" label-width="100px">
-                <el-form-item label="知识产权名称">
-                    <el-input v-model="form.brand_name"></el-input>
+            <el-form ref="form" :model="form" label-width="150px">
+                <el-form-item label="facebook url">
+                    <el-input v-model="form.facebook_url"></el-input>
                 </el-form-item>
-                <el-form-item label="知识产权类目">
-                    <el-input v-model="form.product_category"></el-input>
+                <el-form-item label="亚马逊profile url">
+                    <el-input v-model="form.profile_url"></el-input>
                 </el-form-item>
-                <el-form-item label="知识产权类型">
-                    <el-input v-model="form.brand_type"></el-input>
-                </el-form-item>
-                <el-form-item label="官网链接">
-                    <el-input v-model="form.website"></el-input>
-                </el-form-item>
-                 <el-form-item label="备注">
-                    <el-input v-model="form.remark"></el-input>
-                </el-form-item>
-                <el-form-item label="知识产权图片">
+                <!-- <el-form-item label="知识产权图片">
                     <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
                         <i class="el-icon-upload"></i>
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     </el-upload>
-                </el-form-item>
+                </el-form-item> -->
             </el-form>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editVisible = false">取 消</el-button>
@@ -97,7 +88,7 @@
         </el-dialog>
 
         <!-- 详情提示 -->
-        <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
+        <el-dialog title="详情" :visible.sync="detailVisible" width="95%">
             <el-table :data="suppliers_details" border style="width: 100%">
                 <el-table-column prop="paypal_account" label="粉丝名称" show-overflow-tooltip>
                 </el-table-column>
@@ -139,7 +130,7 @@
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0">无</span>
-                            <img v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"/>
+                            <img style="cursor: pointer;" v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/>
                             <span v-else>无</span>
                         </el-badge>
                         <span v-else>无</span>
@@ -172,29 +163,34 @@
                 </el-table-column>
                 <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
                 </el-table-column>
+                <el-table-column fixed="right" label="操作"width="100">
+                    <template slot-scope="scope">
+                        <el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                    </template>
+                </el-table-column>
             </el-table>
         </el-dialog>
 
-        <!-- 查看产品图片 -->
-        <el-dialog title="知识产权图片" :visible.sync="productVisible" width="20%" @close="closeProduct">
-            <el-table :data="picturestList" border style="width: 100%">
-                <el-table-column prop="sum" label="图片">
-                    <template slot-scope="scope">
-                        <!-- <span>{{scope.row.url}}</span> -->
-                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
-                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
-                        <!-- <span v-else>无</span> -->
-                    </template>
-                    <!-- <template slot-scope="scope">
-                        <img class="img_fnsku" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.url" />                  
-                    </template> -->
-                </el-table-column>
-                <el-table-column label="操作" width="100">
-                    <template slot-scope="scope">
-                        <el-button type="danger" @click="handleDeletePic(scope.$index, scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
+        <el-dialog title="测评截图" :visible.sync="productVisible" width="70%">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList.length != 0">
+                <span>评论截图</span>
+                <el-carousel-item v-for="(item, index) in picturestList" :key="index">
+                    <img class="img_carousel" :src="$axios.defaults.baseURL+item.url.url" />
+                </el-carousel-item>
+            </el-carousel>
+            <br>
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList2.length != 0">
+                <span class="demonstration">退款截图</span>
+                <el-carousel-item v-for="(item, index) in picturestList2" :key="index">
+                    <img class="img_carousel" :src="$axios.defaults.baseURL+item.url.url" />
+                </el-carousel-item>
+            </el-carousel>
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList3.length != 0">
+                <span class="demonstration">反馈截图</span>
+                <el-carousel-item v-for="(item, index) in picturestList3" :key="index">
+                    <img class="img_carousel" :src="$axios.defaults.baseURL+item.url.url" />
+                </el-carousel-item>
+            </el-carousel>
         </el-dialog>
 
         <!-- 删除产品图片提示 -->
@@ -262,7 +258,10 @@
                 task_records: [],
                 export_token: '',
                 exportIds: [],
-                exportVisible: false
+                exportVisible: false,
+                picturestList: [],
+                picturestList2: [],
+                picturestList3: []
             }
         },
         created() {
@@ -372,16 +371,12 @@
             
             handleEdit(index, row) {
                 this.idx = index;
-                const item = this.tableData[index];
+                const item = row
                 this.form = {
                     id: item.id,
-                    brand_name: item.brand_name,
-                    product_category: item.product_category,
-                    brand_type: item.brand_type,
-                    website: item.website,
-                    remark: item.remark
+                    facebook_url: item.facebook_url,
+                    profile_url: item.profile_url,
                 }
-                this.fileList = []
                 this.editVisible = true;
             },
             handleDelete(index, row) {
@@ -405,30 +400,33 @@
             saveEdit() {
                 this.submitDisabled = true
                 let params = {
-                    remark: this.form.remark,
+                    facebook_url: this.form.facebook_url,
+                    profile_url: this.form.profile_url,
+                    fan: 'true'
                 }
-                let formData = new FormData()
-                formData.append('brand_name', this.form.brand_name)
-                formData.append('product_category', this.form.product_category)
-                formData.append('website', this.form.website)
-                formData.append('brand_type', this.form.brand_type)
-                formData.append('remark', this.form.remark)
-                this.fileList.forEach((item) => {
-                    formData.append('logo[]', item.raw)
-                })
+                // let formData = new FormData()
+                // formData.append('brand_name', this.form.brand_name)
+                // formData.append('product_category', this.form.product_category)
+                // formData.append('website', this.form.website)
+                // formData.append('brand_type', this.form.brand_type)
+                // formData.append('remark', this.form.remark)
+                // this.fileList.forEach((item) => {
+                //     formData.append('logo[]', item.raw)
+                // })
                 let config = {
                     headers: {
                         'Authorization': localStorage.getItem('token')
                     }
                 }
-                this.$axios.patch('/intellectual_properties/' + this.form.id, formData, config).then((res) => {
+                this.$axios.patch('/task_records/' + this.form.id, params, config).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.getData()
                         this.editVisible = false
+                        this.detailVisible = false
                     }
                 }).catch((res) => {
-                    console.log('err')
+                    console.log(res)
                 }).finally((res) => {
                     this.submitDisabled = false
                 })
@@ -484,14 +482,6 @@
             },
             handleRemove(a, b) {
                 this.fileList = b
-            },
-            showPictures(index, row) {
-                this.product_id = row.id
-                const item = this.tableData[index]
-                item.pictures.forEach((data) => {
-                    this.picturestList.push(data)
-                })
-                this.productVisible = true;
             },
             closeProduct() {
                 this.productVisible = false
@@ -551,6 +541,23 @@
                 this.exportIds = []
                 this.$refs.multipleTable.clearSelection()
             },
+            showPictures(index, row) {
+                this.picturestList = []
+                this.picturestList2 = []
+                this.picturestList3 = []
+                this.product_id = row.id
+                const item = row
+                item.pictures.forEach((data) => {
+                    if (data.remark == 'review') {
+                        this.picturestList.push(data)
+                    } else if (data.remark == 'refund'){
+                        this.picturestList2.push(data)
+                    } else {
+                        this.picturestList3.push(data)
+                    }
+                })
+                this.productVisible = true;
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "正在进行中"
@@ -605,5 +612,14 @@
     .item {
       margin-top: 10px;
       margin-right: 40px;
+    }
+    .el-carousel__item.is-animating{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+    .img_carousel {
+        max-width: 40rem;
     }
 </style>

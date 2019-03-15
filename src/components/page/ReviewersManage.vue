@@ -1065,7 +1065,7 @@
                 if((this.user_page2 * 20) < this.user_total2) {
                     this.user_page2 += 1
                     // this.getUsers(obj.loaded)
-                    this.remoteMethod(this.query2,obj.loaded)
+                    this.remoteMethod2(this.query2,obj.loaded)
                 } else {
                     obj.complete()
                 }

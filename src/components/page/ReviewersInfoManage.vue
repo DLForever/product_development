@@ -98,7 +98,7 @@
                 </el-table-column>
                 <el-table-column prop="status" label="状态" width="120">
                     <template slot-scope="scope">
-                        <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status)}}</el-tag>
+                        <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status, scope.row.done_direct)}}</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
@@ -173,10 +173,18 @@
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="是否需要返款" prop="isPay">
-                    <el-radio v-model="form.need_refund" label="true">是</el-radio>
-                    <el-radio v-model="form.need_refund" label="false">否</el-radio>
-                </el-form-item>
+                <template v-if="form.status == '1'">
+                    <el-form-item label="是否需要返款" prop="isPay">
+                        <el-radio v-model="form.need_refund" label="1">是</el-radio>
+                        <el-radio v-model="form.need_refund" label="0">否</el-radio>
+                    </el-form-item>
+                </template>
+                <template v-if="form.need_refund=='1'">
+                    <el-form-item label="是否完全返款">
+                        <el-radio v-model="form.done_direct" label="1">是</el-radio>
+                        <el-radio v-model="form.done_direct" label="0">否</el-radio>
+                    </el-form-item>
+                </template>
                 <el-form-item label="返款时间" prop="pay_time">
                     <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="form.refund_time" type="datetime" placeholder="选择日期" ></el-date-picker>
                 </el-form-item>
@@ -235,9 +243,15 @@
                     <el-input v-model="addReviewerForm.facebook_url"></el-input>
                 </el-form-item>
                 <el-form-item label="是否需要返款" prop="isPay">
-                    <el-radio v-model="addReviewerForm.isPay" label="true">是</el-radio>
-                    <el-radio v-model="addReviewerForm.isPay" label="false">否</el-radio>
+                    <el-radio v-model="addReviewerForm.isPay" label="1">是</el-radio>
+                    <el-radio v-model="addReviewerForm.isPay" label="0">否</el-radio>
                 </el-form-item>
+                <template v-if="addReviewerForm.isPay == '1'">
+                    <el-form-item label="是否完全返款">
+                        <el-radio v-model="addReviewerForm.done_direct" label="1">是</el-radio>
+                        <el-radio v-model="addReviewerForm.done_direct" label="0">否</el-radio>
+                    </el-form-item>
+                </template>
                 <el-form-item label="亚马逊profile url">
                     <el-input v-model="addReviewerForm.profile_url"></el-input>
                 </el-form-item>
@@ -475,7 +489,8 @@
                     feedback: '',
                     id: '',
                     need_refund: '',
-                    refund_time: ''
+                    refund_time: '',
+                    done_direct: ''
                 },
                 idx: -1,
                 productVisible: false,
@@ -499,7 +514,7 @@
                 search_keyword: '',
                 feedbackVisible: false,
                 status: '',
-                statusOptions: [{value: 1, label: '正在进行中'}, {value: 2, label: '已评论'}, {value: 3, label: '已完成'}, {value: 5, label: '失败'}],
+                statusOptions: [{value: 1, label: '正在进行中'}, {value: 2, label: '需返款'}, {value: 3, label: '已完成'}, {value: 5, label: '失败'}, {value: 6, label: '等待评论'}, {value: 7, label: '需返佣金'}],
                 statusSelect: '',
                 user_id_filter: '',
                 query: undefined,
@@ -806,6 +821,7 @@
                 const item = this.tableData[index];
                 this.form = {
                     id: item.id,
+                    status: item.status
                 }
                 this.form.remark = ''
                 this.fileList = []
@@ -831,8 +847,18 @@
             },
             // 保存编辑
             saveDone() {
-                if (this.form.need_refund == '' || this.form.need_refund == undefined) {
-                    this.$message.error('请选择是否需要返款')
+                if(this.form.status == '1') {
+                    if (this.form.need_refund == '' || this.form.need_refund == undefined) {
+                        this.$message.error('请选择是否需要返款')
+                        return
+                    }
+                    if (this.form.need_refund == '1' && this.form.done_direct == undefined) {
+                        this.$message.error('请选择是否完全返款')
+                        return
+                    }
+                }
+                if(this.form.refund_time == undefined) {
+                    this.$message.error('请选择返款时间')
                     return
                 }
                 this.submitDisabled = true
@@ -840,6 +866,9 @@
                 formData.append('remark', this.form.remark)
                 formData.append('need_refund', this.form.need_refund)
                 formData.append('refund_time', this.form.refund_time)
+                if(this.form.done_direct != undefined) {
+                    formData.append('done_direct', this.form.done_direct)
+                }
                 this.fileList.forEach((item) => {
                     formData.append('picture_review[]', item.raw)
                 })
@@ -1078,8 +1107,19 @@
                     isPay: String(item.need_refund),
                     remark: item.remark,
                     poundage: item.charge,
-                },
-                this.sumPrice = parseFloat((Number(this.addReviewerForm.pay_price) + Number(this.addReviewerForm.commission) + Number(this.addReviewerForm.poundage)).toPrecision(12))
+                    done_direct: String(item.done_direct),
+                }
+                if(this.addReviewerForm.isPay == 'true') {
+                    this.addReviewerForm.isPay = '1'
+                } else if(this.addReviewerForm.isPay == 'false') {
+                    this.addReviewerForm.isPay = '0'
+                }
+                if(this.addReviewerForm.done_direct == 'true') {
+                    this.addReviewerForm.done_direct = '1'
+                } else if(this.addReviewerForm.done_direct == 'false') {
+                    this.addReviewerForm.done_direct = '0'
+                }
+                // this.sumPrice = parseFloat((Number(this.addReviewerForm.pay_price) + Number(this.addReviewerForm.commission) + Number(this.addReviewerForm.poundage)).toPrecision(12))
                 this.fileList = []
                 this.fileList2 = []
                 this.updatereviewerVisible = true
@@ -1109,6 +1149,7 @@
                         formData.append('task_record[remark]', this.addReviewerForm.remark)
                         formData.append('task_record[task_id]', this.addReviewerForm.task_id)
                         formData.append('task_record[task_period_id]', this.addReviewerForm.task_period_id)
+                        formData.append('task_record[done_direct]', this.addReviewerForm.done_direct)
                         this.fileList.forEach((item) => {
                             formData.append('picture_review[]', item.raw)
                         })
@@ -1256,17 +1297,23 @@
                     }
                 })
             },
-            getStatusName(status) {
+            getStatusName(status, done_direct) {
                 if(status == 1) {
                     return "正在进行中"
-                } else if(status == 2) {
-                    return "已评论"
+                } else if(status == 2 && done_direct == true) {
+                    return "需返款"
+                } else if(status == 2 && done_direct == false) {
+                    return "先返本金"
                 } else if(status == 3) {
                     return "已完成"
                 }else if(status == 4) {
                     return "已删除"
                 }else if(status == 5) {
                     return "失败"
+                }else if(status == 6) {
+                    return "等待评论"
+                }else if(status == 7) {
+                    return "需返佣金"
                 }else {
                     return '其他'
                 }

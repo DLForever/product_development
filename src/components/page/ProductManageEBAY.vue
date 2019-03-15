@@ -672,10 +672,10 @@
               paginationShow2: true,
               filter_name: '',
               feature_options: [{value: 0, label: '无'}, {value: 1, label: '含电'}, {value: 2, label: '液体'}, {value: 3, label: '粉末'}],
-              search_options: [{value: 'supplierDis', label: '供应商'}, {value: 'dateDis', label: '日期'}, {value: 'classifyDis', label: '分类'}, {value: 'userDis', label: '开发人员'}],
-              search_selects: [],
-              search_show: [{'supplierDis' : false}, {'dateDis' : false}, {'classifyDis' : false}, {'userDis' : false}],
-              search_show2: ['supplierDis', 'dateDis', 'classifyDis', 'userDis']
+                search_options: [{value: 'supplierDis', label: '供应商'}, {value: 'dateDis', label: '日期'}, {value: 'classifyDis', label: '分类'}, {value: 'userDis', label: '开发人员'}],
+                search_selects: [],
+                search_show: [{'supplierDis' : false}, {'dateDis' : false}, {'classifyDis' : false}, {'userDis' : false}],
+                search_show2: ['supplierDis', 'dateDis', 'classifyDis', 'userDis']
             }
         },
         created() {

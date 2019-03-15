@@ -60,6 +60,9 @@
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">编辑</el-button>
                                 </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleDelete(scope.$index, scope.row)" type="text">删除</el-button>
+                                </el-dropdown-item>
                             </el-dropdown-menu>
                         </el-dropdown>
                     </template>
@@ -76,22 +79,34 @@
         <el-dialog title="编辑" :visible.sync="editVisible" width="50%">
             <el-form ref="form" :model="form" label-width="100px">
                 <el-form-item label="供应商名称">
-                    <el-input v-model="form.name"></el-input>
+                    <el-input v-model.trim="form.name"></el-input>
                 </el-form-item>
                 <el-form-item label="电话">
-                    <el-input v-model="form.phone"></el-input>
+                    <el-input v-model.trim="form.phone"></el-input>
                 </el-form-item>
                 <el-form-item label="邮箱">
-                    <el-input v-model="form.email"></el-input>
+                    <el-input v-model.trim="form.email"></el-input>
                 </el-form-item>
                 <el-form-item label="地址">
-                    <el-input v-model="form.address"></el-input>
+                    <el-input v-model.trim="form.address"></el-input>
                 </el-form-item>
                 <el-form-item label="网址">
-                    <el-input v-model="form.website"></el-input>
+                    <el-input v-model.trim="form.website"></el-input>
                 </el-form-item>
                  <el-form-item label="备注">
-                    <el-input v-model="form.remark"></el-input>
+                    <el-input v-model.trim="form.remark"></el-input>
+                </el-form-item>
+                <el-form-item label="营业执照">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="证书">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
@@ -186,6 +201,10 @@
                     name: '',
                     date: '',
                     address: '',
+                    website: '',
+                    email: '',
+                    remark: '',
+                    phone: ''
                 },
                 idx: -1,
                 img_product: 1,
@@ -204,7 +223,9 @@
                 detailVisible: false,
                 picturesVisible: false,
                 picturestList: [],
-                search_supplier: ''
+                search_supplier: '',
+                fileList: [],
+                fileList2: [],
             }
         },
         created() {
@@ -256,7 +277,7 @@
             filter_product() {
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/products?page='+this.cur_page + '&name=' + this.search_supplier, {
+                this.$axios.get( '/suppliers/?page='+this.cur_page + '&name=' + this.search_supplier, {
                     headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
@@ -279,10 +300,10 @@
                 this.getData()
             },
             formatter_created_at(row, column) {
-				return row.created_at.substr(0, 19);
+				return row.created_at.substr(0, 19)
 			},
 			formatter_updated_at(row, column) {
-				return row.updated_at.substr(0, 19);
+				return row.updated_at.substr(0, 19)
 			},
             search() {
                 this.is_search = true;
@@ -299,8 +320,10 @@
             },
             
             handleEdit(index, row) {
-                this.idx = index;
-                const item = this.tableData[index];
+                this.fileList = []
+                this.fileList2 = []
+                this.idx = index
+                const item = this.tableData[index]
                 this.form = {
                     id: item.id,
                     name: item.name,
@@ -313,8 +336,29 @@
                 this.editVisible = true;
             },
             handleDelete(index, row) {
-                this.idx = index;
-                this.delVisible = true;
+                this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'danger'
+                }).then(() => {
+                    // let params = {
+                    //     id: row.id
+                    // }
+                    this.$axios.delete('/suppliers/' + row.id, {
+                         headers: {
+                            'Authorization': localStorage.getItem('token')
+                        }
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.getData()
+                            this.$message.success("删除成功")
+                        }
+                    }).catch(() => {
+                        
+                    })
+                }).catch(() => {
+                    this.$message.info('已取消删除')
+                })
             },
             delAll() {
                 const length = this.multipleSelection.length;
@@ -342,6 +386,12 @@
                 formData.append('supplier[address]', this.form.address)
                 formData.append('supplier[website]', this.form.website)
                 formData.append('supplier[remark]', this.form.remark)
+                this.fileList.forEach((item) => {
+                    formData.append('supplier[pictures][]', item.raw)
+                })
+                this.fileList2.forEach((item) => {
+                    formData.append('supplier[cert_pictures][]', item.raw)
+                })
                 let config = {
                     headers: {
                         'Authorization': localStorage.getItem('token')
@@ -441,6 +491,18 @@
                     console.log(res)
                     this.$message.info('已取消删除')
                 })
+            },
+            changeFile(file) {
+                this.fileList.push(file)
+            },
+            handleRemove(a, b) {
+                this.fileList = b
+            },
+            changeFile2(file) {
+                this.fileList2.push(file)
+            },
+            handleRemove2(a, b) {
+                this.fileList2 = b
             },
         }
     }
