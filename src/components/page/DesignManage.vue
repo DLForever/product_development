@@ -59,9 +59,9 @@
                 </el-table-column>
                 <el-table-column prop="apply_username" label="申请人" width="70">
                 </el-table-column>
-                <el-table-column prop="sample_name" label="样品名" width="70">
+                <el-table-column prop="samplestemp" label="样品名" width="70" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <span class="link-type" @click="handleApply(scope.$index, scope.row)">{{scope.row.sample_name}}</span>
+                        <span class="link-type" @click="handleApply(scope.$index, scope.row)">{{scope.row.samplestemp}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="origin_url" label="来源URL" width="80">
@@ -78,7 +78,17 @@
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0">无</span>
-                            <img style="cursor: pointer;" v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/>
+                            <img style="cursor: pointer;" v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row, 'ref')"/>
+                            <span v-else>无</span>
+                        </el-badge>
+                        <span v-else>无</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="email" label="制作的图" width="120">
+                    <template slot-scope="scope">
+                        <el-badge :value="scope.row.img_count2" class="item" v-if="scope.row.img_count2 != 0">
+                            <span v-if="scope.row.pictures.length === 0">无</span>
+                            <img style="cursor: pointer;" v-else-if="scope.row.done_pictures[0] != undefined && scope.row.done_pictures[0].url.thumb.url != null && !(scope.row.done_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.done_pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row, 'done_pic')"/>
                             <span v-else>无</span>
                         </el-badge>
                         <span v-else>无</span>
@@ -111,15 +121,15 @@
                                 <el-dropdown-item>
                                     <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp详情</el-button>
                                 </el-dropdown-item>
-                                <!-- <el-dropdown-item>
-                                    <el-button @click="showPictures(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp图片</el-button>
-                                </el-dropdown-item> -->
+                                <el-dropdown-item>
+                                    <el-button @click="showapplyDetails(scope.$index, scope.row)" type="text">借样详情</el-button>
+                                </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp编辑</el-button>
                                 </el-dropdown-item>
-                                <el-dropdown-item>
+                                <!-- <el-dropdown-item>
                                     <el-button @click="handlePlan(scope.$index, scope.row)" type="text">预计完成</el-button>
-                                </el-dropdown-item>
+                                </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="handleDone(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp完成</el-button>
                                 </el-dropdown-item>
@@ -148,7 +158,7 @@
                     <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 10}" placeholder="请输入制图要求" v-model="form.remark"></el-input>
                 </el-form-item>
                 <el-form-item label="样品">
-                    <el-select v-model="form.sample_id" filterable remote :loading="loading4" @visible-change="selectVisble4" :remote-method="remoteMethod4" clearable placeholder="选择样品" class="handle-select mr10">
+                    <el-select v-model="form.sample_id" filterable multiple remote :loading="loading4" @visible-change="selectVisble4" :remote-method="remoteMethod4" clearable placeholder="选择样品" class="handle-select mr10">
                         <el-option v-for="item in sample_Options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_sample" ref="infiniteLoading4"></infinite-loading>
                     </el-select>
@@ -225,7 +235,7 @@
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0">无</span>
-                            <img style="cursor: pointer;" v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/>
+                            <img style="cursor: pointer;" v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row, 'ref')"/>
                             <span v-else>无</span>
                         </el-badge>
                         <span v-else>无</span>
@@ -309,6 +319,11 @@
         <!-- 申请借样提示框 -->
         <el-dialog title="借样" :visible.sync="applyVisible" width="50%" center>
             <el-form label-width="100px">
+                <el-form-item label="样品">
+                    <el-select v-model="sample_id" clearable placeholder="请选择样品" @change="showSearch">
+                        <el-option v-for="item in sample_options2" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="数量">
                     <el-input-number placeholder="请输入数量" :min="0" v-model.trim="apply_stocksum"></el-input-number>
                 </el-form-item>
@@ -379,6 +394,33 @@
                 </el-pagination>
             </div>
             <!-- </div> -->
+        </el-dialog>
+
+        <!-- 借样详情提示 -->
+        <el-dialog title="详情" :visible.sync="applyDetailVisible" width="90%">
+            <el-table :data="apply_details" border style="width: 100%">
+                <el-table-column prop="name" label="样品名" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="sum" label="数量">
+                </el-table-column>
+                <el-table-column prop="apply_username" label="申请人">
+                </el-table-column>
+                <el-table-column prop="check_username" label="审核人">
+                </el-table-column>
+                <el-table-column prop="user_remark" label="申请备注">
+                </el-table-column>
+                <el-table-column prop="manager_remark" label="管理员备注">
+                </el-table-column>
+                <el-table-column prop="status" label="状态">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.status | statusFilter">{{getStatusApply(scope.row.status)}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
+                </el-table-column>
+                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
+                </el-table-column>
+            </el-table>
         </el-dialog>
     </div>
 </template>
@@ -532,7 +574,11 @@
                 subject_id: '',
                 cur_page2: 1,
                 change_detailsVisible: false,
-                products_change_details: []
+                products_change_details: [],
+                sample_options2: [],
+                applyDetailVisible: false,
+                apply_details: [],
+                picture_task_id: ''
             }
         },
         created() {
@@ -596,13 +642,23 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             data.img_count = data.pictures.length
+                            data.img_count2 = data.done_pictures.length
+                            if(data.samples != undefined) {
+                                data.samples.forEach((data2, index) => {
+                                    if (index == 0) {
+                                        data.samplestemp = data2.name
+                                    }else {
+                                        data.samplestemp += '、' + data2.name
+                                    }
+                                }) 
+                            }
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
                     }
                 }).catch((res) => {
-                	console.log('error')
+                	console.log(res)
                 })
             },
             filter_product() {
@@ -621,12 +677,21 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             data.img_count = data.pictures.length
+                            data.img_count2 = data.done_pictures.length
+                            if(data.samples != undefined) {
+                                data.samples.forEach((data2, index) => {
+                                    if (index == 0) {
+                                        data.samplestemp = data2.name
+                                    }else {
+                                        data.samplestemp += '、' + data2.name
+                                    }
+                                }) 
+                            }
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
                     }
-                    
                 }).catch((res) => {
                     console.log(res)
                 }).finally(() => {
@@ -680,12 +745,18 @@
                 const item = this.tableData[index];
                 this.form = {
                     id: item.id,
-                    sample_id: item.sample_id,
+                    sample_id: [],
                     ref_url: item.ref_url,
                     sample_remark: item.sample_remark,
                     remark: item.remark
                 }
-                this.sample_Options.push({id: item.sample_id, name: item.sample_name})
+                // this.sample_Options = row.samples
+                row.samples.forEach((data) => {
+                    this.sample_Options.push({id: data.id, name: data.name})
+                    this.form.sample_id.push(data.id)
+                })
+                // console.log(this.form.sample_id)
+                // this.sample_Options.push({id: item.sample_id, name: item.sample_name})
                 this.fileList = []
                 this.editVisible = true;
             },
@@ -731,10 +802,12 @@
             saveEdit() {
                 this.submitDisabled = true
                 let formData = new FormData()
-                if (this.form.sample_id == '') {
+                if (this.form.sample_id == '' || this.form.sample_id == undefined) {
                     formData.append('sample_id', 0)
                 } else {
-                    formData.append('sample_id', this.form.sample_id)
+                    this.form.sample_id.forEach((data) => {
+                        formData.append('sample_ids[]', data)
+                    })
                 }
                 formData.append('ref_url', this.form.ref_url)
                 formData.append('sample_remark', this.form.sample_remark)
@@ -802,7 +875,7 @@
             handleRemove2(a, b) {
                 this.fileList2 = b
             },
-            showPictures(index, row) {
+            showPictures(index, row, remark) {
                 this.product_id = row.id
                 const item = this.tableData[index]
                 if (item.pictures.length == 0) {
@@ -812,15 +885,23 @@
                 this.picturestList = []
                 this.picturestList2 = []
                 this.product_id = row.id
-                item.pictures.forEach((data) => {
-                    if(data.remark == 'adv') {
-                        this.picturestList.push(data)
-                    }else {
+                if (remark == 'ref') {
+                    item.pictures.forEach((data) => {
                         this.picturestList2.push(data)
-                    }
-                    
-                })
-                this.productVisible = true;
+                        // if(data.remark == 'required') {
+                        //     this.picturestList2.push(data)
+                        // }else {
+                        //     this.picturestList.push(data)
+                        // }
+                    })
+                }else if(remark == 'done_pic') {
+                    item.done_pictures.forEach((data) => {
+                        this.picturestList2.push(data)
+                    })
+                }else{
+
+                }
+                this.productVisible = true
             },
             handleDeletePic(remark, id, index) {
                 this.remark = remark
@@ -874,12 +955,6 @@
                 }).catch((res) => {
 
                 })
-            },
-            formatter_created_at(row, column) {
-                return row.created_at.substr(0, 19);
-            },
-            formatter_updated_at(row, column) {
-                return row.updated_at.substr(0, 19);
             },
             handleCreate(index, row) {
                 this.addReviewerForm.task_id = row.task_id
@@ -1250,10 +1325,12 @@
                 })
             },
             handleApply(index, row) {
-                this.sample_id = row.sample_id
+                this.sample_options2 = row.samples
                 this.apply_stocksum = ''
                 this.apply_stockremark = ''
+                this.sample_id = ''
                 this.out_type = 0
+                this.picture_task_id = row.id
                 this.applyVisible = true
             },
             saveApply() {
@@ -1266,6 +1343,7 @@
                     id: this.sample_id,
                     sum: this.apply_stocksum,
                     out_type: 1,
+                    picture_task_id: this.picture_task_id,
                     remark: this.apply_stockremark
                 }
                 this.$axios.post('/sample_outs', params, {
@@ -1362,6 +1440,20 @@
                     this.paginationShow2 = true
                 })
             },
+            showapplyDetails(index, row) {
+                this.$axios.get('/sample_outs?picture_task_id=' + row.id, {
+                    headers: {
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.apply_details = res.data.data
+                        this.applyDetailVisible = true
+                    }
+                }).catch((res) => {
+
+                })
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "正在申请"
@@ -1393,7 +1485,20 @@
                 }else {
                     return '其他'
                 }
-            }
+            },
+            getStatusApply(status) {
+                if(status == 1) {
+                    return "待审核"
+                }else if (status == 2) {
+                    return "已借出"
+                }else if (status == 3) {
+                    return "申请归还"
+                } else if(status ==4) {
+                    return '已完成'
+                } else{
+                    return "其他"
+                }
+            },
         },
         components: {
             "infinite-loading": VueInfiniteLoading

@@ -532,7 +532,7 @@
                     <el-date-picker v-model="designForm.plan_date" type="datetime" placeholder="选择日期" ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="样品">
-                    <el-select v-model="designForm.sampleSelect" filterable remote :loading="loading2" @visible-change="selectVisble2" :remote-method="remoteMethod2" placeholder="选择样品" class="handle-select mr10">
+                    <el-select v-model="designForm.sampleSelect" filterable multiple remote :loading="loading2" @visible-change="selectVisble2" :remote-method="remoteMethod2" placeholder="选择样品" class="handle-select mr10">
                         <el-option v-for="item in sample_Options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_sample" ref="infiniteLoading3"></infinite-loading>
                     </el-select>
@@ -694,7 +694,7 @@
                     demand: '',
                     sampleInfo: '',
                     referUrl: '',
-                    sampleSelect: '',
+                    sampleSelect: [],
                     plan_date: ''
                 },
                 loading2: false,
@@ -1616,7 +1616,7 @@
                 this.designForm.id = row.id
                 this.designForm.demand = ''
                 this.designForm.sampleInfo = ''
-                this.designForm.sampleSelect = ''
+                this.designForm.sampleSelect = []
                 this.designForm.referUrl = ''
                 this.designForm.remark = ''
                 this.fileList2 = []
@@ -1642,11 +1642,14 @@
                 formData.append('remark', this.designForm.demand)
                 formData.append('sample_remark', this.designForm.sampleInfo)
                 formData.append('ref_url', this.designForm.referUrl)
-                formData.append('sample_id', this.designForm.sampleSelect)
+                this.designForm.sampleSelect.forEach((data) => {
+                    formData.append('sample_ids[]', data)
+                })
                 formData.append('plan_date', this.designForm.plan_date)
                 this.fileList2.forEach((item) => {
                     formData.append('pictures[]', item.raw)
                 })
+                console.log(formData)
                 let config = {
                     headers: {
                         'Authorization': localStorage.getItem('token')

@@ -58,7 +58,7 @@
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column fixed prop="asin" label="ASIN" width="130" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="plan_date" label="计划日期" width="90">
+                <el-table-column  prop="plan_date" label="计划日期" width="90">
                 </el-table-column>
                 <el-table-column prop="keyword" label="关键词" show-overflow-tooltip>
                 </el-table-column>
@@ -68,14 +68,22 @@
                 </el-table-column>
                 <el-table-column prop="currency" label="币种" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="pay_price" label="支付价格" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="commission" label="佣金" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="charge" label="手续费" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="sumPrice" label="总费用" show-overflow-tooltip>
-                </el-table-column>
+                <template v-if="filter_refund">
+                    <el-table-column key="3" prop="pay_price" label="支付价格"  show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column key="4" prop="charge" label="手续费" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column key="5" prop="sumPrice" label="总费用" show-overflow-tooltip>
+                    </el-table-column>
+                </template>
+                <template v-if="filter_commission">
+                    <el-table-column key="3" prop="commission" label="佣金" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column key="4" prop="commission_charge" label="佣金手续费" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column key="5" prop="sumPrice" label="总费用" show-overflow-tooltip>
+                    </el-table-column>
+                </template>
                 <el-table-column prop="need_refund2" label="是否需要返款" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <el-tag type="warning" v-if="scope.row.need_refund2 == '是'">是</el-tag>
@@ -185,6 +193,11 @@
                         <el-radio v-model="form.done_direct" label="0">否</el-radio>
                     </el-form-item>
                 </template>
+                <template v-if="form.status == '6'">
+                    <el-form-item label="佣金">
+                        <el-input-number v-model="form.commission" :min="0"></el-input-number>
+                    </el-form-item>
+                </template>
                 <el-form-item label="返款时间" prop="pay_time">
                     <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="form.refund_time" type="datetime" placeholder="选择日期" ></el-date-picker>
                 </el-form-item>
@@ -230,9 +243,9 @@
                 <el-form-item label="支付价格" prop="pay_price">
                     <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.pay_price" :min="0" :step="10" @change="totalPrice"></el-input-number>
                 </el-form-item>
-                <el-form-item label="佣金" prop="commission">
+                <!-- <el-form-item label="佣金" prop="commission">
                     <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.commission" :min="0" @change="totalPrice"></el-input-number>
-                </el-form-item>
+                </el-form-item> -->
                 <!-- <el-form-item label="手续费" prop="poundage">
                     <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.poundage" :min="0" @change="totalPrice"></el-input-number>
                 </el-form-item> -->
@@ -329,11 +342,13 @@
                 </el-table-column>
                 <el-table-column prop="commission" label="佣金">
                 </el-table-column>
+                <el-table-column prop="commission_charge" label="佣金手续费" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column prop="charge" label="手续费" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="sumPrice" label="总费用" show-overflow-tooltip>
+                <el-table-column prop="sumPrice2" label="总费用" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <el-button type="warning">{{scope.row.sumPrice}}</el-button>
+                        <el-button type="warning">{{scope.row.sumPrice2}}</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="need_refund2" label="是否需要返款" width="95">
@@ -658,7 +673,9 @@
               site_options: ['US', 'UK', 'DE', 'JP'],
               site_filter: '',
               filter_name: '',
-              filter_shopname: ''
+              filter_shopname: '',
+              filter_refund: false,
+              filter_commission: false
             }
         },
         created() {
@@ -726,7 +743,7 @@
                             } else if(String(data.need_refund) == 'false'){
                                 data.need_refund2 = '否'
                             }
-                            data.sumPrice = parseFloat((Number(data.charge) + Number(data.commission) + Number(data.pay_price)).toPrecision(12))
+                            data.sumPrice2 = parseFloat((Number(data.charge) + Number(data.commission) + Number(data.commission_charge) + Number(data.pay_price)).toPrecision(12))
                             data.img_count = data.pictures.length
                         })
                         this.tableData = res.data.data
@@ -760,9 +777,24 @@
                             } else if(String(data.need_refund) == 'false'){
                                 data.need_refund2 = '否'
                             }
-                            data.sumPrice = parseFloat((Number(data.charge) + Number(data.commission) + Number(data.pay_price)).toPrecision(12))
+                            data.sumPrice2 = parseFloat((Number(data.charge) + Number(data.commission) + Number(data.commission_charge) + Number(data.pay_price)).toPrecision(12))
+                            if(this.statusSelect == 2) {
+                                data.sumPrice = parseFloat((Number(data.charge) + Number(data.pay_price)).toPrecision(12))
+                            } else if (this.statusSelect == 7) {
+                                data.sumPrice = parseFloat((Number(data.commission_charge) + Number(data.commission)).toPrecision(12))
+                            }
                             data.img_count = data.pictures.length
                         })
+                        if(this.statusSelect == 2) {
+                            this.filter_refund = true
+                            this.filter_commission = false
+                        } else if(this.statusSelect == 7) {
+                            this.filter_refund = false
+                            this.filter_commission = true
+                        } else {
+                            this.filter_refund = false
+                            this.filter_commission = false
+                        }
                         this.tableData = res.data.data
                         this.totals = res.data.count
                     }
@@ -785,6 +817,8 @@
                 this.site_filter = ''
                 this.filter_name = ''
                 this.filter_shopname = ''
+                this.filter_refund = false
+                this.filter_commission = false
                 this.getData()
             },
             formatter_created_at(row, column) {
@@ -821,7 +855,8 @@
                 const item = this.tableData[index];
                 this.form = {
                     id: item.id,
-                    status: item.status
+                    status: item.status,
+                    commission: 0
                 }
                 this.form.remark = ''
                 this.fileList = []
@@ -857,6 +892,9 @@
                         return
                     }
                 }
+                if(this.form.status == '6') {
+
+                }
                 if(this.form.refund_time == undefined) {
                     this.$message.error('请选择返款时间')
                     return
@@ -866,6 +904,7 @@
                 formData.append('remark', this.form.remark)
                 formData.append('need_refund', this.form.need_refund)
                 formData.append('refund_time', this.form.refund_time)
+                formData.append('commission', this.form.commission)
                 if(this.form.done_direct != undefined) {
                     formData.append('done_direct', this.form.done_direct)
                 }
@@ -1140,7 +1179,7 @@
                         formData.append('task_record[currency]', this.addReviewerForm.currency)
                         formData.append('task_record[pay_time]', this.addReviewerForm.pay_time)
                         formData.append('task_record[pay_price]', this.addReviewerForm.pay_price)
-                        formData.append('task_record[commission]', this.addReviewerForm.commission)
+                        // formData.append('task_record[commission]', this.addReviewerForm.commission)
                         formData.append('task_record[charge]', this.addReviewerForm.poundage)
                         formData.append('task_record[need_refund]', this.addReviewerForm.isPay)
                         formData.append('task_record[paypal_account]', this.addReviewerForm.paypal_account)

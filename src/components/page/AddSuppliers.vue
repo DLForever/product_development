@@ -166,12 +166,12 @@
 						formData.append('supplier[address]', this.form.address)
 						formData.append('supplier[website]', this.form.website)
 						formData.append('supplier[remark]', this.form.remark)
-						// this.fileList.forEach((item) => {
-						// 	formData.append('supplier[pictures][]', item.raw)
-						// })
-						// this.fileList2.forEach((item) => {
-						// 	formData.append('supplier[cert_pictures][]', item.raw)
-						// })
+						this.fileList.forEach((item) => {
+							formData.append('supplier[pictures][]', item.raw)
+						})
+						this.fileList2.forEach((item) => {
+							formData.append('supplier[cert_pictures][]', item.raw)
+						})
 						let config = {
 							headers: {
 								'Authorization': localStorage.getItem('token')
@@ -185,7 +185,7 @@
 								this.$router.push('/suppliersManage')
 							}
 						}).catch((res) => {
-							console.log('err')
+							console.log(res)
 						}).finally((res) => {
 		                    this.submitDisabled = false
 		                })

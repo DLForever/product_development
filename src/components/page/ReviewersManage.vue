@@ -226,9 +226,9 @@
                 <el-form-item label="支付价格" prop="pay_price">
                     <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.pay_price" :min="0" :step="10" @change="totalPrice"></el-input-number>
                 </el-form-item>
-                <el-form-item label="佣金" prop="commission">
+                <!-- <el-form-item label="佣金" prop="commission">
                     <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.commission" :min="0" @change="totalPrice"></el-input-number>
-                </el-form-item>
+                </el-form-item> -->
                 <!-- <el-form-item label="手续费" prop="poundage">
                     <el-input-number style="margin-bottom: 5px;" v-model="addReviewerForm.poundage" :min="0" @change="totalPrice"></el-input-number>
                 </el-form-item> -->
@@ -977,7 +977,7 @@
                         formData.append('task_record[currency]', this.addReviewerForm.currency)
                         formData.append('task_record[pay_time]', this.addReviewerForm.pay_time)
                         formData.append('task_record[pay_price]', this.addReviewerForm.pay_price)
-                        formData.append('task_record[commission]', this.addReviewerForm.commission)
+                        // formData.append('task_record[commission]', this.addReviewerForm.commission)
                         // formData.append('task_record[charge]', this.addReviewerForm.poundage)
                         formData.append('task_record[paypal_account]', this.addReviewerForm.paypal_account)
                         formData.append('task_record[profile_url]', this.addReviewerForm.profile_url)

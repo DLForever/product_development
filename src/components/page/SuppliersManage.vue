@@ -137,14 +137,13 @@
                         <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
                 </el-table-column>
-                <el-table-column label="证书">
+                <!-- <el-table-column label="证书">
                     <template slot-scope="scope">
                         <span v-if="scope.row.cert_pic.length === 0">无</span>
                         <img style="cursor: pointer;" v-else-if="scope.row.cert_pic[0] != undefined && !(scope.row.cert_pic[0].url.thumb.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.cert_pic[0].url.thumb.url" @click="showPictures(scope.$index, scope.row, 'cert')"/>
                         <span v-else>无</span>
-                        <!-- <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a> -->
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column prop="phone" label="电话" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="email" label="邮箱" show-overflow-tooltip>
@@ -161,6 +160,19 @@
                 <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable>
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
+                </el-table-column>
+            </el-table>
+            <br><br>
+            <el-table v-if="info_files.length != 0" :data="info_files" border style="width: 100%">
+                <el-table-column prop="name" label="证书" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <a :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="name" label="操作" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <el-button type="text" class="red" icon="el-icon-delete" @click="handleDeleteInfo(scope.$index, scope.row)">删除</el-button>
+                    </template>
                 </el-table-column>
             </el-table>
         </el-dialog>
@@ -226,6 +238,7 @@
                 search_supplier: '',
                 fileList: [],
                 fileList2: [],
+                info_files: []
             }
         },
         created() {
@@ -326,12 +339,12 @@
                 const item = this.tableData[index]
                 this.form = {
                     id: item.id,
-                    name: item.name,
-                    phone: item.phone,
-                    email: item.email,
-                    address: item.address,
-                    website: item.website,
-                    remark: item.remark
+                    name: item.name || '',
+                    phone: item.phone || '',
+                    email: item.email || '',
+                    address: item.address || '',
+                    website: item.website || '',
+                    remark: item.remark || ''
                 }
                 this.editVisible = true;
             },
@@ -357,6 +370,34 @@
                         
                     })
                 }).catch(() => {
+                    this.$message.info('已取消删除')
+                })
+            },
+            handleDeleteInfo(index, row) {
+                this.$confirm('此操作将永久删除该证书, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'danger'
+                }).then(() => {
+                    let params = {
+                        img_id: row.id,
+                        t_type: 2
+                    }
+                    this.$axios.post('/suppliers/' + this.product_id + '/delete_img', params, {
+                         headers: {
+                            'Authorization': localStorage.getItem('token')
+                        }
+                    }).then((res) => {
+                        if(res.data.code == 200) {
+                            this.info_files.splice(index, 1)
+                            this.getData()
+                            this.$message.success("删除成功")
+                        }
+                    }).catch((res) => {
+                        console.log(res)
+                    })
+                }).catch((res) => {
+                    console.log(res)
                     this.$message.info('已取消删除')
                 })
             },
@@ -432,6 +473,7 @@
                 this.delVisible = false;
             },
             handleDetails(index, row) {
+                this.product_id = row.id
                 this.$axios.get('/suppliers/' + row.id, {
                     headers: {
                         'Authorization': localStorage.getItem('token')
@@ -447,6 +489,7 @@
                                 res.data.data.cert_pic.push(data)
                             }
                         })
+                        this.info_files = res.data.data.info_files
                         this.suppliers_details = [res.data.data]
                         this.detailVisible = true
                     }
@@ -472,7 +515,8 @@
                     type: 'danger'
                 }).then(() => {
                     let params = {
-                        img_id: id
+                        img_id: id,
+                        t_type: 1
                     }
                     this.$axios.post('/suppliers/' + this.product_id + '/delete_img', params, {
                          headers: {
@@ -547,5 +591,8 @@
     }
     .img_carousel {
         max-width: 40rem;
+    }
+    .red{
+        color: #ff0000;
     }
 </style>
