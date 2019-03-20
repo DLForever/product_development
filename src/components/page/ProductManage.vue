@@ -73,8 +73,9 @@
                 </el-table-column>
                 <el-table-column prop="name" label="产品名称" width="230" show-overflow-tooltip>
                 </el-table-column>
-                
-                <el-table-column prop="category_name" label="分类" show-overflow-tooltip>
+                <el-table-column prop="category_name" label="分类" width="140" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="active_task_count" label="任务数" width="70" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="created_at_format" label="创建时间" sortable width="135">
                 </el-table-column>

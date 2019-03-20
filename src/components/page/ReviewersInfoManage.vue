@@ -744,6 +744,11 @@
                                 data.need_refund2 = '否'
                             }
                             data.sumPrice2 = parseFloat((Number(data.charge) + Number(data.commission) + Number(data.commission_charge) + Number(data.pay_price)).toPrecision(12))
+                            if(this.statusSelect == 2) {
+                                data.sumPrice = parseFloat((Number(data.charge) + Number(data.pay_price)).toPrecision(12))
+                            } else if (this.statusSelect == 7) {
+                                data.sumPrice = parseFloat((Number(data.commission_charge) + Number(data.commission)).toPrecision(12))
+                            }
                             data.img_count = data.pictures.length
                         })
                         this.tableData = res.data.data

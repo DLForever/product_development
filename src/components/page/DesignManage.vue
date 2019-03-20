@@ -409,6 +409,8 @@
                 </el-table-column>
                 <el-table-column prop="user_remark" label="申请备注">
                 </el-table-column>
+                <el-table-column prop="back_remark" label="归还备注">
+                </el-table-column>
                 <el-table-column prop="manager_remark" label="管理员备注">
                 </el-table-column>
                 <el-table-column prop="status" label="状态">
@@ -420,7 +422,25 @@
                 </el-table-column>
                 <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
                 </el-table-column>
+                <el-table-column fixed="right" label="操作"width="100">
+                    <template slot-scope="scope">
+                        <el-button type="text" icon="el-icon-refresh" @click="returnSamples(scope.$index, scope.row)">归还</el-button>
+                    </template>
+                </el-table-column>
             </el-table>
+        </el-dialog>
+
+        <!-- 归还提示框 -->
+        <el-dialog title="提示" :visible.sync="returnVisible" width="50%" center>
+            <el-form label-width="50px">
+                <el-form-item label="备注">
+                    <el-input placeholder="请输入备注" v-model.trim="return_remark"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="returnVisible = false">取 消</el-button>
+                <el-button type="primary" @click="returndone">确认归还</el-button>
+            </span>
         </el-dialog>
     </div>
 </template>
@@ -578,7 +598,10 @@
                 sample_options2: [],
                 applyDetailVisible: false,
                 apply_details: [],
-                picture_task_id: ''
+                picture_task_id: '',
+                returnVisible: false,
+                return_remark: '',
+                apply_index: undefined
             }
         },
         created() {
@@ -751,10 +774,12 @@
                     remark: item.remark
                 }
                 // this.sample_Options = row.samples
-                row.samples.forEach((data) => {
-                    this.sample_Options.push({id: data.id, name: data.name})
-                    this.form.sample_id.push(data.id)
-                })
+                if(row.samples != undefined) {
+                    row.samples.forEach((data) => {
+                        this.sample_Options.push({id: data.id, name: data.name})
+                        this.form.sample_id.push(data.id)
+                    })
+                }
                 // console.log(this.form.sample_id)
                 // this.sample_Options.push({id: item.sample_id, name: item.sample_name})
                 this.fileList = []
@@ -1452,6 +1477,35 @@
                     }
                 }).catch((res) => {
 
+                })
+            },
+            returnSamples(index, row) {
+                this.idx = row.id
+                this.return_remark = ''
+                this.apply_index = index
+                this.returnVisible = true
+            },
+            returndone() {
+                if(this.return_remark == '') {
+                    this.$message.error('请输入备注')
+                    return
+                } 
+                let params = {
+                    remark: this.return_remark
+                }
+                this.$axios.delete('/sample_outs/' + this.idx, {
+                    headers: {'Authorization': localStorage.getItem('token')},
+                    params
+                }).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('归还申请已提交')
+                        this.apply_details[this.apply_index].status = 3
+                        this.apply_details[this.apply_index].back_remark = this.return_remark
+                        this.getData()
+                        this.returnVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
                 })
             },
             getStatusName(status) {
