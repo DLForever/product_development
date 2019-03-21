@@ -18,7 +18,7 @@
                 </div> -->
             </div>
             <br><br>
-            <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
+            <el-table v-loading="table_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column prop="username" label="用户名" show-overflow-tooltip>
                 </el-table-column>
@@ -191,7 +191,8 @@
                 editRolesVisible: false,
                 editCountVisible: false,
                 shopCount: 0,
-                user_id: undefined
+                user_id: undefined,
+                table_loading: true
             }
         },
         created() {
@@ -230,6 +231,7 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
+                this.table_loading = true
                 this.$axios.get( '/users?page='+this.cur_page, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
@@ -247,6 +249,7 @@
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
+                        this.table_loading = false
                     }
                 }).catch((res) => {
                 	console.log('error')

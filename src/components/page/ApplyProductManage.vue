@@ -25,7 +25,7 @@
                 </div>
             </div>
             <br><br>
-            <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
+            <el-table v-loading="table_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column prop="apply_username" label="申请人" show-overflow-tooltip>
                 </el-table-column>
@@ -184,6 +184,7 @@
                 user_total2: 0,
                 query2: undefined,
                 loading2: false,
+                table_loading: true
             }
         },
         created() {
@@ -216,6 +217,7 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
+                this.table_loading = true
                 this.$axios.get( '/product_applies/?page='+this.cur_page  + '&apply_user_id=' + this.user_id_filter + '&check_user_id=' + this.user_check_id_filter, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
@@ -228,12 +230,14 @@
                     this.tableData = res.data.data
                     this.totals = res.data.count
                     this.paginationShow = true
+                    this.table_loading = false
                     }
                 }).catch((res) => {
                 	console.log('error')
                 })
             },
             filter_product() {
+                this.table_loading = true
                 this.cur_page = 1
                 this.paginationShow = false
                 this.$axios.get( '/product_applies/?page='+this.cur_page  + '&apply_user_id=' + this.user_id_filter + '&check_user_id=' + this.user_check_id_filter, {
@@ -246,6 +250,7 @@
                     })
                         this.tableData = res.data.data
                         this.totals = res.data.count
+                        this.table_loading = false
                     }
                     this.paginationShow = true
                 }).catch((res) => {

@@ -31,7 +31,7 @@
                 </div>
             </div>
             <br><br>
-            <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
+            <el-table v-loading="table_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column prop="asin" label="ASIN" width="150" fixed show-overflow-tooltip>
                 </el-table-column>
@@ -634,7 +634,8 @@
                 site_options: ['US', 'UK', 'DE', 'JP'],
                 paytype_options: ['PayPal', '微信'],
                 currency_options: ['美金', '英镑', '欧元', '日元'],
-                keyword_options: []
+                keyword_options: [],
+                table_loading: true
             }
         },
         created() {
@@ -681,6 +682,7 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
+                this.table_loading = true
                 this.$axios.get( '/tasks?page='+this.cur_page + '&status=' + this.status + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
@@ -697,12 +699,14 @@
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
+                        this.table_loading = false
                     }
                 }).catch((res) => {
                 	console.log('error')
                 })
             },
             filter_product() {
+                this.table_loading = true
                 this.cur_page = 1
                 this.paginationShow = false
                 this.$axios.get( '/tasks?page='+this.cur_page + '&status=' + this.statusSelect + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id, {
@@ -721,6 +725,7 @@
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
+                        this.table_loading = false
                     }
                     
                 }).catch((res) => {

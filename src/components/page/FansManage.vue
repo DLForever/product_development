@@ -17,7 +17,7 @@
                 </div>
             </div>
             <br><br>
-            <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
+            <el-table v-loading="table_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column prop="paypal_account" label="粉丝名称" show-overflow-tooltip>
                 </el-table-column>
@@ -261,7 +261,8 @@
                 exportVisible: false,
                 picturestList: [],
                 picturestList2: [],
-                picturestList3: []
+                picturestList3: [],
+                table_loading: true
             }
         },
         created() {
@@ -308,6 +309,7 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
+                this.table_loading = true
                 this.export_token = localStorage.getItem('token')
                 this.$axios.get( '/fans?page='+this.cur_page + '&query=' + this.search_fan, {
                 	headers: {'Authorization': localStorage.getItem('token')}
@@ -317,12 +319,14 @@
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
+                        this.table_loading = false
                     }
                 }).catch((res) => {
                 	console.log('error')
                 })
             },
             filter_product() {
+                this.table_loading = true
                 this.cur_page = 1
                 this.paginationShow = false
                 this.$axios.get( '/fans?page='+this.cur_page + '&query=' + this.search_fan, {
@@ -332,6 +336,7 @@
                     if(res.data.code == 200) {
                         this.tableData = res.data.data
                         this.totals = res.data.count
+                        this.table_loading = false
                     }
                     this.paginationShow = true
                 }).catch((res) => {

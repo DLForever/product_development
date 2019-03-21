@@ -18,7 +18,7 @@
                 </div>
             </div>
             <br><br>
-            <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
+            <el-table v-loading="table_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column prop="id" label="分类ID" width="120" show-overflow-tooltip>
                 </el-table-column>
@@ -156,7 +156,8 @@
                 category_name: '',
                 category_total: [],
                 isFilter: false,
-                remark: ''
+                remark: '',
+                table_loading: true
             }
         },
         created() {
@@ -187,6 +188,7 @@
             },
             // 获取 easy-mock 的模拟数据
             getData() {
+                this.table_loading = true
                 this.$axios.get( '/categories?page='+this.cur_page + '&name=' + this.category_name + '&remark=' + this.remark + '&list=true', {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
@@ -200,6 +202,7 @@
                         })
                         this.totals = res.data.count
                         this.paginationShow = true
+                        this.table_loading = false
                     }
                 }).catch((res) => {
                 	console.log('error')

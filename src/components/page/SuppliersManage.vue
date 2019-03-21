@@ -18,7 +18,7 @@
                 </div>
             </div>
             <br><br>
-            <el-table :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
+            <el-table v-loading="table_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column prop="id" label="供应商ID" show-overflow-tooltip>
                 </el-table-column>
@@ -169,6 +169,13 @@
                         <a :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
                     </template>
                 </el-table-column>
+                <el-table-column prop="name" label="预览" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <img v-if="scope.row.url.url.endsWith('.jpg') || scope.row.url.url.endsWith('.png')" style="max-width: 10rem" :src="$axios.defaults.baseURL+scope.row.url.url"/>
+                        <pdf v-else-if="scope.row.url.url.endsWith('.pdf')" style="max-width: 10rem" :src="$axios.defaults.baseURL+scope.row.url.url"></pdf>
+                        <span v-else></span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="name" label="操作" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <el-button type="text" class="red" icon="el-icon-delete" @click="handleDeleteInfo(scope.$index, scope.row)">删除</el-button>
@@ -189,6 +196,7 @@
 </template>
 
 <script>
+    import pdf from 'vue-pdf'
     export default {
 //      name: 'product_manage',
         data() {
@@ -238,7 +246,8 @@
                 search_supplier: '',
                 fileList: [],
                 fileList2: [],
-                info_files: []
+                info_files: [],
+                table_loading: true
             }
         },
         created() {
@@ -270,6 +279,7 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
+                this.table_loading = true
                 this.$axios.get( '/suppliers/?page='+this.cur_page + '&name=' + this.search_supplier, {
                 	headers: {'Authorization': localStorage.getItem('token')}
                 },
@@ -279,15 +289,17 @@
                         data.size = data.length + '*' + data.width + '*' + data.height
                         data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                     })
-                    this.tableData = res.data.data
-                    this.totals = res.data.count
-                    this.paginationShow = true
+                        this.tableData = res.data.data
+                        this.totals = res.data.count
+                        this.paginationShow = true
+                        this.table_loading = false
                     }
                 }).catch((res) => {
                 	console.log('error')
                 })
             },
             filter_product() {
+                this.table_loading = true
                 this.cur_page = 1
                 this.paginationShow = false
                 this.$axios.get( '/suppliers/?page='+this.cur_page + '&name=' + this.search_supplier, {
@@ -300,6 +312,7 @@
                     })
                         this.tableData = res.data.data
                         this.totals = res.data.count
+                        this.table_loading = false
                     }
                     this.paginationShow = true
                 }).catch((res) => {
@@ -489,6 +502,11 @@
                                 res.data.data.cert_pic.push(data)
                             }
                         })
+                        // res.data.data.info_files.forEach((data) => {
+                        //     console.log(data.url.url)
+                        //     data.url.url2 =  pdf.createLoadingTask(data.url.url)
+                        //     console.log(data.url.url2)
+                        // })
                         this.info_files = res.data.data.info_files
                         this.suppliers_details = [res.data.data]
                         this.detailVisible = true
@@ -548,6 +566,9 @@
             handleRemove2(a, b) {
                 this.fileList2 = b
             },
+        },
+        components: {
+            "pdf": pdf
         }
     }
 
