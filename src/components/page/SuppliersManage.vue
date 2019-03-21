@@ -176,7 +176,7 @@
                         <span v-else></span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="name" label="操作" show-overflow-tooltip>
+                <el-table-column prop="name" label="操作" width="100px">
                     <template slot-scope="scope">
                         <el-button type="text" class="red" icon="el-icon-delete" @click="handleDeleteInfo(scope.$index, scope.row)">删除</el-button>
                     </template>

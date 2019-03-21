@@ -696,7 +696,8 @@
                     sampleInfo: '',
                     referUrl: '',
                     sampleSelect: [],
-                    plan_date: ''
+                    plan_date: '',
+                    product_subject_id: ''
                 },
                 loading2: false,
                 query2: false,
@@ -1619,7 +1620,7 @@
                 })
             },
             handleAddDesign(index, row) {
-                this.designForm.id = row.id
+                this.designForm.product_subject_id = row.product_subject_id
                 this.designForm.demand = ''
                 this.designForm.sampleInfo = ''
                 this.designForm.sampleSelect = []
@@ -1644,7 +1645,7 @@
                     remark: this.form.remark,
                 }
                 let formData = new FormData()
-                formData.append('product_subject_id', this.designForm.id)
+                formData.append('product_subject_id', this.designForm.product_subject_id)
                 formData.append('remark', this.designForm.demand)
                 formData.append('sample_remark', this.designForm.sampleInfo)
                 formData.append('ref_url', this.designForm.referUrl)
