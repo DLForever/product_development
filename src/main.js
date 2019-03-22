@@ -38,7 +38,17 @@ var defaultHost = window.location.protocol + "//" + window.location.hostname
 var defaultHost = 'http://47.74.177.128'
 axios.defaults.baseURL = defaultHost
 
+// axios.interceptors.request.use(
+//     config => {
+//         ElementUI.Message.info('request in66666')
+//         // console.log('request in66666')
+//         return config
+//     }
+//     )
+
 axios.interceptors.response.use(
+    // ElementUI.Message.error('response in66666'),
+    // console.log('response in8888'),
     response => {
         if (response.data.code != 200) {
             ElementUI.Message.error(response.data.message)

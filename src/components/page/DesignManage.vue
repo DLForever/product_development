@@ -2,7 +2,7 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-lx-goodsfill"></i> 制图管理</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-lx-pic"></i> 制图管理</el-breadcrumb-item>
                 <el-breadcrumb-item>制图任务管理</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -52,7 +52,7 @@
                 </el-table-column>
                 <el-table-column fixed prop="sku" label="SKU" width="130" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <span class="link-type" @click="showChangeProduct(scope.$index, scope.row)">{{scope.row.sku.substring(0, scope.row.sku.length-2)}}</span>
+                        <span class="link-type" @click="showChangeProduct(scope.$index, scope.row)">{{scope.row.sku}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="username" label="制图人" width="70">
@@ -87,7 +87,7 @@
                 <el-table-column prop="email" label="制作的图" width="120">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count2" class="item" v-if="scope.row.img_count2 != 0">
-                            <span v-if="scope.row.pictures.length === 0">无</span>
+                            <span v-if="scope.row.done_pictures.length === 0">无</span>
                             <img style="cursor: pointer;" v-else-if="scope.row.done_pictures[0] != undefined && scope.row.done_pictures[0].url.thumb.url != null && !(scope.row.done_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.done_pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row, 'done_pic')"/>
                             <span v-else>无</span>
                         </el-badge>
@@ -681,10 +681,11 @@
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
-                        this.table_loading = false
                     }
                 }).catch((res) => {
                 	console.log(res)
+                }).finally(() => {
+                    this.table_loading = false
                 })
             },
             filter_product() {
@@ -718,12 +719,11 @@
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
-                        this.table_loading = false
                     }
                 }).catch((res) => {
                     console.log(res)
                 }).finally(() => {
-                    
+                    this.table_loading = false
                 })
             },
             clear_filter() {
@@ -908,10 +908,10 @@
             showPictures(index, row, remark) {
                 this.product_id = row.id
                 const item = this.tableData[index]
-                if (item.pictures.length == 0) {
-                    this.$message.info('暂未上传图片!')
-                    return
-                }
+                // if (item.pictures.length == 0 && item.done_pictures.length == 0) {
+                //     this.$message.info('暂未上传图片!')
+                //     return
+                // }
                 this.picturestList = []
                 this.picturestList2 = []
                 this.product_id = row.id

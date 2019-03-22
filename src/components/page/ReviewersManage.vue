@@ -71,8 +71,8 @@
                 </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="150">
                 </el-table-column>
-                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="150">
-                </el-table-column>
+                <!-- <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="150">
+                </el-table-column> -->
                 <el-table-column label="操作" width="100" fixed="right">
                     <template slot-scope="scope">
                         <el-dropdown>
@@ -699,10 +699,11 @@
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
-                        this.table_loading = false
                     }
                 }).catch((res) => {
                 	console.log('error')
+                }).finally(() => {
+                    this.table_loading = false
                 })
             },
             filter_product() {
@@ -725,13 +726,11 @@
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
-                        this.table_loading = false
                     }
-                    
                 }).catch((res) => {
                     console.log('error')
                 }).finally(() => {
-                    
+                    this.table_loading = false
                 })
             },
             clear_filter() {

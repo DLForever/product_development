@@ -436,10 +436,11 @@
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
-                        this.table_loading = false
                     }
                 }).catch((res) => {
                 	console.log('error')
+                }).finally(() => {
+                    this.table_loading = false
                 })
             },
             filter_product() {
@@ -472,11 +473,12 @@
                     })
                         this.tableData = res.data.data
                         this.totals = res.data.count
-                        this.table_loading = false
                     }
                     this.paginationShow = true
                 }).catch((res) => {
                     console.log('error')
+                }).finally(() => {
+                    this.table_loading = false
                 })
             },
             getUsers() {

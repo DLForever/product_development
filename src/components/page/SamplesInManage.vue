@@ -31,8 +31,8 @@
                 </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable>
                 </el-table-column>
-                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable>
-                </el-table-column>
+                <!-- <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable>
+                </el-table-column> -->
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column label="操作" width="100">
@@ -204,10 +204,11 @@
                     this.tableData = res.data.data
                     this.totals = res.data.count
                     this.paginationShow = true
-                    this.table_loading = false
                     }
                 }).catch((res) => {
                 	console.log('error')
+                }).finally(() => {
+                    this.table_loading = false
                 })
             },
             filter_product() {
@@ -230,11 +231,12 @@
                     })
                         this.tableData = res.data.data
                         this.totals = res.data.count
-                        this.table_loading = false
                     }
                     this.paginationShow = true
                 }).catch((res) => {
                     console.log('error')
+                }).finally(() => {
+                    this.table_loading = false
                 })
             },
             getUsers() {

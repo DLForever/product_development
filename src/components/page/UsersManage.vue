@@ -34,8 +34,8 @@
                 </el-table-column>
                 <el-table-column prop="created_at_format" label="创建时间" sortable width="140">
                 </el-table-column>
-                <el-table-column prop="updated_at" label="更新时间" sortable width="140">
-                </el-table-column>
+                <!-- <el-table-column prop="updated_at" label="更新时间" sortable width="140">
+                </el-table-column> -->
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column label="操作" width="100">
@@ -249,10 +249,11 @@
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
-                        this.table_loading = false
                     }
                 }).catch((res) => {
                 	console.log('error')
+                }).finally(() => {
+                    this.table_loading = false
                 })
             },
             getRoles() {
