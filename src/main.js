@@ -8,6 +8,7 @@ import '../static/css/theme-green/index.css';       // 浅绿色主题
 import '../static/css/icon.css';
 import "babel-polyfill";
 import judge from '../static/js/judge_number.js'
+import { Loading } from 'element-ui'
 
 Vue.use(ElementUI, { size: 'small' });
 Vue.prototype.$axios = axios;
@@ -38,18 +39,28 @@ var defaultHost = window.location.protocol + "//" + window.location.hostname
 var defaultHost = 'http://47.74.177.128'
 axios.defaults.baseURL = defaultHost
 
-// axios.interceptors.request.use(
-//     config => {
-//         ElementUI.Message.info('request in66666')
-//         // console.log('request in66666')
-//         return config
-//     }
-//     )
+var loadinginstace
+axios.interceptors.request.use(
+    config => {
+        config.headers.Authorization = localStorage.getItem('token')
+        // console.log('request')
+        // loadinginstace = Loading.service({ fullscreen: true })
+        // loadinginstace = ElementUI.loading({
+        //     lock: true,
+        //     text: 'Loading',
+        //     spinner: 'el-icon-loading',
+        //     background: 'rgba(0, 0, 0, 0.7)'
+        // })
+        // console.log('request in66666')
+        return config
+    }
+    )
 
 axios.interceptors.response.use(
     // ElementUI.Message.error('response in66666'),
     // console.log('response in8888'),
     response => {
+        // loadinginstace.close()
         if (response.data.code != 200) {
             ElementUI.Message.error(response.data.message)
         }

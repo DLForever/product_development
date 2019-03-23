@@ -65,9 +65,7 @@
                 this.options = []
                 if (process.env.NODE_ENV === 'development') {
                 };
-                this.$axios.get( '/categories?page='+this.cur_page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+this.cur_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	this.options3 = res.data.data
@@ -83,9 +81,7 @@
                 })
             },
             getCatetoryLoop(page) {
-                this.$axios.get( '/categories?page='+page, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+page
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
@@ -117,11 +113,8 @@
                     this.$message.error('请选择分类')
                     return
                 }
-                this.$axios.delete('/categories/' + this.category_id.pop(), {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.delete('/categories/' + this.category_id.pop()
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('删除成功！')
                         this.category_id = []
@@ -148,12 +141,7 @@
 					category_id: this.category_id.pop(),
 					name: this.classifyName
 				}
-				let config = {
-					headers: {
-						'Authorization': localStorage.getItem('token')
-					}
-				}
-				this.$axios.post('/categories', params, config).then((res) => {
+				this.$axios.post('/categories', params).then((res) => {
 					if(res.data.code == 200) {
 						this.category_id = []
 						this.classifyName = ''
@@ -187,15 +175,10 @@
 				}
 				
 				let formData = new FormData()
-				let config = {
-					headers: {
-						'Authorization': localStorage.getItem('token')
-					}
-				}
 				this.batchList.forEach((item) => {
 					formData.append('file', item.raw)
 				})
-				this.$axios.post('/products/batch', formData, config).then((res) => {
+				this.$axios.post('/products/batch', formData).then((res) => {
 					if(res.data.code == 200) {
 						this.$message.success("提交成功")
 						this.batchList = []
@@ -230,9 +213,7 @@
 				this.$message.error("对不起，超过个数限制")
 			},
 			getCatetory() {
-            	this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1] , {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+            	this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1]
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	this.options = []

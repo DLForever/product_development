@@ -239,9 +239,7 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
-                this.$axios.get( '/samples?page='+this.cur_page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/samples?page='+this.cur_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -259,9 +257,7 @@
             filter_product() {
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/samples?page='+this.cur_page + '&shopname=' + this.search_shopname + '&fnsku=' + this.search_fnsku, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/samples?page='+this.cur_page + '&shopname=' + this.search_shopname + '&fnsku=' + this.search_fnsku
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -285,9 +281,7 @@
             getCategories() {
                 if (process.env.NODE_ENV === 'development') {
                 };
-                this.$axios.get( '/categories?page='+this.cur_page, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+this.cur_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
@@ -375,7 +369,6 @@
             },
             // 保存编辑
             saveEdit() {
-                console.log(this.category_id)
                 this.submitDisabled = true
                 let params = {
                     remark: this.form.remark,
@@ -405,12 +398,7 @@
                 // this.fileList2.forEach((item) => {
                 //     formData.append('package_pictures[]', item.raw)
                 // })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.patch('/samples/' + this.form.id, formData, config).then((res) => {
+                this.$axios.patch('/samples/' + this.form.id, formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.options = []
@@ -451,10 +439,7 @@
             	this.form = {
             		id: item.id
             	}
-            	this.$axios.delete('/samples/'+this.form.id, 
-            	{
-            		headers: {'Authorization': localStorage.getItem('token')}
-            	}
+            	this.$axios.delete('/samples/'+this.form.id
             ).then((res) => {
             	if(res.data.code == 200){
             		this.tableData.splice(this.idx, 1)
@@ -481,9 +466,8 @@
                     price: this.price,
                     remark: this.stock_remark
                 }
-                this.$axios.post('/sample_ins', params, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.post('/sample_ins', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('提交成功')
                         this.getData()
@@ -514,9 +498,8 @@
                     out_type: this.out_type,
                     remark: this.apply_stockremark
                 }
-                this.$axios.post('/sample_outs', params, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.post('/sample_outs', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('提交成功')
                         this.getData()

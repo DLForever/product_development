@@ -734,9 +734,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&country=' + this.site_filter + '&shopname=' + this.filter_shopname + '&product_name=' + this.filter_name, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&country=' + this.site_filter + '&shopname=' + this.filter_shopname + '&product_name=' + this.filter_name
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -776,9 +774,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&country=' + this.site_filter + '&shopname=' + this.filter_shopname + '&product_name=' + this.filter_name, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&country=' + this.site_filter + '&shopname=' + this.filter_shopname + '&product_name=' + this.filter_name
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -921,12 +917,7 @@
                 this.fileList.forEach((item) => {
                     formData.append('picture_review[]', item.raw)
                 })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.post('/task_records/' + this.form.id + '/done_review', formData, config).then((res) => {
+                this.$axios.post('/task_records/' + this.form.id + '/done_review', formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('完成评论！')
                         this.getData()
@@ -946,9 +937,6 @@
             		id: item.id
             	}
             	this.$axios.delete('/task_records/'+this.form.id, 
-            	{
-            		headers: {'Authorization': localStorage.getItem('token')}
-            	}
             ).then((res) => {
             	if(res.data.code == 200){
             		this.tableData.splice(this.idx, 1)
@@ -1028,11 +1016,8 @@
                     // id: this.product_id,
                     img_id: this.picture_id
                 }
-                this.$axios.post('/task_records/' + this.product_id + '/delete_img', params, {
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/task_records/' + this.product_id + '/delete_img', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         if (this.remark == 'review') {
                             this.picturestList.splice(this.idx, 1)
@@ -1070,11 +1055,8 @@
                 this.fileList3.forEach((item) => {
                     formData.append('picture_feedback[]', item.raw)
                 })
-                this.$axios.post('/task_records/' + this.form.id + '/done_failure', formData, {
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/task_records/' + this.form.id + '/done_failure', formData
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.getData()
                         this.$message.success("反馈成功!")
@@ -1111,11 +1093,8 @@
                             this.$refs.infiniteLoading.stateChanger.reset()
                         }
                     }
-                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim(), {
-                        headers: {
-                            'Authorization': localStorage.getItem('token')
-                        },
-                    }).then((res) => {
+                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim()
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.loading = false
                             //                          this.options = res.data.data
@@ -1205,12 +1184,7 @@
                         this.fileList2.forEach((item) => {
                             formData.append('picture_refund[]', item.raw)
                         })
-                        let config = {
-                            headers: {
-                                'Authorization': localStorage.getItem('token')
-                            }
-                        }
-                        this.$axios.patch('/task_records/' + this.idx, formData, config).then((res) => {
+                        this.$axios.patch('/task_records/' + this.idx, formData).then((res) => {
                             if(res.data.code == 200) {
                                 this.$message.success('提交成功！')
                                 this.$refs[formName].resetFields()
@@ -1246,12 +1220,7 @@
                 this.fileList2.forEach((item) => {
                     formData.append('picture_refund[]', item.file)
                 })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.post('/task_records/' + this.form.id + '/done_refund', formData, config).then((res) => {
+                this.$axios.post('/task_records/' + this.form.id + '/done_refund', formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('完成返款！')
                         this.getData()
@@ -1284,12 +1253,7 @@
                 this.fileList2.forEach((item) => {
                     formData.append('picture_refund[]', item.file)
                 })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.post('/task_records/' + this.form.id + '/update_picture', formData, config).then((res) => {
+                this.$axios.post('/task_records/' + this.form.id + '/update_picture', formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('完成添加返款！')
                         this.getData()

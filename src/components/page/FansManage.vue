@@ -311,9 +311,7 @@
                 };
                 this.table_loading = true
                 this.export_token = localStorage.getItem('token')
-                this.$axios.get( '/fans?page='+this.cur_page + '&query=' + this.search_fan, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/fans?page='+this.cur_page + '&query=' + this.search_fan
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.tableData = res.data.data
@@ -330,9 +328,7 @@
                 this.table_loading = true
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/fans?page='+this.cur_page + '&query=' + this.search_fan, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/fans?page='+this.cur_page + '&query=' + this.search_fan
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.tableData = res.data.data
@@ -419,12 +415,7 @@
                 // this.fileList.forEach((item) => {
                 //     formData.append('logo[]', item.raw)
                 // })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.patch('/task_records/' + this.form.id, params, config).then((res) => {
+                this.$axios.patch('/task_records/' + this.form.id, params).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.getData()
@@ -445,9 +436,6 @@
             		id: item.id
             	}
             	this.$axios.delete('/intellectual_properties/'+this.form.id, 
-            	{
-            		headers: {'Authorization': localStorage.getItem('token')}
-            	}
             ).then((res) => {
             	if(res.data.code == 200){
             		this.tableData.splice(this.idx, 1)
@@ -460,11 +448,8 @@
                 this.delVisible = false;
             },
             handleDetails(index, row) {
-                this.$axios.get('/fans/' + row.id, {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.get('/fans/' + row.id
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.suppliers_details = [res.data.data]
                         this.task_records = res.data.data.task_records
@@ -503,11 +488,8 @@
                     id: this.product_id,
                     img_id: this.picture_id
                 }
-                this.$axios.post('/intellectual_properties/delete_img', params, {
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/intellectual_properties/delete_img', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.picturestList.splice(this.idx, 1);
                         this.getData()

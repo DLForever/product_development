@@ -130,9 +130,7 @@
 			getData() {
                 if (process.env.NODE_ENV === 'development') {
                 };
-                this.$axios.get( '/categories?page='+this.cur_page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+this.cur_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                     }
@@ -172,12 +170,7 @@
 						this.fileList2.forEach((item) => {
 							formData.append('supplier[cert_pictures][]', item.raw)
 						})
-						let config = {
-							headers: {
-								'Authorization': localStorage.getItem('token')
-							}
-						}
-						this.$axios.post('/suppliers', formData, config).then((res) => {
+						this.$axios.post('/suppliers', formData).then((res) => {
 							if(res.data.code == 200) {
 								this.$message.success('提交成功！');
 								this.$refs['form'].resetFields()
@@ -212,18 +205,12 @@
 					console.log('上传模板大小不能超过10MB！')
 					return
 				}
-				
 				let formData = new FormData()
-				let config = {
-					headers: {
-						'Authorization': localStorage.getItem('token')
-					}
-				}
 				console.log(this.batchProduct)
 				this.batchProduct.forEach((item) => {
 					formData.append('file', item.raw)
 				})
-				this.$axios.post('/products/batch', formData, config).then((res) => {
+				this.$axios.post('/products/batch', formData).then((res) => {
 					if(res.data.code == 200) {
 						this.$message.success("提交成功")
 						this.batchProduct = []

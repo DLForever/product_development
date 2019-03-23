@@ -493,9 +493,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -527,9 +525,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -557,9 +553,8 @@
                 this.getData()
             },
             getSuppliers() {
-                this.$axios.get('/suppliers?page=' + this.supplier_page, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.get('/suppliers?page=' + this.supplier_page
+                ).then((res) => {
                     if(res.data.code==200) {
                         this.supplier_options = this.supplier_options.concat(res.data.data)
                         this.supplier_total = res.data.count
@@ -569,9 +564,8 @@
                 })
             },
             getUsers() {
-                this.$axios.get('/users?page=' + this.user_page, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.get('/users?page=' + this.user_page
+                ).then((res) => {
                     if(res.data.code==200) {
                         this.user_options = this.user_options.concat(res.data.data)
                         this.user_total = res.data.count
@@ -583,9 +577,7 @@
             getCategories() {
                 if (process.env.NODE_ENV === 'development') {
                 };
-                this.$axios.get( '/categories?page='+this.category_page, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+this.category_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.options3 = res.data.data
@@ -602,9 +594,7 @@
                 })
             },
             getCatetoryLoop(page) {
-                this.$axios.get( '/categories?page='+page, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+page
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
@@ -750,12 +740,7 @@
                 // this.fileList2.forEach((item) => {
                 //     formData.append('package_pictures[]', item.raw)
                 // })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.patch('/samples/' + this.form.id, formData, config).then((res) => {
+                this.$axios.patch('/samples/' + this.form.id, formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         // this.options = []
@@ -799,10 +784,7 @@
             	this.form = {
             		id: item.id
             	}
-            	this.$axios.delete('/samples/'+this.form.id, 
-            	{
-            		headers: {'Authorization': localStorage.getItem('token')}
-            	}
+            	this.$axios.delete('/samples/'+this.form.id
             ).then((res) => {
             	if(res.data.code == 200){
             		this.tableData.splice(this.idx, 1)
@@ -834,9 +816,8 @@
                     price: this.price,
                     remark: this.stock_remark
                 }
-                this.$axios.post('/sample_ins', params, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.post('/sample_ins', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('提交成功')
                         this.getData()
@@ -867,9 +848,8 @@
                     out_type: this.out_type,
                     remark: this.apply_stockremark
                 }
-                this.$axios.post('/sample_outs', params, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.post('/sample_outs', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('提交成功')
                         this.getData()
@@ -913,9 +893,8 @@
                 }
             },
             getSuppliersEdit() {
-                this.$axios.get('/suppliers?page=' + this.supplier_page_edit, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.get('/suppliers?page=' + this.supplier_page_edit
+                ).then((res) => {
                     if(res.data.code==200) {
                         this.supplier_options_edit = this.supplier_options_edit.concat(res.data.data)
                         this.supplier_total_edit = res.data.count
@@ -942,11 +921,8 @@
                             this.$refs.infiniteLoading.stateChanger.reset()
                         }
                     }
-                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim(), {
-                        headers: {
-                            'Authorization': localStorage.getItem('token')
-                        },
-                    }).then((res) => {
+                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim()
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.loading = false
                             //                          this.options = res.data.data
@@ -985,11 +961,8 @@
                 let params = {
                     img_id: this.picture_id
                 }
-                this.$axios.post('/samples/' + this.product_id+ '/delete_img', params, {
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/samples/' + this.product_id+ '/delete_img', params
+                ).then((res) => {
                     if(res.data.code == 204) {
                         this.picturesProductList.splice(this.idx, 1);
                         this.getData()
@@ -1001,9 +974,7 @@
                 })
             },
             getCatetory() {
-                this.$axios.get( '/categories?parent_id=' + this.category_id_filter[this.category_id_filter.length -1] , {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?parent_id=' + this.category_id_filter[this.category_id_filter.length -1]
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.options = []
@@ -1032,9 +1003,7 @@
                 })
             },
             getCatetory2() {
-                this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1] , {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1]
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.options = []

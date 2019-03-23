@@ -239,9 +239,7 @@
 			getData() {
                 if (process.env.NODE_ENV === 'development') {
                 };
-                this.$axios.get( '/categories?page='+this.cur_page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+this.cur_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	this.options3 = res.data.data
@@ -256,9 +254,7 @@
                 })
             },
             getCatetoryLoop(page) {
-                this.$axios.get( '/categories?page='+page, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+page
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
@@ -286,9 +282,8 @@
 			   })
 			},
 			getSuppliers() {
-				this.$axios.get('/suppliers?page=' + this.supplier_page, {
-					headers: {'Authorization': localStorage.getItem('token')}
-				}).then((res) => {
+				this.$axios.get('/suppliers?page=' + this.supplier_page
+				).then((res) => {
 					if(res.data.code==200) {
 						this.supplierOptions = this.supplierOptions.concat(res.data.data)
 						this.supplier_total = res.data.count
@@ -375,12 +370,7 @@
 						this.fileList.forEach((item) => {
 							formData.append('sample[pictures][]', item.raw)
 						})
-						let config = {
-							headers: {
-								'Authorization': localStorage.getItem('token')
-							}
-						}
-						this.$axios.post('/samples', formData, config).then((res) => {
+						this.$axios.post('/samples', formData).then((res) => {
 							if(res.data.code == 200) {
 								this.$message.success('提交成功！');
 								this.$refs['form'].resetFields()
@@ -420,18 +410,12 @@
 					console.log('上传模板大小不能超过10MB！')
 					return
 				}
-				
 				let formData = new FormData()
-				let config = {
-					headers: {
-						'Authorization': localStorage.getItem('token')
-					}
-				}
 				console.log(this.batchProduct)
 				this.batchProduct.forEach((item) => {
 					formData.append('file', item.raw)
 				})
-				this.$axios.post('/samples/batch', formData, config).then((res) => {
+				this.$axios.post('/samples/batch', formData).then((res) => {
 					if(res.data.code == 200) {
 						this.$message.success("提交成功")
 						this.batchProduct = []
@@ -487,9 +471,7 @@
 				}
 			},
 			getCatetory() {
-                this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1] , {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1]
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.options = []

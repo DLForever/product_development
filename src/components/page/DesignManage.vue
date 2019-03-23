@@ -270,7 +270,7 @@
             <br> -->
             <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList2.length != 0">
                 <el-carousel-item v-for="(item, index) in picturestList2" :key="index">
-                    <img class="img_carousel" @click="handleDeletePic(item.remark, item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeletePic(item.remark, item.id, item.product_subject_id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
         </el-dialog>
@@ -660,9 +660,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/picture_tasks?page='+this.cur_page + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&status=' + this.status + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id + '&product_name=' + this.filter_productname + '&sku=' + this.filter_sku, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/picture_tasks?page='+this.cur_page + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&status=' + this.status + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id + '&product_name=' + this.filter_productname + '&sku=' + this.filter_sku
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -698,9 +696,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/picture_tasks?page='+this.cur_page + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&status=' + this.statusSelect + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id + '&product_name=' + this.filter_productname + '&sku=' + this.filter_sku, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/picture_tasks?page='+this.cur_page + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&status=' + this.statusSelect + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id + '&product_name=' + this.filter_productname + '&sku=' + this.filter_sku
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -799,11 +795,8 @@
                     // let params = {
                     //     task_period_id: row.id
                     // }
-                    this.$axios.post('/picture_tasks/' + row.id + '/done_destroy','', {
-                         headers: {
-                            'Authorization': localStorage.getItem('token')
-                        }
-                    }).then((res) => {
+                    this.$axios.post('/picture_tasks/' + row.id + '/done_destroy',''
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.getData()
                             this.$message.success("删除成功")
@@ -845,12 +838,7 @@
                 this.fileList.forEach((item) => {
                     formData.append('pictures[]', item.raw)
                 })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.patch('/picture_tasks/' + this.form.id, formData, config).then((res) => {
+                this.$axios.patch('/picture_tasks/' + this.form.id, formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.getData()
@@ -933,7 +921,7 @@
                 }
                 this.productVisible = true
             },
-            handleDeletePic(remark, id, index) {
+            handleDeletePic(remark, id, product_subject_id, index) {
                 this.remark = remark
                 this.idx = index;
                 this.$confirm('此操作将永久删除该图片, 是否继续?', '提示', {
@@ -944,19 +932,29 @@
                     let params = {
                         img_id: id
                     }
-                    this.$axios.post('/picture_tasks/' + this.product_id + '/delete_img', params, {
-                         headers: {
-                            'Authorization': localStorage.getItem('token')
-                        }
-                    }).then((res) => {
-                        if(res.data.code == 200) {
-                            this.picturestList2.splice(index, 1)
-                            this.getData()
-                            this.$message.success("删除成功")
-                        }
-                    }).catch((res) => {
-                        console.log(res)
-                    })
+                    if(remark == 'required') {
+                        this.$axios.post('/picture_tasks/' + this.product_id + '/delete_img', params
+                        ).then((res) => {
+                            if(res.data.code == 200) {
+                                this.picturestList2.splice(index, 1)
+                                this.getData()
+                                this.$message.success("删除成功")
+                            }
+                        }).catch((res) => {
+                            console.log(res)
+                        })
+                    }else {
+                        this.$axios.post('/product_subjects/' + product_subject_id + '/delete_img', params
+                        ).then((res) => {
+                            if(res.data.code == 200) {
+                                this.picturestList2.splice(index, 1)
+                                this.getData()
+                                this.$message.success("删除成功")
+                            }
+                        }).catch((res) => {
+                            console.log(res)
+                        })
+                    }
                 }).catch((res) => {
                     console.log(res)
                     this.$message.info('已取消删除')
@@ -967,11 +965,8 @@
                     // id: this.product_id,
                     img_id: this.picture_id
                 }
-                this.$axios.post('/tasks/' + this.product_id + '/delete_img', params, {
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/tasks/' + this.product_id + '/delete_img', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         if (this.remark == 'adv') {
                             this.picturestList.splice(this.idx, 1);
@@ -1018,11 +1013,8 @@
                             this.$refs.infiniteLoading.stateChanger.reset()
                         }
                     }
-                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim(), {
-                        headers: {
-                            'Authorization': localStorage.getItem('token')
-                        },
-                    }).then((res) => {
+                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim()
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.loading = false
                             //                          this.options = res.data.data
@@ -1069,11 +1061,8 @@
                             this.$refs.infiniteLoading2.stateChanger.reset()
                         }
                     }
-                    this.$axios.get("/users/?page=" + this.user_page2 + '&name=' + query.trim(), {
-                        headers: {
-                            'Authorization': localStorage.getItem('token')
-                        },
-                    }).then((res) => {
+                    this.$axios.get("/users/?page=" + this.user_page2 + '&name=' + query.trim()
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.loading2 = false
                             //                          this.options = res.data.data
@@ -1104,11 +1093,8 @@
                 this.date_time.pop()
             },
             checkSelf() {
-                this.$axios.post('/tasks/' + this.task_id + '/check','',{
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/tasks/' + this.task_id + '/check',''
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.getData()
                         this.$message.success("通过自审")
@@ -1139,9 +1125,8 @@
                     task_ids: id,
                     user_id: this.distributeUser,
                 }
-                this.$axios.post('/picture_tasks/allocate_task', params, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.post('/picture_tasks/allocate_task', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('分配成功!')
                         this.distributeVisible = false
@@ -1164,11 +1149,8 @@
                             this.$refs.infiniteLoading3.stateChanger.reset()
                         }
                     }
-                    this.$axios.get("/users/?page=" + this.dis_user_page + '&name=' + query.trim(), {
-                        headers: {
-                            'Authorization': localStorage.getItem('token')
-                        },
-                    }).then((res) => {
+                    this.$axios.get("/users/?page=" + this.dis_user_page + '&name=' + query.trim()
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.loading3 = false
                             //                          this.options = res.data.data
@@ -1218,11 +1200,8 @@
                     task_period_id: row.id,
                     plan_sum: row.plan_sum
                 }
-                this.$axios.post('/tasks/' + this.task_id + '/update_period', params,{
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/tasks/' + this.task_id + '/update_period', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.getData()
                         row.originalSum = row.plan_sum
@@ -1246,11 +1225,8 @@
                     let params = {
                         task_period_id: row.id
                     }
-                    this.$axios.post('/tasks/' + this.task_id + '/delete_period', params, {
-                         headers: {
-                            'Authorization': localStorage.getItem('token')
-                        }
-                    }).then((res) => {
+                    this.$axios.post('/tasks/' + this.task_id + '/delete_period', params
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.detailOptions2.splice(index, 1);
                             this.getData()
@@ -1290,11 +1266,8 @@
                 let params = {
                     plan_date: this.plan_date,
                 }
-                this.$axios.post('/picture_tasks/' + this.product_id + '/update_plan_date', params,{
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/picture_tasks/' + this.product_id + '/update_plan_date', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.getData()
                         this.$message.success("更新成功")
@@ -1322,12 +1295,7 @@
                 this.fileList2.forEach((item) => {
                     formData.append('pictures[]', item.raw)
                 })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.post('/picture_tasks/' + this.form.id + '/done_task', formData, config).then((res) => {
+                this.$axios.post('/picture_tasks/' + this.form.id + '/done_task', formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('完成！')
                         this.getData()
@@ -1376,9 +1344,8 @@
                     picture_task_id: this.picture_task_id,
                     remark: this.apply_stockremark
                 }
-                this.$axios.post('/sample_outs', params, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.post('/sample_outs', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('提交成功')
                         this.getData()
@@ -1417,11 +1384,8 @@
                             this.$refs.infiniteLoading4.stateChanger.reset()
                         }
                     }
-                    this.$axios.get("/samples/?page=" + this.sample_page + '&name=' + query.trim(), {
-                        headers: {
-                            'Authorization': localStorage.getItem('token')
-                        },
-                    }).then((res) => {
+                    this.$axios.get("/samples/?page=" + this.sample_page + '&name=' + query.trim()
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.loading4 = false
                             let temp_options = []
@@ -1449,11 +1413,8 @@
                 this.showChangeDetails()
             },
             showChangeDetails() {
-                this.$axios.get('/products?product_subject_id=' + this.subject_id + '&page=' + this.cur_page2, {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.get('/products?product_subject_id=' + this.subject_id + '&page=' + this.cur_page2
+                ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             data.size = data.length + '*' + data.width + '*' + data.height
@@ -1471,11 +1432,8 @@
                 })
             },
             showapplyDetails(index, row) {
-                this.$axios.get('/sample_outs?picture_task_id=' + row.id, {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.get('/sample_outs?picture_task_id=' + row.id
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.apply_details = res.data.data
                         this.applyDetailVisible = true
@@ -1499,7 +1457,6 @@
                     remark: this.return_remark
                 }
                 this.$axios.delete('/sample_outs/' + this.idx, {
-                    headers: {'Authorization': localStorage.getItem('token')},
                     params
                 }).then((res) => {
                     if(res.data.code == 200) {

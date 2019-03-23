@@ -187,9 +187,7 @@
 //                  this.url = '/ms/table/list';
                 };
                 this.table_loading = true
-                this.$axios.get( '/sample_ins/?page='+this.cur_page + '&user_id=' + this.user_id_filter, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/sample_ins/?page='+this.cur_page + '&user_id=' + this.user_id_filter
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -215,9 +213,7 @@
                 this.table_loading = true
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/sample_ins/?page='+this.cur_page + '&user_id=' + this.user_id_filter, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/sample_ins/?page='+this.cur_page + '&user_id=' + this.user_id_filter
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -240,9 +236,8 @@
                 })
             },
             getUsers() {
-                this.$axios.get('/users?page=' + this.user_page, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.get('/users?page=' + this.user_page
+                ).then((res) => {
                     if(res.data.code==200) {
                         this.user_options = this.user_options.concat(res.data.data)
                         this.user_total = res.data.count
@@ -336,12 +331,7 @@
                 this.fileList2.forEach((item) => {
                     formData.append('package_pictures[]', item.raw)
                 })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.patch('/products/' + this.form.id, formData, config).then((res) => {
+                this.$axios.patch('/products/' + this.form.id, formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.fileList = []
@@ -362,10 +352,7 @@
             	this.form = {
             		id: item.id
             	}
-            	this.$axios.delete('/products/'+this.form.id, 
-            	{
-            		headers: {'Authorization': localStorage.getItem('token')}
-            	}
+            	this.$axios.delete('/products/'+this.form.id
             ).then((res) => {
             	if(res.data.code == 200){
             		this.tableData.splice(this.idx, 1)
@@ -417,11 +404,8 @@
                             this.$refs.infiniteLoading.stateChanger.reset()
                         }
                     }
-                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim(), {
-                        headers: {
-                            'Authorization': localStorage.getItem('token')
-                        },
-                    }).then((res) => {
+                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim()
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.loading = false
                             //                          this.options = res.data.data

@@ -152,9 +152,7 @@
 			getData() {
                 if (process.env.NODE_ENV === 'development') {
                 };
-                this.$axios.get( '/categories?page='+this.cur_page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+this.cur_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
@@ -165,9 +163,7 @@
                 })
             },
             getRoles() {
-            	this.$axios.get( '/roles?page='+this.roles_page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+            	this.$axios.get( '/roles?page='+this.roles_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	this.roleoptions = res.data.data
@@ -177,9 +173,7 @@
                 })
             },
             getPolicies() {
-            	this.$axios.get( '/policies', {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+            	this.$axios.get( '/policies'
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	this.policyoptions = res.data.data
@@ -238,12 +232,7 @@
 						this.form.policy_ids.forEach((data) => {
 							formData.append('policy_ids[]', data)
 						})
-						let config = {
-							headers: {
-								'Authorization': localStorage.getItem('token')
-							}
-						}
-						this.$axios.post('/users', formData, config).then((res) => {
+						this.$axios.post('/users', formData).then((res) => {
 							if(res.data.code == 200) {
 								this.$message.success('提交成功！')
 								this.$refs['form'].resetFields()
@@ -279,16 +268,11 @@
 				}
 				
 				let formData = new FormData()
-				let config = {
-					headers: {
-						'Authorization': localStorage.getItem('token')
-					}
-				}
 				console.log(this.batchProduct)
 				this.batchProduct.forEach((item) => {
 					formData.append('file', item.raw)
 				})
-				this.$axios.post('/products/batch', formData, config).then((res) => {
+				this.$axios.post('/products/batch', formData).then((res) => {
 					if(res.data.code == 200) {
 						this.$message.success("提交成功")
 						this.batchProduct = []

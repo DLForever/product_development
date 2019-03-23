@@ -141,9 +141,7 @@
 			getData() {
                 if (process.env.NODE_ENV === 'development') {
                 };
-                this.$axios.get( '/categories?page='+this.cur_page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+this.cur_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	// this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
@@ -160,9 +158,7 @@
                 })
             },
             getCatetoryLoop(page) {
-            	this.$axios.get( '/categories?page='+page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+            	this.$axios.get( '/categories?page='+page
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
@@ -207,12 +203,7 @@
 					name: this.classifyName,
 					remark: this.remark
 				}
-				let config = {
-					headers: {
-						'Authorization': localStorage.getItem('token')
-					}
-				}
-				this.$axios.post('/categories', params, config).then((res) => {
+				this.$axios.post('/categories', params).then((res) => {
 					if(res.data.code == 200) {
 						this.category_id = []
 						this.classifyName = ''
@@ -245,17 +236,11 @@
 					console.log('上传模板大小不能超过10MB！')
 					return
 				}
-				
 				let formData = new FormData()
-				let config = {
-					headers: {
-						'Authorization': localStorage.getItem('token')
-					}
-				}
 				this.batchList.forEach((item) => {
 					formData.append('file', item.raw)
 				})
-				this.$axios.post('/products/batch', formData, config).then((res) => {
+				this.$axios.post('/products/batch', formData).then((res) => {
 					if(res.data.code == 200) {
 						this.$message.success("提交成功")
 						this.batchList = []
@@ -304,9 +289,7 @@
                 })
 			},
 			getCatetory() {
-            	this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1] , {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+            	this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1]
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	this.options = []

@@ -683,9 +683,7 @@
 //                  this.url = '/ms/table/list';
                 };
                 this.table_loading = true
-                this.$axios.get( '/tasks?page='+this.cur_page + '&status=' + this.status + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/tasks?page='+this.cur_page + '&status=' + this.status + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -710,9 +708,7 @@
                 this.table_loading = true
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/tasks?page='+this.cur_page + '&status=' + this.statusSelect + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/tasks?page='+this.cur_page + '&status=' + this.statusSelect + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -840,12 +836,7 @@
                 this.fileList2.forEach((item) => {
                     formData.append('picture_fb[]', item.raw)
                 })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.patch('/tasks/' + this.form.id, formData, config).then((res) => {
+                this.$axios.patch('/tasks/' + this.form.id, formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.getData()
@@ -865,9 +856,6 @@
             		id: item.id
             	}
             	this.$axios.delete('/tasks/'+this.form.id, 
-            	{
-            		headers: {'Authorization': localStorage.getItem('token')}
-            	}
             ).then((res) => {
             	if(res.data.code == 200){
             		this.tableData.splice(this.idx, 1)
@@ -939,11 +927,8 @@
                     // id: this.product_id,
                     img_id: this.picture_id
                 }
-                this.$axios.post('/tasks/' + this.product_id + '/delete_img', params, {
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/tasks/' + this.product_id + '/delete_img', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         if (this.remark == 'adv') {
                             this.picturestList.splice(this.idx, 1);
@@ -989,12 +974,7 @@
                         formData.append('task_record[remark]', this.addReviewerForm.remark)
                         formData.append('task_record[task_id]', this.addReviewerForm.task_id)
                         formData.append('task_record[task_period_id]', this.addReviewerForm.task_period_id)
-                        let config = {
-                            headers: {
-                                'Authorization': localStorage.getItem('token')
-                            }
-                        }
-                        this.$axios.post('/task_records', formData, config).then((res) => {
+                        this.$axios.post('/task_records', formData).then((res) => {
                             if(res.data.code == 200) {
                                 this.$message.success('提交成功！')
                                 this.$refs[formName].resetFields()
@@ -1041,11 +1021,8 @@
                             this.$refs.infiniteLoading.stateChanger.reset()
                         }
                     }
-                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim(), {
-                        headers: {
-                            'Authorization': localStorage.getItem('token')
-                        },
-                    }).then((res) => {
+                    this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim()
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.loading = false
                             //                          this.options = res.data.data
@@ -1092,11 +1069,8 @@
                             this.$refs.infiniteLoading2.stateChanger.reset()
                         }
                     }
-                    this.$axios.get("/users/?page=" + this.user_page2 + '&name=' + query.trim(), {
-                        headers: {
-                            'Authorization': localStorage.getItem('token')
-                        },
-                    }).then((res) => {
+                    this.$axios.get("/users/?page=" + this.user_page2 + '&name=' + query.trim()
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.loading2 = false
                             //                          this.options = res.data.data
@@ -1130,11 +1104,8 @@
                 this.date_time.pop()
             },
             checkSelf() {
-                this.$axios.post('/tasks/' + this.task_id + '/check','',{
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/tasks/' + this.task_id + '/check',''
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.getData()
                         this.$message.success("通过自审")
@@ -1165,9 +1136,8 @@
                     task_ids: id,
                     user_id: this.distributeUser,
                 }
-                this.$axios.post('/tasks/allocate_task', params, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.post('/tasks/allocate_task', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('分配成功!')
                         this.distributeVisible = false
@@ -1190,11 +1160,8 @@
                             this.$refs.infiniteLoading3.stateChanger.reset()
                         }
                     }
-                    this.$axios.get("/users/?page=" + this.dis_user_page + '&name=' + query.trim(), {
-                        headers: {
-                            'Authorization': localStorage.getItem('token')
-                        },
-                    }).then((res) => {
+                    this.$axios.get("/users/?page=" + this.dis_user_page + '&name=' + query.trim()
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.loading3 = false
                             //                          this.options = res.data.data
@@ -1244,11 +1211,8 @@
                     task_period_id: row.id,
                     plan_sum: row.plan_sum
                 }
-                this.$axios.post('/tasks/' + this.task_id + '/update_period', params,{
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/tasks/' + this.task_id + '/update_period', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.getData()
                         row.originalSum = row.plan_sum
@@ -1277,11 +1241,8 @@
                     plan_date: this.plan_date,
                     plan_sum: this.plan_sum
                 }
-                this.$axios.post('/tasks/' + this.task_id + '/create_period', params,{
-                     headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/tasks/' + this.task_id + '/create_period', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.getData()
                         this.$message.success("增加成功")
@@ -1309,11 +1270,8 @@
                     let params = {
                         task_period_id: row.id
                     }
-                    this.$axios.post('/tasks/' + this.task_id + '/delete_period', params, {
-                         headers: {
-                            'Authorization': localStorage.getItem('token')
-                        }
-                    }).then((res) => {
+                    this.$axios.post('/tasks/' + this.task_id + '/delete_period', params
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.detailOptions2.splice(index, 1);
                             this.getData()

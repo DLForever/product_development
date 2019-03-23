@@ -480,9 +480,7 @@
 			getData() {
                 if (process.env.NODE_ENV === 'development') {
                 };
-                this.$axios.get( '/categories?page='+this.cur_page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+this.cur_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	this.getCatetoryLoop(1)
@@ -496,9 +494,7 @@
                 })
             },
             getSubjects() {
-                this.$axios.get( '/product_subjects?page='+this.cur_page + '&sku=', {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/product_subjects?page='+this.cur_page + '&sku='
                 ).then((res) => {
                     if(res.data.code == 200) {
                     	this.subject_options = res.data.data
@@ -525,9 +521,7 @@
             	})
             },
             getCatetoryLoop(page) {
-                this.$axios.get( '/categories?page='+page, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+page
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
@@ -555,9 +549,8 @@
 			   })
 			},
 			getSuppliers() {
-				this.$axios.get('/suppliers?page=' + this.supplier_page, {
-					headers: {'Authorization': localStorage.getItem('token')}
-				}).then((res) => {
+				this.$axios.get('/suppliers?page=' + this.supplier_page
+					).then((res) => {
 					if(res.data.code==200) {
 						res.data.data.forEach((data) => {
 							if(!(this.suppliers_temp).find((option) => option.id == data.id)) {
@@ -598,7 +591,6 @@
 				// }
 				
 				let formData = new FormData()
-				console.log(this.$refs[formName].validate())
 				this.$refs[formName].validate((valid) => {
 					if(valid) {
 						this.submitDisabled = true
@@ -667,12 +659,7 @@
 						// formData.append('origin_url', this.form.origin_url)
 						// formData.append('picture_url', this.form.picture_url)
 						// formData.append('remark', this.form.remark)
-						let config = {
-							headers: {
-								'Authorization': localStorage.getItem('token')
-							}
-						}
-						this.$axios.post('/products', formData, config).then((res) => {
+						this.$axios.post('/products', formData).then((res) => {
 							if(res.data.code == 200) {
 								this.$message.success('提交成功，等待管理员审核！');
 								this.$refs['form'].resetFields()
@@ -712,18 +699,12 @@
 					console.log('上传模板大小不能超过10MB！')
 					return
 				}
-				
 				let formData = new FormData()
-				let config = {
-					headers: {
-						'Authorization': localStorage.getItem('token')
-					}
-				}
 				console.log(this.batchProduct)
 				this.batchProduct.forEach((item) => {
 					formData.append('file', item.raw)
 				})
-				this.$axios.post('/products/batch', formData, config).then((res) => {
+				this.$axios.post('/products/batch', formData).then((res) => {
 					if(res.data.code == 200) {
 						this.$message.success("提交成功")
 						this.batchProduct = []
@@ -826,11 +807,8 @@
                             this.$refs.infiniteLoading2.stateChanger.reset()
                         }
                     }
-                    this.$axios.get("/product_subjects?page=" + this.subject_page + '&sku=' + query.trim(), {
-                        headers: {
-                            'Authorization': localStorage.getItem('token')
-                        },
-                    }).then((res) => {
+                    this.$axios.get("/product_subjects?page=" + this.subject_page + '&sku=' + query.trim()
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.loading = false
                             //                          this.options = res.data.data
@@ -924,12 +902,7 @@
 						this.subject_fileList.forEach((item) => {
 							formData.append('product[pictures][]', item.raw)
 						})
-						let config = {
-							headers: {
-								'Authorization': localStorage.getItem('token')
-							}
-						}
-						this.$axios.post('/products/add_attr', formData, config).then((res) => {
+						this.$axios.post('/products/add_attr', formData).then((res) => {
 							if(res.data.code == 200) {
 								this.$message.success('提交成功！');
 								this.$refs['subject_form'].resetFields()
@@ -987,17 +960,11 @@
 					console.log('上传模板大小不能超过10MB！')
 					return
 				}
-				
 				let formData = new FormData()
-				let config = {
-					headers: {
-						'Authorization': localStorage.getItem('token')
-					}
-				}
 				this.changeList.forEach((item) => {
 					formData.append('file', item.raw)
 				})
-				this.$axios.post('/products/batch_attr', formData, config).then((res) => {
+				this.$axios.post('/products/batch_attr', formData).then((res) => {
 					if(res.data.code == 200) {
 						this.$message.success("提交成功")
 						this.changeList = []

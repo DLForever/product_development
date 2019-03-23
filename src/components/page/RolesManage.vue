@@ -156,9 +156,7 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
-                this.$axios.get( '/roles?page='+this.cur_page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/roles?page='+this.cur_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.tableData = res.data.data
@@ -171,9 +169,7 @@
             },
             getPolicies() {
                 this.policyoptions = []
-                this.$axios.get( '/policies', {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/policies'
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -191,9 +187,7 @@
             filter_product() {
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/products?page='+this.cur_page + '&shopname=' + this.search_shopname + '&fnsku=' + this.search_fnsku, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/products?page='+this.cur_page + '&shopname=' + this.search_shopname + '&fnsku=' + this.search_fnsku
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -276,12 +270,7 @@
                     add: addPolicies,
                     remove: removePolicies
                 }
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.post('/roles/' + this.idx +'/change_policy', params, config).then((res) => {
+                this.$axios.post('/roles/' + this.idx +'/change_policy', params).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.getData()
@@ -320,10 +309,7 @@
             	this.form = {
             		id: item.id
             	}
-            	this.$axios.delete('/roles/'+this.form.id, 
-            	{
-            		headers: {'Authorization': localStorage.getItem('token')}
-            	}
+            	this.$axios.delete('/roles/'+this.form.id
             ).then((res) => {
             	if(res.data.code == 200){
             		this.tableData.splice(this.idx, 1)

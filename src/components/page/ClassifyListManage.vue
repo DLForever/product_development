@@ -189,9 +189,7 @@
             // 获取 easy-mock 的模拟数据
             getData() {
                 this.table_loading = true
-                this.$axios.get( '/categories?page='+this.cur_page + '&name=' + this.category_name + '&remark=' + this.remark + '&list=true', {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+this.cur_page + '&name=' + this.category_name + '&remark=' + this.remark + '&list=true'
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.tableData = res.data.data
@@ -204,15 +202,13 @@
                         this.paginationShow = true
                     }
                 }).catch((res) => {
-                	console.log('error')
+                	console.log(res)
                 }).finally(() => {
                     this.table_loading = false
                 })
             },
             getTotalCategory() {
-                this.$axios.get( '/categories?page='+this.cur_page + '&list=true', {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+this.cur_page + '&list=true'
                 ).then((res) => {
                     if(res.data.code == 200) {
                         for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
@@ -224,9 +220,7 @@
                 })
             },
             getTotalCategory2(page) {
-                this.$axios.get( '/categories?page='+page + '&list=true', {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+page + '&list=true'
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.category_total = this.category_total.concat(res.data.data)
@@ -282,9 +276,7 @@
                 this.isFilter = true
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/categories?page='+this.cur_page + '&name=' + this.category_name + '&remark=' + this.remark + '&list=true', {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/categories?page='+this.cur_page + '&name=' + this.category_name + '&remark=' + this.remark + '&list=true'
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.tableData = res.data.data
@@ -297,7 +289,7 @@
                         this.paginationShow = true
                     }
                 }).catch((res) => {
-                    console.log('error')
+                    console.log(res)
                 })
             },
             clear_filter() {
@@ -387,12 +379,7 @@
                 this.fileList2.forEach((item) => {
                     formData.append('package_pictures[]', item.raw)
                 })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.patch('/products/' + this.form.id, formData, config).then((res) => {
+                this.$axios.patch('/products/' + this.form.id, formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.fileList = []
@@ -413,10 +400,7 @@
             	this.form = {
             		id: item.id
             	}
-            	this.$axios.delete('/products/'+this.form.id, 
-            	{
-            		headers: {'Authorization': localStorage.getItem('token')}
-            	}
+            	this.$axios.delete('/products/'+this.form.id
             ).then((res) => {
             	if(res.data.code == 200){
             		this.tableData.splice(this.idx, 1)
@@ -443,9 +427,8 @@
                 let params = {
                     ids: ids
                 }
-                this.$axios.patch('/product_applies/0',params, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },).then((res) => {
+                this.$axios.patch('/product_applies/0',params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('审核成功')
                         this.getData()
@@ -456,9 +439,8 @@
                 })
             },
             handleDetails(index, row) {
-                this.$axios.get('/products/' + row.product_id, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.get('/products/' + row.product_id
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.products_details = [res.data.data]
                         this.detailVisible = true

@@ -280,9 +280,7 @@
 //                  this.url = '/ms/table/list';
                 };
                 this.table_loading = true
-                this.$axios.get( '/suppliers/?page='+this.cur_page + '&name=' + this.search_supplier, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/suppliers/?page='+this.cur_page + '&name=' + this.search_supplier
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -303,9 +301,7 @@
                 this.table_loading = true
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/suppliers/?page='+this.cur_page + '&name=' + this.search_supplier, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/suppliers/?page='+this.cur_page + '&name=' + this.search_supplier
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -372,11 +368,8 @@
                     // let params = {
                     //     id: row.id
                     // }
-                    this.$axios.delete('/suppliers/' + row.id, {
-                         headers: {
-                            'Authorization': localStorage.getItem('token')
-                        }
-                    }).then((res) => {
+                    this.$axios.delete('/suppliers/' + row.id
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.getData()
                             this.$message.success("删除成功")
@@ -398,11 +391,8 @@
                         img_id: row.id,
                         t_type: 2
                     }
-                    this.$axios.post('/suppliers/' + this.product_id + '/delete_img', params, {
-                         headers: {
-                            'Authorization': localStorage.getItem('token')
-                        }
-                    }).then((res) => {
+                    this.$axios.post('/suppliers/' + this.product_id + '/delete_img', params
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.info_files.splice(index, 1)
                             this.getData()
@@ -448,12 +438,7 @@
                 this.fileList2.forEach((item) => {
                     formData.append('supplier[cert_pictures][]', item.raw)
                 })
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.patch('/suppliers/' + this.form.id, formData, config).then((res) => {
+                this.$axios.patch('/suppliers/' + this.form.id, formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.getData()
@@ -489,11 +474,8 @@
             },
             handleDetails(index, row) {
                 this.product_id = row.id
-                this.$axios.get('/suppliers/' + row.id, {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.get('/suppliers/' + row.id
+                ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.business_pic = []
                         res.data.data.cert_pic = []
@@ -538,11 +520,8 @@
                         img_id: id,
                         t_type: 1
                     }
-                    this.$axios.post('/suppliers/' + this.product_id + '/delete_img', params, {
-                         headers: {
-                            'Authorization': localStorage.getItem('token')
-                        }
-                    }).then((res) => {
+                    this.$axios.post('/suppliers/' + this.product_id + '/delete_img', params
+                    ).then((res) => {
                         if(res.data.code == 200) {
                             this.picturestList.splice(index, 1)
                             this.getData()

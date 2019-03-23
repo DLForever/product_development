@@ -172,7 +172,6 @@
                 if (process.env.NODE_ENV === 'development') {
                 };
                 this.$axios.get( '/categories?page='+this.cur_page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
                 },
                 ).then((res) => {
                     if(res.data.code == 200) {
@@ -209,12 +208,12 @@
 						this.fileList.forEach((item) => {
 							formData.append('logo[]', item.raw)
 						})
-						let config = {
-							headers: {
-								'Authorization': localStorage.getItem('token')
-							}
-						}
-						this.$axios.post('/intellectual_properties', formData, config).then((res) => {
+						// let config = {
+						// 	headers: {
+						// 		'Authorization': localStorage.getItem('token')
+						// 	}
+						// }
+						this.$axios.post('/intellectual_properties', formData).then((res) => {
 							if(res.data.code == 200) {
 								this.$message.success('提交成功！')
 								this.$refs['form'].resetFields()
@@ -250,16 +249,11 @@
 				}
 				
 				let formData = new FormData()
-				let config = {
-					headers: {
-						'Authorization': localStorage.getItem('token')
-					}
-				}
 				console.log(this.batchProduct)
 				this.batchProduct.forEach((item) => {
 					formData.append('file', item.raw)
 				})
-				this.$axios.post('/products/batch', formData, config).then((res) => {
+				this.$axios.post('/products/batch', formData).then((res) => {
 					if(res.data.code == 200) {
 						this.$message.success("提交成功")
 						this.batchProduct = []

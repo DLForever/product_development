@@ -232,9 +232,7 @@
 //                  this.url = '/ms/table/list';
                 };
                 this.table_loading = true
-                this.$axios.get( '/users?page='+this.cur_page, {
-                	headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/users?page='+this.cur_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -258,9 +256,7 @@
             },
             getRoles() {
                 this.rolesoptions = []
-                this.$axios.get( '/roles?page='+this.roles_page, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/roles?page='+this.roles_page
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.rolesoptions = res.data.data
@@ -271,9 +267,7 @@
             },
             getPolicies() {
                 this.policyoptions = []
-                this.$axios.get( '/policies', {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/policies'
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -291,9 +285,7 @@
             filter_product() {
                 this.cur_page = 1
                 this.paginationShow = false
-                this.$axios.get( '/products?page='+this.cur_page + '&shopname=' + this.search_shopname + '&fnsku=' + this.search_fnsku, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                },
+                this.$axios.get( '/products?page='+this.cur_page + '&shopname=' + this.search_shopname + '&fnsku=' + this.search_fnsku
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -374,12 +366,7 @@
                 formData.append('user[phone]', this.form.phone)
                 formData.append('user[remark]', this.form.remark)
                 formData.append('user[sex]', this.form.sex)
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.patch('/users/' + this.form.id, formData, config).then((res) => {
+                this.$axios.patch('/users/' + this.form.id, formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.options = []
@@ -420,10 +407,8 @@
             	this.form = {
             		id: item.id
             	}
-            	this.$axios.delete('/users/'+this.form.id,
-                	{
-                		headers: {'Authorization': localStorage.getItem('token')}
-                	}).then((res) => {
+            	this.$axios.delete('/users/'+this.form.id
+                	).then((res) => {
                     	if(res.data.code == 200){
                     		this.tableData.splice(this.idx, 1)
                     		this.getData()
@@ -439,9 +424,8 @@
                 this.policesSelect = []
                 this.policesSave = []
                 this.idx = row.id
-                this.$axios.get('/users/' + this.idx, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.get('/users/' + this.idx
+                ).then((res) => {
                     if(res.data.code == 200){
                         res.data.data.policies_list.forEach((data) => {
                             this.policesSelect.push(data.id)
@@ -471,12 +455,7 @@
                     add: addPolicies,
                     remove: removePolicies
                 }
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.post('/users/' + this.idx +'/change_policy', params, config).then((res) => {
+                this.$axios.post('/users/' + this.idx +'/change_policy', params).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.getData()
@@ -493,9 +472,8 @@
                 this.rolesSelect = []
                 this.rolesSave = []
                 this.idx = row.id
-                this.$axios.get('/users/' + this.idx, {
-                    headers: {'Authorization': localStorage.getItem('token')}
-                }).then((res) => {
+                this.$axios.get('/users/' + this.idx
+                ).then((res) => {
                     if(res.data.code == 200){
                         res.data.data.roles.forEach((data) => {
                             this.rolesSelect.push(data.id)
@@ -525,12 +503,7 @@
                     add: addRoles,
                     remove: removeRoles
                 }
-                let config = {
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }
-                this.$axios.post('/users/' + this.idx +'/change_role', params, config).then((res) => {
+                this.$axios.post('/users/' + this.idx +'/change_role', params).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
                         this.getData()
@@ -552,11 +525,8 @@
                 let params = {
                     sum: this.shopCount
                 }
-                this.$axios.post('/users/' + this.user_id + '/update_shopsum', params,{
-                    headers: {
-                        'Authorization': localStorage.getItem('token')
-                    }
-                }).then((res) => {
+                this.$axios.post('/users/' + this.user_id + '/update_shopsum', params
+                ).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('修改成功')
                         this.editCountVisible = false
