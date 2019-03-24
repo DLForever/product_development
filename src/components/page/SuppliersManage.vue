@@ -342,22 +342,28 @@
                 this.idx = row.id
                 this.checkVisible = true
             },
-            
             handleEdit(index, row) {
                 this.fileList = []
                 this.fileList2 = []
                 this.idx = index
                 const item = this.tableData[index]
-                this.form = {
-                    id: item.id,
-                    name: item.name || '',
-                    phone: item.phone || '',
-                    email: item.email || '',
-                    address: item.address || '',
-                    website: item.website || '',
-                    remark: item.remark || ''
-                }
-                this.editVisible = true;
+                this.$axios.get('/suppliers/' + row.id
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.form = {
+                            id: res.data.data.id,
+                            name: res.data.data.name || '',
+                            phone: res.data.data.phone || '',
+                            email: res.data.data.email || '',
+                            address: res.data.data.address || '',
+                            website: res.data.data.website || '',
+                            remark: res.data.data.remark || ''
+                        }
+                        this.editVisible = true;
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                })
             },
             handleDelete(index, row) {
                 this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {

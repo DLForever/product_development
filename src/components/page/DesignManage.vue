@@ -270,7 +270,7 @@
             <br> -->
             <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList2.length != 0">
                 <el-carousel-item v-for="(item, index) in picturestList2" :key="index">
-                    <img class="img_carousel" @click="handleDeletePic(item.remark, item.id, item.product_subject_id, index)" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeletePic(item.remark, item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
         </el-dialog>
@@ -602,7 +602,8 @@
                 returnVisible: false,
                 return_remark: '',
                 apply_index: undefined,
-                table_loading: true
+                table_loading: true,
+                product_subject_id: ''
             }
         },
         created() {
@@ -913,6 +914,7 @@
                         // }
                     })
                 }else if(remark == 'done_pic') {
+                    this.product_subject_id = item.product_subject_id
                     item.done_pictures.forEach((data) => {
                         this.picturestList2.push(data)
                     })
@@ -921,7 +923,7 @@
                 }
                 this.productVisible = true
             },
-            handleDeletePic(remark, id, product_subject_id, index) {
+            handleDeletePic(remark, id, index) {
                 this.remark = remark
                 this.idx = index;
                 this.$confirm('此操作将永久删除该图片, 是否继续?', '提示', {
@@ -944,7 +946,7 @@
                             console.log(res)
                         })
                     }else {
-                        this.$axios.post('/product_subjects/' + product_subject_id + '/delete_img', params
+                        this.$axios.post('/product_subjects/' + this.product_subject_id + '/delete_img', params
                         ).then((res) => {
                             if(res.data.code == 200) {
                                 this.picturestList2.splice(index, 1)
