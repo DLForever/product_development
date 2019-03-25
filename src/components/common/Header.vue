@@ -21,6 +21,13 @@
                         </router-link>
                     </el-tooltip>
                 </el-badge>
+                <!-- <el-badge :value="message_count" class="item" >
+                    <el-tooltip effect="dark" :content="message_count?`有${message_count}条未读消息`:`消息中心`" placement="bottom">
+                        <router-link to="/notifications">
+                            <i class="el-icon-bell"></i>
+                        </router-link>
+                    </el-tooltip>
+                </el-badge> -->
                 <!-- <div class="btn-bell">
                     <el-tooltip effect="dark" :content="message?`有${message}条未读消息`:`消息中心`" placement="bottom">
                         <router-link to="/tabs">

@@ -104,7 +104,7 @@
             </el-table>
             </el-table>
             <div class="pagination" v-if="paginationShow && totals != 0">
-                <el-pagination  @current-change="handleCurrentChange" @size-change="handleSizeChange" :page-size="pagesize" layout="prev, pager, next" :total="totals">
+                <el-pagination  @current-change="handleCurrentChange" @size-change="handleSizeChange" :page-size="pagesize" layout="prev, pager, next" :total="totals" :current-page.sync="cur_page">
                 </el-pagination>
             </div>
         </div>
@@ -639,6 +639,13 @@
             }
         },
         created() {
+            if (this.$store.getters.isSkip == true) {
+                this.cur_page = this.$store.getters.skipPage
+            } else {
+                this.cur_page = 1
+                this.$store.dispatch('setSkipPage', 1)
+            }
+            this.$store.dispatch('setIsSkip', false)
             this.getData();
         },
         watch: {
@@ -674,6 +681,7 @@
             // 分页导航
             handleCurrentChange(val) {
                 this.cur_page = val;
+                this.$store.dispatch('setSkipPage', this.cur_page)
                 this.getData();
             },
             // 获取 easy-mock 的模拟数据
@@ -682,6 +690,8 @@
                 if (process.env.NODE_ENV === 'development') {
 //                  this.url = '/ms/table/list';
                 };
+                console.log('skipPage::::::')
+                console.log(this.$store.getters.skipPage)
                 this.table_loading = true
                 this.$axios.get( '/tasks?page='+this.cur_page + '&status=' + this.status + '&user_id=' + this.user_id_filter + '&apply_user_id=' + this.apply_user_id
                 ).then((res) => {
@@ -1091,7 +1101,8 @@
                 }
             },
             toReviewers(index, row) {
-                this.$router.push({name: 'Reviewersinfomanage', params: {task_id: row.id}});
+                this.$router.push({name: 'Reviewersinfomanage', params: {task_id: row.id}})
+                this.$store.dispatch('setIsSkip', true)
             },
             orderAdd() {
                 this.date_time.push(this.add_date_time)

@@ -2,6 +2,8 @@ import Vue from 'vue';
 import App from './App';
 import router from './router';
 import axios from 'axios';
+import store from './store';
+import './utils/requests'
 import ElementUI from 'element-ui';
 // import 'element-ui/lib/theme-chalk/index.css';    // 默认主题
 import '../static/css/theme-green/index.css';       // 浅绿色主题
@@ -39,39 +41,8 @@ var defaultHost = window.location.protocol + "//" + window.location.hostname
 var defaultHost = 'http://47.74.177.128'
 axios.defaults.baseURL = defaultHost
 
-var loadinginstace
-axios.interceptors.request.use(
-    config => {
-        config.headers.Authorization = localStorage.getItem('token')
-        // console.log('request')
-        // loadinginstace = Loading.service({ fullscreen: true })
-        // loadinginstace = ElementUI.loading({
-        //     lock: true,
-        //     text: 'Loading',
-        //     spinner: 'el-icon-loading',
-        //     background: 'rgba(0, 0, 0, 0.7)'
-        // })
-        // console.log('request in66666')
-        return config
-    }
-    )
-
-axios.interceptors.response.use(
-    // ElementUI.Message.error('response in66666'),
-    // console.log('response in8888'),
-    response => {
-        // loadinginstace.close()
-        if (response.data.code != 200) {
-            ElementUI.Message.error(response.data.message)
-        }
-        return response
-    },
-    error => {
-        ElementUI.Message.error('服务器更新中')
-    }
-    )
-
 new Vue({
     router,
+    store,
     render: h => h(App)
 }).$mount('#app');
