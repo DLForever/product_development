@@ -154,6 +154,23 @@
                     <span>{{form.category_name}}</span>
                     <!-- <el-cascader :options="options" v-model="category_id" expand-trigger="hover" change-on-select></el-cascader> -->
                 </el-form-item>
+                <el-form-item label="变体">
+                    <table class="table text-center">
+                        <tbody v-for="(attrs,index) in subject_attrs">
+                            <td>
+                                <el-input v-model.trim="subject_attrs[index]" placeholder="属性"></el-input>
+                            </td>
+                            <div v-if="index == 0">
+                                <i class="el-icon-remove" @click="subject_Del(index)"></i>
+                                <span>&nbsp</span>
+                                <i class="el-icon-circle-plus" @click="subject_Add(index)" :disabled="false"></i>
+                            </div>
+                            <div v-else>
+                                <i class="el-icon-remove" @click="subject_Del(index)"></i>
+                            </div>
+                        </tbody>
+                    </table>
+                </el-form-item>
                 <el-form-item label="平台">
                     <el-checkbox label="wish" v-model="form.wish" border></el-checkbox>
                     <el-checkbox label="eBay" v-model="form.ebay" border></el-checkbox>
@@ -676,7 +693,10 @@
                 search_selects: [],
                 search_show: [{'supplierDis' : false}, {'dateDis' : false}, {'classifyDis' : false}, {'userDis' : false}],
                 search_show2: ['supplierDis', 'dateDis', 'classifyDis', 'userDis'],
-                table_loading: true
+                table_loading: true,
+                subject_attrs: [],
+                subject: [],
+                subject_temp: []
             }
         },
         created() {
@@ -910,6 +930,7 @@
                 //         })
                 //     }
                 // })
+                this.subject = []
                 this.$axios.get('/products/' + row.id
                 ).then((res) => {
                     if(res.data.code == 200) {
@@ -945,6 +966,12 @@
                             english_name: res.data.data.english_name,
                             feature: res.data.data.feature
                         }
+                        let temp = []
+                        temp = (res.data.data.name.split('-'))
+                        this.subject.push(temp[0])
+                        this.subject_temp = this.subject_temp.concat(this.subject)
+                        temp.shift()
+                        this.subject_attrs = temp
                         this.idx = index;
                         this.editVisible = true;
                     }
@@ -981,6 +1008,9 @@
             },
             // 保存编辑
             saveEdit() {
+                if (this.judge_subject_arrs(this.subject_attrs) == false) {
+                    return false
+                }
                 let temp = 0
                 this.fileList.forEach((item) => {
                     if(!(item.raw.type.match(/image/))){
@@ -991,12 +1021,13 @@
                     this.$message.error('请上传正确的图片格式!')
                     return
                 }
+                this.subject = this.subject.concat(this.subject_attrs).join('-')
                 this.submitDisabled = true
                 let params = {
                     remark: this.form.remark,
                 }
                 let formData = new FormData()
-                formData.append('product[name]', this.form.name)
+                formData.append('product[name]', this.subject)
                 formData.append('product[title]', this.form.title)
                 // formData.append('product[category_id]', this.category_id[this.category_id.length - 1])
                 // formData.append('product[supplier_id]', this.form.supplier_id)
@@ -1044,6 +1075,8 @@
                 }).catch((res) => {
                     console.log('err')
                 }).finally((res) => {
+                    this.subject = []
+                    this.subject = this.subject.concat(this.subject_temp)
                     this.submitDisabled = false
                 })
                 // this.$axios.patch('/admin/users/' + this.form.id, params, {
@@ -1616,6 +1649,16 @@
                         this.search_show[tempIndex2][data] = false
                     }
                 })
+            },
+            subject_Add(index) {
+                this.subject_attrs.push('')
+            },
+            subject_Del(index) {
+                if (this.subject_attrs.length == 1) {
+                    this.$message.info('至少保留一项')
+                    return false
+                }
+                this.subject_attrs.splice(index, 1)
             },
             getStatusName(status) {
                 if(status == 1) {

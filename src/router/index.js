@@ -205,6 +205,22 @@ export default new Router({
             ]
         },
         {
+            path: '/designManager',
+            type: 'designer',
+            name: '制图管理',
+            component: resolve => require(['../components/page/Login.vue'], resolve),
+            redirect: 'designmanage',
+            icon: 'el-icon-lx-pic',
+            menuShow: true,
+            children: [
+                {
+                    path: '/designmanage',
+                    component: resolve => require(['../components/page/DesignManage.vue'], resolve),
+                    meta: { title: '制图任务管理' }
+                }
+            ]
+        },
+        {
             path: '/login',
             component: resolve => require(['../components/page/Login.vue'], resolve)
         },

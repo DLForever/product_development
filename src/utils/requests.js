@@ -4,7 +4,6 @@ import ElementUI from 'element-ui';
 axios.interceptors.request.use(
     config => {
         config.headers.Authorization = localStorage.getItem('token')
-        // console.log('request')
         // loadinginstace = Loading.service({ fullscreen: true })
         // loadinginstace = ElementUI.loading({
         //     lock: true,
@@ -12,14 +11,12 @@ axios.interceptors.request.use(
         //     spinner: 'el-icon-loading',
         //     background: 'rgba(0, 0, 0, 0.7)'
         // })
-        // console.log('request in66666')
         return config
     }
     )
 
 axios.interceptors.response.use(
     // ElementUI.Message.error('response in66666'),
-    // console.log('response in8888'),
     response => {
         // loadinginstace.close()
         if (response.data.code != 200) {

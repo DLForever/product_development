@@ -18,4 +18,18 @@ exports.install = function(Vue, options) {
 		}
 		return true
 	}
+	Vue.prototype.judge_subject_arrs = function(arr) {
+		let temp = 0
+		arr.some((data) => {
+			if (data.includes('-')) {
+				temp = 1
+				return true
+			}
+		})
+		if (temp) {
+			this.$message.info("属性不能包含 '-' 符号")
+			return false
+		}
+		return true
+	}
 }

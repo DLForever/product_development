@@ -4,7 +4,23 @@
         <div class="collapse-btn" @click="collapseChage">
             <i class="el-icon-menu"></i>
         </div>
-        <div class="logo">产品开发系统</div>
+        <div class="logo">
+            <a href="/" style="color: #fff;"><span>产品开发系统</span></a>
+        </div>
+        <!-- <div class="topbar-title">
+            <el-row>
+                <el-col :span="24">
+                    <el-menu class="el-menu-demo" mode="horizontal" :router="true">
+                        <el-menu-item index="/">首页</el-menu-item>
+                        <el-menu-item index="/">开发部</el-menu-item>
+                        <el-menu-item index="/">运营部</el-menu-item>
+                        <el-menu-item index="/">采购部</el-menu-item>
+                        <el-menu-item index="/">财务部</el-menu-item>
+                        <el-menu-item index="/">美工部</el-menu-item>
+                    </el-menu>
+                </el-col>
+            </el-row>
+        </div> -->
         <div class="header-right">
             <div class="header-user-con">
                 <!-- 全屏显示 -->
@@ -195,5 +211,24 @@
     }
     .el-dropdown-menu__item{
         text-align: center;
+    }
+    .topbar-title {
+        float: left;
+        text-align: left;
+        padding-left: 10px;
+        /*border-left: 1px solid #000;*/
+    }
+    .topbar-title .el-menu--horizontal {
+        background-color: transparent;
+    }
+    .el-menu--horizontal > .el-menu-item:not(.is-disabled):hover, .el-menu--horizontal > .el-menu-item:not(.is-disabled):focus, .el-menu--horizontal > .el-menu-item.is-active {
+        color: #fff;
+        background-color: transparent;
+        border-bottom: 3px solid #409EFF !important;
+    }
+    .topbar-title .el-menu--horizontal > .el-menu-item {
+        height: 70px;
+        line-height: 70px;
+        color: #fff;
     }
 </style>

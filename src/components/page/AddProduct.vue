@@ -829,6 +829,17 @@
                 }
             },
             onSubmitSubjects(formName) {
+            	let temp2 = 0
+            	this.subject_attrs.some((data) => {
+            		if (data.vals.includes('-')) {
+            			temp2 = 1
+            			return true
+            		}
+            	})
+            	if (temp2) {
+            		this.$message.info("属性不能包含 '-' 符号")
+            		return false
+            	}
 				let temp = 0
 				this.subject_fileList.forEach((item) => {
 					if(!(item.raw.type.match(/image/))){
