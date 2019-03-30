@@ -32,4 +32,11 @@ exports.install = function(Vue, options) {
 		}
 		return true
 	}
+	Vue.prototype.setActiveItem = function() {
+		this.$refs.elcarousel.setActiveItem(0)
+		this.$refs.elcarousel2.setActiveItem(0)
+	}
+	Vue.prototype.setActiveItemSingle = function() {
+		this.$refs.elcarousel.setActiveItem(0)
+	}
 }

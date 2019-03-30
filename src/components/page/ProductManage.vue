@@ -57,6 +57,7 @@
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
+                            <!-- <img style="cursor: pointer;" v-else-if="scope.row.pictures[0] != undefined" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/> -->
                             <img style="cursor: pointer;" v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/>
                             <img style="cursor: pointer;" v-else-if="scope.row.subject_pictures[0] != undefined && scope.row.subject_pictures[0].url.thumb.url != null && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/>
                             <span v-else>无</span>
@@ -310,15 +311,16 @@
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="图片" :visible.sync="productVisible" width="70%">
-            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturesProductList.length != 0">
+        <el-dialog title="图片" :visible.sync="productVisible" width="70%" @close="setActiveItem()">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturesProductList.length != 0" ref="elcarousel">
                 <span>产品图片</span>
                 <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
+                    <el-button type="primary" style="margin-bottom: 4px;" @click="setMainPicture(item.id)">将下图设为主图</el-button>
                     <img class="img_carousel" @click="handleDeletePro(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" ref="image" @load="imageLoaded" />
                 </el-carousel-item>
             </el-carousel>
             <br>
-            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturesSubjectsList.length != 0">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturesSubjectsList.length != 0" ref="elcarousel2">
                 <span class="demonstration">主体图片</span>
                 <el-carousel-item v-for="(item, index) in picturesSubjectsList" :key="index">
                     <img class="img_carousel" @click="handleDeleteSubjectPic(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
@@ -725,7 +727,8 @@
                 table_loading: true,
                 subject_attrs: [],
                 subject: [],
-                subject_temp: []
+                subject_temp: [],
+                img_index: 0
             }
         },
         created() {
@@ -798,6 +801,22 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             data.img_count = data.pictures.length + data.subject_pictures.length
+                            data.pictures.some((data2, index) => {
+                                if (data2.is_main == true) {
+                                    let main = data2
+                                    data.pictures.splice(index, 1)
+                                    data.pictures.unshift(main)
+                                    return true
+                                }
+                            })
+                            data.subject_pictures.some((data2, index) => {
+                                if (data2.is_main == true) {
+                                    let main = data2
+                                    data.subject_pictures.splice(index, 1)
+                                    data.subject_pictures.unshift(main)
+                                    return true
+                                }
+                            })
                             // data.size = data.length + '*' + data.width + '*' + data.height
                             // data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                             // data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
@@ -816,7 +835,7 @@
                         this.paginationShow = true
                     }
                 }).catch((res) => {
-                	console.log('error')
+                	console.log(res)
                 }).finally(() => {
                     this.table_loading = false
                 })
@@ -840,6 +859,22 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             data.img_count = data.pictures.length + data.subject_pictures.length
+                            data.pictures.some((data2, index) => {
+                                if (data2.is_main == true) {
+                                    let main = data2
+                                    data.pictures.splice(index, 1)
+                                    data.pictures.unshift(main)
+                                    return true
+                                }
+                            })
+                            data.subject_pictures.some((data2, index) => {
+                                if (data2.is_main == true) {
+                                    let main = data2
+                                    data.subject_pictures.splice(index, 1)
+                                    data.subject_pictures.unshift(main)
+                                    return true
+                                }
+                            })
                             // data.size = data.length + '*' + data.width + '*' + data.height
                             // data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                             // data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
@@ -1155,6 +1190,9 @@
                 this.product_id = row.id
                 const item = this.tableData[index]
                 item.pictures.forEach((data) => {
+                    // if (data.is_main == true) {
+                    //     this.picturesProductList.unshift(data)
+                    // }
                     this.picturesProductList.push(data)
                 })
                 item.subject_pictures.forEach((data) => {
@@ -1704,6 +1742,32 @@
                 }
                 this.subject_attrs.splice(index, 1)
             },
+            setMainPicture(id) {
+                console.log(this.refs.elcarousel)
+                this.$confirm('将下图设置为主图, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'info'
+                }).then(() => {
+                    let params = {
+                        img_id: id
+                    }
+                    this.$axios.post('/products/' + this.product_id + '/set_main_picture', params
+                    ).then((res) => {
+                        if(res.data.code == 200) {
+                            this.getData()
+                            this.$message.success("设置成功")
+                        }
+                    }).catch(() => {
+                        
+                    })
+                }).catch(() => {
+                    // this.$message.info('已取消设置')
+                })
+            },
+            // closeImg() {
+            //     this.setActiveItem()
+            // },
             getStatusName(status) {
                 if(status == 1) {
                     return "未审核"
@@ -1803,6 +1867,6 @@
         align-items: center;
     }
     .img_carousel {
-        max-width: 40rem;
+        max-width: 35rem;
     }
 </style>

@@ -322,15 +322,15 @@
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="图片" :visible.sync="productVisible" width="70%">
-            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturesProductList.length != 0">
+        <el-dialog title="图片" :visible.sync="productVisible" width="70%" @close="setActiveItem()">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturesProductList.length != 0" ref="elcarousel">
                 <span>产品图片</span>
                 <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
                     <img class="img_carousel" @click="handleDeletePro(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
             <br>
-            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturesSubjectsList.length != 0">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturesSubjectsList.length != 0" ref="elcarousel2">
                 <span class="demonstration">主体图片</span>
                 <el-carousel-item v-for="(item, index) in picturesSubjectsList" :key="index">
                     <img class="img_carousel" @click="handleDeleteSubjectPic(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
@@ -770,6 +770,22 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             data.img_count = data.pictures.length + data.subject_pictures.length
+                            data.pictures.some((data2, index) => {
+                                if (data2.is_main == true) {
+                                    let main = data2
+                                    data.pictures.splice(index, 1)
+                                    data.pictures.unshift(main)
+                                    return true
+                                }
+                            })
+                            data.subject_pictures.some((data2, index) => {
+                                if (data2.is_main == true) {
+                                    let main = data2
+                                    data.subject_pictures.splice(index, 1)
+                                    data.subject_pictures.unshift(main)
+                                    return true
+                                }
+                            })
                             // data.size = data.length + '*' + data.width + '*' + data.height
                             // data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                             // data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
@@ -803,6 +819,22 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             data.img_count = data.pictures.length + data.subject_pictures.length
+                            data.pictures.some((data2, index) => {
+                                if (data2.is_main == true) {
+                                    let main = data2
+                                    data.pictures.splice(index, 1)
+                                    data.pictures.unshift(main)
+                                    return true
+                                }
+                            })
+                            data.subject_pictures.some((data2, index) => {
+                                if (data2.is_main == true) {
+                                    let main = data2
+                                    data.subject_pictures.splice(index, 1)
+                                    data.subject_pictures.unshift(main)
+                                    return true
+                                }
+                            })
                             // data.size = data.length + '*' + data.width + '*' + data.height
                             // data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                             // data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height

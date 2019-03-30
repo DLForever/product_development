@@ -514,7 +514,7 @@
                 user_options2: [],
                 fileList2: [],
                 statusSelect: '',
-                statusOptions: [{value: 1, label: '已提交申请'}, {value: 2, label: '已通过审核'}, {value: 4, label: '已分配送测人'}, {value: 5, label: '正在进行中'}, {value: 6, label: '已评论'}, {value: 7, label: '已完成'}],
+                statusOptions: [{value: 1, label: '已提交申请'}, {value: 2, label: '已通过审核'}, {value: 4, label: '已分配送测人'}, {value: 5, label: '正在进行中'}, {value: 6, label: '已计划完成'}, {value: 7, label: '已完成'}],
                 picturestList2: [],
                 detailOptions: [],
                 detailOptions2: [],
@@ -1329,7 +1329,7 @@
                 }else if(status == 5) {
                     return "正在进行中"
                 }else if(status == 6) {
-                    return "已评论"
+                    return "已计划完成"
                 }else if(status == 7) {
                     return "已完成"
                 }else {

@@ -260,7 +260,7 @@
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="图片" :visible.sync="productVisible" width="70%">
+        <el-dialog title="图片" :visible.sync="productVisible" width="70%" @close="setActiveItemSingle()">
 <!--             <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList.length != 0">
                 <span>产品广告位图片</span>
                 <el-carousel-item v-for="(item, index) in picturestList" :key="index">
@@ -268,7 +268,7 @@
                 </el-carousel-item>
             </el-carousel>
             <br> -->
-            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList2.length != 0">
+            <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturestList2.length != 0" ref="elcarousel">
                 <el-carousel-item v-for="(item, index) in picturestList2" :key="index">
                     <img class="img_carousel" @click="handleDeletePic(item.remark, item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>

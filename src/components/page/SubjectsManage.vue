@@ -163,9 +163,10 @@
         </el-dialog>
 
         <!-- 查看产品图片 -->
-        <el-dialog title="主体图片" :visible.sync="productVisible" width="80%">
-            <el-carousel height="700px" arrow="always" :autoplay="false" v-if="picturesProductList.length != 0">
+        <el-dialog title="主体图片" :visible.sync="productVisible" width="80%" @close="setActiveItemSingle()">
+            <el-carousel height="700px" arrow="always" :autoplay="false" v-if="picturesProductList.length != 0" ref="elcarousel">
                 <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
+                    <el-button type="primary" style="margin-bottom: 4px;" @click="setMainPicture(item.id)">将下图设为主图</el-button>
                     <img class="img_carousel" @click="handleDeletePro(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
@@ -446,6 +447,14 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             data.img_count = data.pictures.length
+                            data.pictures.some((data2, index) => {
+                                if (data2.is_main == true) {
+                                    let main = data2
+                                    data.pictures.splice(index, 1)
+                                    data.pictures.unshift(main)
+                                    return true
+                                }
+                            })
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -476,6 +485,14 @@
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
                             data.img_count = data.pictures.length
+                            data.pictures.some((data2, index) => {
+                                if (data2.is_main == true) {
+                                    let main = data2
+                                    data.pictures.splice(index, 1)
+                                    data.pictures.unshift(main)
+                                    return true
+                                }
+                            })
                             // data.size = data.length + '*' + data.width + '*' + data.height
                         })
                         this.tableData = res.data.data
@@ -991,6 +1008,28 @@
                         console.log('失败')
                     })
                 }
+            },
+            setMainPicture(id) {
+                this.$confirm('将下图设置为主图, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'info'
+                }).then(() => {
+                    let params = {
+                        img_id: id
+                    }
+                    this.$axios.post('/product_subjects/' + this.product_id + '/set_main_picture', params
+                    ).then((res) => {
+                        if(res.data.code == 200) {
+                            this.getData()
+                            this.$message.success("设置成功")
+                        }
+                    }).catch(() => {
+                        
+                    })
+                }).catch(() => {
+                    // this.$message.info('已取消设置')
+                })
             },
             getFeatureName(feature) {
                 if(Number(feature) == 0) {
