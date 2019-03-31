@@ -10,13 +10,14 @@
         <!-- <div class="topbar-title">
             <el-row>
                 <el-col :span="24">
-                    <el-menu class="el-menu-demo" mode="horizontal" :router="true">
+                    <el-menu :default-active="defaultActiveIndex" class="el-menu-demo" mode="horizontal" :router="true">
                         <el-menu-item index="/">首页</el-menu-item>
-                        <el-menu-item index="/">开发部</el-menu-item>
-                        <el-menu-item index="/">运营部</el-menu-item>
-                        <el-menu-item index="/">采购部</el-menu-item>
-                        <el-menu-item index="/">财务部</el-menu-item>
-                        <el-menu-item index="/">美工部</el-menu-item>
+                        <span>{{$store.getters.leftNavState}}</span>
+                        <el-menu-item index="/developDepartment">开发部</el-menu-item>
+                        <el-menu-item index="/operationalDepartment">运营部</el-menu-item>
+                        <el-menu-item index="/purchaseDepartment">采购部</el-menu-item>
+                        <el-menu-item index="/finacialDepartment">财务部</el-menu-item>
+                        <el-menu-item index="/designDepartment">设计部</el-menu-item>
                     </el-menu>
                 </el-col>
             </el-row>
@@ -76,12 +77,17 @@
                 fullscreen: false,
                 name: 'lyh',
                 message: 2,
+                defaultActiveIndex: '/'
             }
         },
         props:{
             clearInte: Function,
             message_count:Number,
             notifications:Array,
+        },
+        created() {
+            // 组件创建完后获取数据
+            this.fetchNavData()
         },
         computed:{
             username(){
@@ -129,11 +135,62 @@
                     }
                 }
                 this.fullscreen = !this.fullscreen;
-            }
+            },
+            fetchNavData() { // 初始化菜单激活项
+                let cur_path = this.$route.path
+                let routers = this.$router.options.routes
+                let nav_type = '', nav_name = ''
+                for (let i = 0; i < routers.length; i++) {
+                    let children = routers[i].children
+                    if (children) {
+                        for (let j = 0; j < children.length; j++) {
+                            if (children[j].path === cur_path) {
+                                nav_type = routers[i].type
+                                nav_name = routers[i].name
+                                break
+                            }
+                            // 如果还有子菜单
+                            if (children[j].children) {
+                                let grandChildren = children[j].children
+                                for (let z = 0; z < grandChildren.length; z++) {
+                                    if (grandChildren[z].path === cur_path) {
+                                        nav_type = routers[i].type
+                                        nav_name = routers[i].name
+                                        break
+                                    }
+                                    if(grandChildren[z].children) {
+                                        let threeChildren = grandChildren[z].children
+                                        for (let y = 0; y < threeChildren.length; y++) {
+                                            if (threeChildren[y].path === cur_path) {
+                                                nav_type = routers[i].type
+                                                nav_name = routers[i].name
+                                                break
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                this.$store.state.topNavState = nav_type
+                this.$store.dispatch('setLeftNavState', nav_name)
+                // this.$store.state.leftNavState = nav_name
+                if (nav_type == 'home') {
+                    this.defaultActiveIndex = '/'
+                } else {
+                    this.defaultActiveIndex = '/' + nav_name + 'Department'
+                }
+            },
         },
         mounted(){
             if(document.body.clientWidth < 1500){
                 this.collapseChage();
+            }
+        },
+        watch: {
+            '$route': function(to, from) {
+                this.fetchNavData()
             }
         }
     }

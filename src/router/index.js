@@ -1,6 +1,10 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 
+import Home from '@/components/common/Home.vue'
+import Dashboard from '@/components/page/Dashboard.vue'
+import Design from '@/components/page/DesignManage.vue'
+
 Vue.use(Router);
 
 export default new Router({
@@ -205,18 +209,138 @@ export default new Router({
             ]
         },
         {
-            path: '/designManager',
+            path: '/',
+            type: 'home',
+            name: 'home',
+            redirect: '/dashboard',
+            component: Dashboard,
+            children: [
+                {
+                    path: '/dashboard',
+                    name: '首页',
+                    leaf: true, // 只有一个节点
+                    menuShow: true,
+                    icon: 'el-icon-lx-home',
+                    // children: [
+                    //     {
+                    //         path: '/designmanage',
+                    //         component: resolve => require(['../components/page/DesignManage.vue'], resolve),
+                    //         name: '制图任务管理',
+                    //         menuShow: true,
+                    //     }
+                    // ]
+                }
+            ]
+        },
+        {
+            path: '/developDepartment',
+            type: 'develop',
+            name: 'develop',
+            // component: Home,
+            redirect: '/addClassify',
+            children: [
+                {
+                    path: '/addClassify',
+                    name: '分类管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-qrcode',
+                    children: [
+                        {
+                            path: '/addClassify',
+                            name: '添加分类',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/classifylistManage',
+                            name: '分类列表',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/classifyManage',
+                            name: '分类管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                },
+                {
+                    path: '/addProduct',
+                    name: '产品管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-cascades',
+                    children: [
+                        {
+                            path: '/addProduct',
+                            name: '添加产品',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/productmanage',
+                            name: '产品管理',
+                            menuShow: true,
+                            children: [
+                                {
+                                    path: '/productmanage',
+                                    name: '产品管理',
+                                    menuShow: true,
+                                    leaf: true,
+                                },
+                                {
+                                    path: '/productmanageeBay',
+                                    name: 'eBay产品管理',
+                                    menuShow: true,
+                                    leaf: true,
+                                },
+                                {
+                                    path: '/productmanagewish',
+                                    name: 'wish产品管理',
+                                    menuShow: true,
+                                    leaf: true,
+                                },
+                            ]
+                        },
+                        {
+                            path: '/checkproductmanage',
+                            name: '审核新建产品',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/applyproductmanage',
+                            name: '审核申请查看',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                }
+            ]
+        },
+        {
+            path: '/designDepartment',
             type: 'designer',
-            name: '制图管理',
-            component: resolve => require(['../components/page/Login.vue'], resolve),
+            name: 'design',
+            component: Home,
             redirect: 'designmanage',
-            icon: 'el-icon-lx-pic',
-            menuShow: true,
             children: [
                 {
                     path: '/designmanage',
-                    component: resolve => require(['../components/page/DesignManage.vue'], resolve),
-                    meta: { title: '制图任务管理' }
+                    name: '制图管理',
+                    meta: { title: '制图任务管理' },
+                    menuShow: true,
+                    icon: 'el-icon-lx-pic',
+                    children: [
+                        {
+                            path: '/designmanage',
+                            // component: Design,
+                            name: '制图任务管理',
+                            meta: { title: '制图任务管理' },
+                            menuShow: true,
+                            leaf: true,
+                        }
+                    ]
                 }
             ]
         },
