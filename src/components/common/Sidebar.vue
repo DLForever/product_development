@@ -1,6 +1,6 @@
 <template>
     <div class="sidebar">
-        <el-menu class="sidebar-el-menu" :default-active="onRoutes" :collapse="collapse" unique-opened router>
+        <!-- <el-menu class="sidebar-el-menu" :default-active="onRoutes" :collapse="collapse" unique-opened router>
             <template v-for="item in items">
                 <template v-if="item.subs">
                     <el-submenu :index="item.index" :key="item.index">
@@ -26,82 +26,34 @@
                     </el-menu-item>
                 </template>
             </template>
-        </el-menu>
+        </el-menu> -->
 
-        <!-- <el-menu class="sidebar-el-menu" router :collapse="collapse" ref="leftNavigation">
+        <el-menu class="sidebar-el-menu" :default-active="onRoutes" router :collapse="collapse" unique-opened ref="leftNavigation">
             <template v-for="(issue,index) in $router.options.routes">
                 <template v-if="issue.name === $store.getters.leftNavState">
                     <template v-for="(item,index) in issue.children">
-                        <el-submenu v-if="!item.leaf" :index="index+''" v-show="item.menuShow">
+                        <el-submenu v-if="!item.leaf" :index="item.index" v-show="item.menuShow">
                             <template slot="title"><i :class="item.icon"></i><span slot="title">{{item.name}}</span></template>
                             <template v-for="(secondterm, index2) in item.children">
-                                <el-submenu v-if="!secondterm.leaf" :index="index2+1+''" v-show="secondterm.menuShow">
+                                <el-submenu v-if="!secondterm.leaf" :index="secondterm.index" v-show="secondterm.menuShow">
                                     <template slot="title"><span slot="title">{{secondterm.name}}</span></template>
-                                    <el-menu-item v-for="threeterm in secondterm.children" :key="threeterm.path" :index="threeterm.path" v-if="threeterm.menuShow"
+                                    <el-menu-item v-for="(threeterm, index3) in secondterm.children" :key="threeterm.index" :index="threeterm.index" v-if="threeterm.menuShow"
                                         :class="$route.path==threeterm.path?'is-active':''">
                                         <span slot="title">{{threeterm.name}}</span>
                                     </el-menu-item>
                                 </el-submenu>
-                                <el-menu-item v-else-if="secondterm.leaf" :index="secondterm.path" :class="$route.path==secondterm.path?'is-active':''" v-show="secondterm.menuShow">
+                                <el-menu-item v-else-if="secondterm.leaf" :index="secondterm.index" :class="$route.path==secondterm.path?'is-active':''" v-show="secondterm.menuShow">
                                     <span slot="title">{{secondterm.name}}</span>
                                 </el-menu-item>
                             </template>
                         </el-submenu>
-                        <el-menu-item v-else-if="item.leaf" :index="item.path" :class="$route.path==item.path?'is-active':''" v-show="item.menuShow">
+                        <el-menu-item v-else-if="item.leaf" :index="item.index" :class="$route.path==item.path?'is-active':''" v-show="item.menuShow">
                             <i :class="item.icon"></i><span slot="title">{{item.name}}</span>
                         </el-menu-item>
                     </template>
                 </template>
             </template>
-        </el-menu> -->
-
-        <!-- <el-menu class="sidebar-el-menu" router :collapse="collapse" ref="leftNavigation">
-            <template v-for="(issue,index) in $router.options.routes">
-                <template v-if="issue.name === $store.getters.leftNavState">
-                    <template v-for="(item,index) in issue.children">
-                        <el-submenu v-if="!item.leaf" :index="index+''" v-show="item.menuShow">
-                            <template slot="title"><i :class="item.icon"></i><span slot="title">{{item.name}}</span></template>
-                            <el-menu-item v-for="term in item.children" :key="term.path" :index="term.path" v-if="term.menuShow"
-                                :class="$route.path==term.path?'is-active':''">
-                                <i :class="term.icon"></i><span slot="title">{{term.name}}</span>
-                            </el-menu-item>
-
-                        </el-submenu>
-                        <el-menu-item v-else-if="item.leaf" :index="item.path" :class="$route.path==item.path?'is-active':''" v-show="item.menuShow">
-                            <i :class="item.icon"></i><span slot="title">{{item.name}}</span>
-                        </el-menu-item>
-                    </template>
-                </template>
-            </template>
-        </el-menu> -->
-
-        <!-- <el-menu class="sidebar-el-menu" :collapse="collapse" ref="leftNavigation" unique-opened router>
-            <template v-for="(item, index) in $router.options.routes">
-                <template v-if="item.name">
-                    <el-submenu :index="item.index" :key="item.index">
-                        <template slot="title">
-                            <i :class="item.icon"></i><span slot="title">{{ item.title }}</span>
-                        </template>
-                        <template v-for="subItem in item.subs">
-                            <el-submenu v-if="subItem.subs" :index="subItem.index" :key="subItem.index">
-                                <template slot="title">{{ subItem.title }}</template>
-                                <el-menu-item v-for="(threeItem,i) in subItem.subs" :key="i" :index="threeItem.index">
-                                    {{ threeItem.title }}
-                                </el-menu-item>
-                            </el-submenu>
-                            <el-menu-item v-else :index="subItem.index" :key="subItem.index">
-                                {{ subItem.title }}
-                            </el-menu-item>
-                        </template>
-                    </el-submenu>
-                </template>
-                <template v-else>
-                    <el-menu-item :index="item.index" :key="item.index">
-                        <i :class="item.icon"></i><span slot="title">{{ item.title }}</span>
-                    </el-menu-item>
-                </template>
-            </template>
-        </el-menu> -->
+        </el-menu>
     </div>
 </template>
 
@@ -340,7 +292,23 @@
                 this.collapse = msg;
             })
         },
+        watch: {
+            "$store.getters.leftNavState": 'changeCollapse'
+            // "$route": "changeCollapse",
+        },
         methods: {
+            changeCollapse() {
+                console.log(this.$route.path)
+                // this.$refs['leftNavigation'].open(this.$route.path.replace('/', ''))
+                // this.collapse =true
+                setTimeout(this.changeCollapse2, 20)
+            },
+            changeCollapse2() {
+                console.log('666')
+                let temp = this.$route.path.replace('/', '')
+                this.$refs['leftNavigation'].open(temp)
+                // this.collapse =false
+            },
             defaultLeftNavOpened() {
                 let cur_path = this.$route.path
                 let routers = this.$router.options.routes
@@ -349,40 +317,39 @@
                     let children = routers[i].children
                     if (children) {
                         for (let j = 0; j < children.length; j++) {
-                            // console.log(111)
-                            // console.log(children[j].path)
-                            // console.log(222)
-                            // console.log(cur_path)
                             if(children[j].path === cur_path) {
+                                subMenuIndex = j
+                                needOpenSubmenu = true
                                 break
                             }
                             // 如果还有子菜单
                             if (children[j].children && !children[j].leaf) {
-                                // console.log('children')
-                                // console.log(children)
-                                // console.log('leaf')
                                 let grandChildren = children[j].children
                                 for (let z = 0; z < grandChildren.length; z++) {
-                                    subMenuIndex = j
-                                    needOpenSubmenu = true
-                                    // break
+                                    if( grandChildren[z].path === cur_path ) {
+                                        console.log('llll8888')
+                                        subMenuIndex = j
+                                        needOpenSubmenu = true
+                                        break
+                                    }
                                     if (grandChildren[z].children && !grandChildren[z].leaf) {
+                                        console.log('lyh520')
                                         subMenuIndex = z
                                         needOpenSubmenu = true
-                                        console.log(grandChildren[z].children)
+                                        break
                                     }
                                 }
                             }
                         }
                     }
                 }
-                if (this.$refs['leftNavigation'] && needOpenSubmenu) {
-                    this.$refs['leftNavigation'].open(subMenuIndex) //打开子菜单
-                }
+                // if (this.$refs['leftNavigation'] && needOpenSubmenu) {
+                //     this.$refs['leftNavigation'].open(subMenuIndex) //打开子菜单
+                // }
             }
         },
         mounted() {
-            this.defaultLeftNavOpened()
+            // this.defaultLeftNavOpened()
         }
     }
 </script>

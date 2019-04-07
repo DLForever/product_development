@@ -25,6 +25,6 @@ axios.interceptors.response.use(
         return response
     },
     error => {
-        ElementUI.Message.error('服务器更新中')
+        // ElementUI.Message.error('服务器更新中')
     }
     )

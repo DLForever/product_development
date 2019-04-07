@@ -74,8 +74,6 @@
                      //        this.getCatetoryLoop(i+1)
                      //    }
                     }
-                    console.log(res.data.data)
-                    console.log(this.options)
                 }).catch((res) => {
                 	console.log('error')
                 })

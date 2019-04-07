@@ -11,7 +11,8 @@ export default new Router({
     routes: [
         {
             path: '/',
-            redirect: '/dashboard'
+            redirect: '/dashboard',
+            index: 'dashboard'
         },
         {
             path: '/',
@@ -39,12 +40,27 @@ export default new Router({
                     meta: { title: '产品管理' }
                 },
                 {
+                    path: '/productmanageOper',
+                    component: resolve => require(['../components/page/ProductManage.vue'], resolve),
+                    meta: { title: '产品管理' }
+                },
+                {
                     path: '/productmanageeBay',
                     component: resolve => require(['../components/page/ProductManageEBAY.vue'], resolve),
                     meta: { title: 'eBay产品' }
                 },
                 {
+                    path: '/productmanageeBayOper',
+                    component: resolve => require(['../components/page/ProductManageEBAY.vue'], resolve),
+                    meta: { title: 'eBay产品' }
+                },
+                {
                     path: '/productmanagewish',
+                    component: resolve => require(['../components/page/ProductManageWISH.vue'], resolve),
+                    meta: { title: 'wish产品' }
+                },
+                {
+                    path: '/productmanagewishOper',
                     component: resolve => require(['../components/page/ProductManageWISH.vue'], resolve),
                     meta: { title: 'wish产品' }
                 },
@@ -213,10 +229,12 @@ export default new Router({
             type: 'home',
             name: 'home',
             redirect: '/dashboard',
+            index: 'dashboard',
             component: Dashboard,
             children: [
                 {
                     path: '/dashboard',
+                    index: 'dashboard',
                     name: '首页',
                     leaf: true, // 只有一个节点
                     menuShow: true,
@@ -238,9 +256,11 @@ export default new Router({
             name: 'develop',
             // component: Home,
             redirect: '/addClassify',
+            index: 'addClassify',
             children: [
                 {
                     path: '/addClassify',
+                    index: 'addClassify',
                     name: '分类管理',
                     menuShow: true,
                     icon: 'el-icon-lx-qrcode',
@@ -248,17 +268,20 @@ export default new Router({
                         {
                             path: '/addClassify',
                             name: '添加分类',
+                            index: 'addClassify',
                             menuShow: true,
                             leaf: true,
                         },
                         {
                             path: '/classifylistManage',
+                            index: 'classifylistManage',
                             name: '分类列表',
                             menuShow: true,
                             leaf: true,
                         },
                         {
                             path: '/classifyManage',
+                            index: 'classifyManage',
                             name: '分类管理',
                             menuShow: true,
                             leaf: true,
@@ -267,35 +290,41 @@ export default new Router({
                 },
                 {
                     path: '/addProduct',
+                    index: 'addProduct',
                     name: '产品管理',
                     menuShow: true,
                     icon: 'el-icon-lx-cascades',
                     children: [
                         {
                             path: '/addProduct',
+                            index: 'addProduct',
                             name: '添加产品',
                             menuShow: true,
                             leaf: true,
                         },
                         {
                             path: '/productmanage',
+                            index: 'productmanage',
                             name: '产品管理',
                             menuShow: true,
                             children: [
                                 {
                                     path: '/productmanage',
+                                    index: 'productmanage',
                                     name: '产品管理',
                                     menuShow: true,
                                     leaf: true,
                                 },
                                 {
                                     path: '/productmanageeBay',
+                                    index: 'productmanageeBay',
                                     name: 'eBay产品管理',
                                     menuShow: true,
                                     leaf: true,
                                 },
                                 {
                                     path: '/productmanagewish',
+                                    index: 'productmanagewish',
                                     name: 'wish产品管理',
                                     menuShow: true,
                                     leaf: true,
@@ -304,29 +333,50 @@ export default new Router({
                         },
                         {
                             path: '/checkproductmanage',
+                            index: 'checkproductmanage',
                             name: '审核新建产品',
+                            component: resolve => require(['../components/page/CheckProductManage.vue'], resolve),
                             menuShow: true,
                             leaf: true,
                         },
                         {
                             path: '/applyproductmanage',
+                            index: 'applyproductmanage',
                             name: '审核申请查看',
                             menuShow: true,
                             leaf: true,
                         },
                     ]
-                }
+                },
+                {
+                    path: '/subjectsmanage',
+                    index: 'subjectsmanage',
+                    name: '主体管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-read',
+                    children: [
+                        {
+                            path: '/subjectsmanage',
+                            index: 'subjectsmanage',
+                            name: '主体管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                },
             ]
         },
         {
             path: '/designDepartment',
-            type: 'designer',
+            index: 'designmanage',
+            type: 'design',
             name: 'design',
             component: Home,
             redirect: 'designmanage',
             children: [
                 {
                     path: '/designmanage',
+                    index: 'designmanage',
                     name: '制图管理',
                     meta: { title: '制图任务管理' },
                     menuShow: true,
@@ -335,6 +385,7 @@ export default new Router({
                         {
                             path: '/designmanage',
                             // component: Design,
+                            index: 'designmanage',
                             name: '制图任务管理',
                             meta: { title: '制图任务管理' },
                             menuShow: true,
@@ -345,11 +396,183 @@ export default new Router({
             ]
         },
         {
+            path: '/outsideDepartment',
+            index: 'addreviewers',
+            type: 'outside',
+            name: 'outside',
+            // component: Home,
+            redirect: 'addreviewers',
+            children: [
+                {
+                    path: '/addreviewers',
+                    index: 'addreviewers',
+                    name: '测评管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-goods',
+                    children: [
+                        {
+                            path: '/addreviewers',
+                            // component: Design,
+                            index: 'addreviewers',
+                            name: '新建测评任务',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/reviewersmanage',
+                            // component: Design,
+                            index: 'reviewersmanage',
+                            name: '测评任务管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/reviewersinfomanage',
+                            // component: Design,
+                            index: 'reviewersinfomanage',
+                            name: '测评记录管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/fansmanage',
+                            // component: Design,
+                            index: 'fansmanage',
+                            name: '粉丝管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                }
+            ]
+        },
+        {
+            path: '/operationalDepartment',
+            index: 'productmanage',
+            type: 'operational',
+            name: 'operational',
+            // component: Home,
+            redirect: 'productmanageOper',
+            children: [
+                {
+                    path: '/productmanageOper',
+                    index: 'productmanageOper',
+                    name: '产品管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-goods',
+                    children: [
+                        {
+                            path: '/productmanageOper',
+                            // component: Design,
+                            index: 'productmanageOper',
+                            name: '所有产品',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/productmanageeBayOper',
+                            // component: Design,
+                            index: 'productmanageeBayOper',
+                            name: 'eBay产品',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/productmanagewishOper',
+                            // component: Design,
+                            index: 'productmanagewishOper',
+                            name: 'wish产品',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                }
+            ]
+        },
+        {
+            path: '/purchaseDepartment',
+            index: 'addSuppliers',
+            type: 'purchase',
+            name: 'purchase',
+            // component: Home,
+            redirect: 'addSuppliers',
+            children: [
+                {
+                    path: '/addSuppliers',
+                    index: 'addSuppliers',
+                    name: '供应商管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-goods',
+                    children: [
+                        {
+                            path: '/addSuppliers',
+                            // component: Design,
+                            index: 'addSuppliers',
+                            name: '新建供应商',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/suppliersManage',
+                            // component: Design,
+                            index: 'productmanageeBay',
+                            name: '供应商管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                },
+                {
+                    path: '/addSamples',
+                    index: 'addSamples',
+                    name: '样品管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-goods',
+                    children: [
+                        {
+                            path: '/addSamples',
+                            // component: Design,
+                            index: 'addSamples',
+                            name: '新建样品',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/samplesManage',
+                            // component: Design,
+                            index: 'samplesManage',
+                            name: '样品管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/samplesinManage',
+                            // component: Design,
+                            index: 'samplesinManage',
+                            name: '入库管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/sampleoutsManage',
+                            // component: Design,
+                            index: 'sampleoutsManage',
+                            name: '借样管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                }
+            ],
+        },
+        {
             path: '/login',
             component: resolve => require(['../components/page/Login.vue'], resolve)
         },
         {
             path: '*',
+            index: '404',
+            leaf: true,
             redirect: '/404'
         }
     ]

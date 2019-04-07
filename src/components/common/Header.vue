@@ -7,21 +7,21 @@
         <div class="logo">
             <a href="/" style="color: #fff;"><span>产品开发系统</span></a>
         </div>
-        <!-- <div class="topbar-title">
+        <div class="topbar-title">
             <el-row>
                 <el-col :span="24">
                     <el-menu :default-active="defaultActiveIndex" class="el-menu-demo" mode="horizontal" :router="true">
                         <el-menu-item index="/">首页</el-menu-item>
-                        <span>{{$store.getters.leftNavState}}</span>
                         <el-menu-item index="/developDepartment">开发部</el-menu-item>
                         <el-menu-item index="/operationalDepartment">运营部</el-menu-item>
                         <el-menu-item index="/purchaseDepartment">采购部</el-menu-item>
                         <el-menu-item index="/finacialDepartment">财务部</el-menu-item>
                         <el-menu-item index="/designDepartment">设计部</el-menu-item>
+                        <el-menu-item index="/outsideDepartment">站外部</el-menu-item>
                     </el-menu>
                 </el-col>
             </el-row>
-        </div> -->
+        </div>
         <div class="header-right">
             <div class="header-user-con">
                 <!-- 全屏显示 -->
@@ -173,7 +173,7 @@
                         }
                     }
                 }
-                this.$store.state.topNavState = nav_type
+                // this.$store.state.topNavState = nav_type
                 this.$store.dispatch('setLeftNavState', nav_name)
                 // this.$store.state.leftNavState = nav_name
                 if (nav_type == 'home') {
