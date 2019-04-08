@@ -3,7 +3,6 @@ import Router from 'vue-router';
 
 import Home from '@/components/common/Home.vue'
 import Dashboard from '@/components/page/Dashboard.vue'
-import Design from '@/components/page/DesignManage.vue'
 
 Vue.use(Router);
 
@@ -81,32 +80,32 @@ export default new Router({
                 },
                 {
                     path: '/addSamples',
-                    component: resolve => require(['../components/page/AddSamples.vue'], resolve),
+                    component: resolve => require(['../components/page/purchaser/AddSamples.vue'], resolve),
                     meta: { title: '添加样品' }
                 },
                 {
                     path: '/samplesManage',
-                    component: resolve => require(['../components/page/SamplesManage.vue'], resolve),
+                    component: resolve => require(['../components/page/purchaser/SamplesManage.vue'], resolve),
                     meta: { title: '样品管理' }
                 },
                 {
                     path: '/samplesinManage',
-                    component: resolve => require(['../components/page/SamplesInManage.vue'], resolve),
+                    component: resolve => require(['../components/page/purchaser/SamplesInManage.vue'], resolve),
                     meta: { title: '入库管理' }
                 },
                 {
                     path: '/returnsamplesManage',
-                    component: resolve => require(['../components/page/ReturnSamplesManage.vue'], resolve),
+                    component: resolve => require(['../components/page/purchaser/ReturnSamplesManage.vue'], resolve),
                     meta: { title: '归还样品' }
                 },
                 {
                     path: '/sampleoutsManage',
-                    component: resolve => require(['../components/page/SampleOutsManage.vue'], resolve),
+                    component: resolve => require(['../components/page/purchaser/SampleOutsManage.vue'], resolve),
                     meta: { title: '审核借样' }
                 },
                 {
                     path: '/applysampleoutsManage',
-                    component: resolve => require(['../components/page/ApplySampleOutsManage.vue'], resolve),
+                    component: resolve => require(['../components/page/purchaser/ApplySampleOutsManage.vue'], resolve),
                     meta: { title: '申请借样' }
                 },
                 {
@@ -126,12 +125,12 @@ export default new Router({
                 },
                 {
                     path: '/addSuppliers',
-                    component: resolve => require(['../components/page/AddSuppliers.vue'], resolve),
+                    component: resolve => require(['../components/page/purchaser/AddSuppliers.vue'], resolve),
                     meta: { title: '添加供应商' }
                 },
                 {
                     path: '/suppliersManage',
-                    component: resolve => require(['../components/page/SuppliersManage.vue'], resolve),
+                    component: resolve => require(['../components/page/purchaser/SuppliersManage.vue'], resolve),
                     meta: { title: '供应商管理' }
                 },
                 {
@@ -156,44 +155,44 @@ export default new Router({
                 },
                 {
                     path: '/addbrands',
-                    component: resolve => require(['../components/page/AddBrands.vue'], resolve),
+                    component: resolve => require(['../components/page/purchaser/AddBrands.vue'], resolve),
                     meta: { title: '新建知识产权' }
                 },
                 {
                     path: '/brandsmanage',
-                    component: resolve => require(['../components/page/BrandsManage.vue'], resolve),
+                    component: resolve => require(['../components/page/purchaser/BrandsManage.vue'], resolve),
                     meta: { title: '知识产权管理' }
                 },
                 {
                     path: '/addreviewers',
-                    component: resolve => require(['../components/page/AddReviewers.vue'], resolve),
+                    component: resolve => require(['../components/page/outsider/AddReviewers.vue'], resolve),
                     meta: { title: '新建测评任务' }
                 },
                 {
                     path: '/reviewersmanage',
-                    component: resolve => require(['../components/page/ReviewersManage.vue'], resolve),
+                    component: resolve => require(['../components/page/outsider/ReviewersManage.vue'], resolve),
                     meta: { title: '测评任务管理' }
                 },
                 {
                     path: '/reviewersinfomanage',
-                    component: resolve => require(['../components/page/ReviewersInfoManage.vue'], resolve),
+                    component: resolve => require(['../components/page/outsider/ReviewersInfoManage.vue'], resolve),
                     name: 'Reviewersinfomanage',
                     meta: { title: '测评记录管理' }
                 },
                 {
                     path: '/reviewersinfomanagefina',
-                    component: resolve => require(['../components/page/ReviewersInfoManage.vue'], resolve),
+                    component: resolve => require(['../components/page/outsider/ReviewersInfoManage.vue'], resolve),
                     name: 'Reviewersinfomanage',
                     meta: { title: '测评记录(财务)' }
                 },
                 {
                     path: '/fansmanage',
-                    component: resolve => require(['../components/page/FansManage.vue'], resolve),
+                    component: resolve => require(['../components/page/outsider/FansManage.vue'], resolve),
                     meta: { title: '粉丝管理' }
                 },
                 {
                     path: '/designmanage',
-                    component: resolve => require(['../components/page/DesignManage.vue'], resolve),
+                    component: resolve => require(['../components/page/designer/DesignManage.vue'], resolve),
                     meta: { title: '制图管理' }
                 },
                 {
@@ -520,7 +519,7 @@ export default new Router({
                         {
                             path: '/suppliersManage',
                             // component: Design,
-                            index: 'productmanageeBay',
+                            index: 'suppliersManage',
                             name: '供应商管理',
                             menuShow: true,
                             leaf: true,
