@@ -31,52 +31,52 @@ export default new Router({
                 },
                 {
                     path: '/addProduct',
-                    component: resolve => require(['../components/page/AddProduct.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/AddProduct.vue'], resolve),
                     meta: { title: '添加产品' }
                 },
                 {
                     path: '/productmanage',
-                    component: resolve => require(['../components/page/ProductManage.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/ProductManage.vue'], resolve),
                     meta: { title: '产品管理' }
                 },
                 {
                     path: '/productmanageOper',
-                    component: resolve => require(['../components/page/ProductManage.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/ProductManage.vue'], resolve),
                     meta: { title: '产品管理' }
                 },
                 {
                     path: '/productmanageeBay',
-                    component: resolve => require(['../components/page/ProductManageEBAY.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/ProductManageEBAY.vue'], resolve),
                     meta: { title: 'eBay产品' }
                 },
                 {
                     path: '/productmanageeBayOper',
-                    component: resolve => require(['../components/page/ProductManageEBAY.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/ProductManageEBAY.vue'], resolve),
                     meta: { title: 'eBay产品' }
                 },
                 {
                     path: '/productmanagewish',
-                    component: resolve => require(['../components/page/ProductManageWISH.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/ProductManageWISH.vue'], resolve),
                     meta: { title: 'wish产品' }
                 },
                 {
                     path: '/productmanagewishOper',
-                    component: resolve => require(['../components/page/ProductManageWISH.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/ProductManageWISH.vue'], resolve),
                     meta: { title: 'wish产品' }
                 },
                 {
                     path: '/checkproductmanage',
-                    component: resolve => require(['../components/page/CheckProductManage.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/CheckProductManage.vue'], resolve),
                     meta: { title: '审核新建产品' }
                 },
                 {
                     path: '/applyproductmanage',
-                    component: resolve => require(['../components/page/ApplyProductManage.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/ApplyProductManage.vue'], resolve),
                     meta: { title: '审核申请查看' }
                 },
                 {
                     path: '/subjectsmanage',
-                    component: resolve => require(['../components/page/SubjectsManage.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/SubjectsManage.vue'], resolve),
                     meta: { title: '主体管理' }
                 },
                 {
@@ -111,17 +111,17 @@ export default new Router({
                 },
                 {
                     path: '/addClassify',
-                    component: resolve => require(['../components/page/AddClassify.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/AddClassify.vue'], resolve),
                     meta: { title: '添加分类' }
                 },
                 {
                     path: '/classifylistManage',
-                    component: resolve => require(['../components/page/ClassifyListManage.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/ClassifyListManage.vue'], resolve),
                     meta: { title: '分类列表' }
                 },
                 {
                     path: '/classifyManage',
-                    component: resolve => require(['../components/page/ClassifyManage.vue'], resolve),
+                    component: resolve => require(['../components/page/developer/ClassifyManage.vue'], resolve),
                     meta: { title: '分类管理' }
                 },
                 {
@@ -136,22 +136,22 @@ export default new Router({
                 },
                 {
                     path: '/addusers',
-                    component: resolve => require(['../components/page/AddUsers.vue'], resolve),
+                    component: resolve => require(['../components/page/admin/AddUsers.vue'], resolve),
                     meta: { title: '创建用户' }
                 },
                 {
                     path: '/usersmanage',
-                    component: resolve => require(['../components/page/UsersManage.vue'], resolve),
+                    component: resolve => require(['../components/page/admin/UsersManage.vue'], resolve),
                     meta: { title: '用户管理' }
                 },
                 {
                     path: '/addroles',
-                    component: resolve => require(['../components/page/AddRoles.vue'], resolve),
+                    component: resolve => require(['../components/page/admin/AddRoles.vue'], resolve),
                     meta: { title: '创建角色' }
                 },
                 {
                     path: '/rolesmanage',
-                    component: resolve => require(['../components/page/RolesManage.vue'], resolve),
+                    component: resolve => require(['../components/page/admin/RolesManage.vue'], resolve),
                     meta: { title: '角色管理' }
                 },
                 {
@@ -179,6 +179,12 @@ export default new Router({
                     component: resolve => require(['../components/page/ReviewersInfoManage.vue'], resolve),
                     name: 'Reviewersinfomanage',
                     meta: { title: '测评记录管理' }
+                },
+                {
+                    path: '/reviewersinfomanagefina',
+                    component: resolve => require(['../components/page/ReviewersInfoManage.vue'], resolve),
+                    name: 'Reviewersinfomanage',
+                    meta: { title: '测评记录(财务)' }
                 },
                 {
                     path: '/fansmanage',
@@ -335,7 +341,6 @@ export default new Router({
                             path: '/checkproductmanage',
                             index: 'checkproductmanage',
                             name: '审核新建产品',
-                            component: resolve => require(['../components/page/CheckProductManage.vue'], resolve),
                             menuShow: true,
                             leaf: true,
                         },
@@ -564,6 +569,33 @@ export default new Router({
                     ]
                 }
             ],
+        },
+        {
+            path: '/finacialDepartment',
+            index: 'reviewersinfomanagefina',
+            type: 'finacial',
+            name: 'finacial',
+            // component: Home,
+            redirect: 'reviewersinfomanagefina',
+            children: [
+                {
+                    path: '/reviewersinfomanagefina',
+                    index: 'reviewersinfomanagefina',
+                    name: '财务管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-goods',
+                    children: [
+                        {
+                            path: '/reviewersinfomanagefina',
+                            // component: Design,
+                            index: 'reviewersinfomanagefina',
+                            name: '测评记录管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                }
+            ]
         },
         {
             path: '/login',

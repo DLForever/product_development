@@ -32,22 +32,22 @@
             <template v-for="(issue,index) in $router.options.routes">
                 <template v-if="issue.name === $store.getters.leftNavState">
                     <template v-for="(item,index) in issue.children">
-                        <el-submenu v-if="!item.leaf" :index="item.index" v-show="item.menuShow">
+                        <el-submenu v-if="!item.leaf" :index="item.index" v-show="item.menuShow" :key="item.index">
                             <template slot="title"><i :class="item.icon"></i><span slot="title">{{item.name}}</span></template>
                             <template v-for="(secondterm, index2) in item.children">
-                                <el-submenu v-if="!secondterm.leaf" :index="secondterm.index" v-show="secondterm.menuShow">
+                                <el-submenu v-if="!secondterm.leaf" :index="secondterm.index" v-show="secondterm.menuShow" :key="secondterm.index">
                                     <template slot="title"><span slot="title">{{secondterm.name}}</span></template>
                                     <el-menu-item v-for="(threeterm, index3) in secondterm.children" :key="threeterm.index" :index="threeterm.index" v-if="threeterm.menuShow"
                                         :class="$route.path==threeterm.path?'is-active':''">
                                         <span slot="title">{{threeterm.name}}</span>
                                     </el-menu-item>
                                 </el-submenu>
-                                <el-menu-item v-else-if="secondterm.leaf" :index="secondterm.index" :class="$route.path==secondterm.path?'is-active':''" v-show="secondterm.menuShow">
+                                <el-menu-item v-else-if="secondterm.leaf" :index="secondterm.index" :key="secondterm.index" :class="$route.path==secondterm.path?'is-active':''" v-show="secondterm.menuShow">
                                     <span slot="title">{{secondterm.name}}</span>
                                 </el-menu-item>
                             </template>
                         </el-submenu>
-                        <el-menu-item v-else-if="item.leaf" :index="item.index" :class="$route.path==item.path?'is-active':''" v-show="item.menuShow">
+                        <el-menu-item v-else-if="item.leaf" :index="item.index" :key="item.index" :class="$route.path==item.path?'is-active':''" v-show="item.menuShow">
                             <i :class="item.icon"></i><span slot="title">{{item.name}}</span>
                         </el-menu-item>
                     </template>
@@ -278,7 +278,8 @@
                     //         }
                     //     ]
                     // }
-                ]
+                ],
+                openNav: []
             }
         },
         computed:{
@@ -293,20 +294,22 @@
             })
         },
         watch: {
-            "$store.getters.leftNavState": 'changeCollapse'
-            // "$route": "changeCollapse",
+            // "$store.getters.leftNavState": 'changeLeftNav',
+            // "$route": "changeLeftNav2",
         },
         methods: {
-            changeCollapse() {
-                console.log(this.$route.path)
+            changeLeftNav() {
+                this.openNav = []
+                this.openNav.push(this.onRoutes)
                 // this.$refs['leftNavigation'].open(this.$route.path.replace('/', ''))
                 // this.collapse =true
-                setTimeout(this.changeCollapse2, 20)
+                // setTimeout(this.changeCollapse2, 200)
             },
-            changeCollapse2() {
-                console.log('666')
-                let temp = this.$route.path.replace('/', '')
-                this.$refs['leftNavigation'].open(temp)
+            changeLeftNav2() {
+                this.openNav.push(this.onRoutes)
+                console.log(this.openNav)
+                // let temp = this.$route.path.replace('/', '')
+                // this.$refs['leftNavigation'].open(temp)
                 // this.collapse =false
             },
             defaultLeftNavOpened() {
