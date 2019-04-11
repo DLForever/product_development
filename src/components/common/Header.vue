@@ -5,7 +5,7 @@
             <i class="el-icon-menu"></i>
         </div>
         <div class="logo">
-            <a href="/" style="color: #fff;"><span>产品开发系统</span></a>
+            <a href="/" style="color: #fff;"><span>WZS管理系统</span></a>
         </div>
         <div class="topbar-title">
             <el-row>
@@ -13,11 +13,14 @@
                     <el-menu :default-active="defaultActiveIndex" class="el-menu-demo" mode="horizontal" :router="true">
                         <el-menu-item index="/">首页</el-menu-item>
                         <el-menu-item index="/developDepartment">开发部</el-menu-item>
-                        <el-menu-item index="/operationalDepartment">运营部</el-menu-item>
-                        <el-menu-item index="/purchaseDepartment">采购部</el-menu-item>
-                        <el-menu-item index="/finacialDepartment">财务部</el-menu-item>
                         <el-menu-item index="/designDepartment">设计部</el-menu-item>
+                        <el-menu-item index="/purchaseDepartment">采购部</el-menu-item>
+                        <el-menu-item index="/operationalDepartment">运营部</el-menu-item>
+                        <!-- <el-menu-item index="/storehouseDepartment">仓储部</el-menu-item>
+                        <el-menu-item index="/logisticsDepartment">物流部</el-menu-item> -->
+                        <el-menu-item index="/finacialDepartment">财务部</el-menu-item>
                         <el-menu-item index="/outsideDepartment">站外部</el-menu-item>
+                        <el-menu-item v-if="roles === '管理员'" index="/adminDepartment">管理中心</el-menu-item>
                     </el-menu>
                 </el-col>
             </el-row>
@@ -77,7 +80,8 @@
                 fullscreen: false,
                 name: 'lyh',
                 message: 2,
-                defaultActiveIndex: '/'
+                defaultActiveIndex: '/',
+                roles: ''
             }
         },
         props:{
@@ -87,6 +91,7 @@
         },
         created() {
             // 组件创建完后获取数据
+            this.roles = localStorage.getItem('roles')
             this.fetchNavData()
         },
         computed:{

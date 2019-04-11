@@ -2,8 +2,14 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-lx-goodsfill"></i> 测评管理</el-breadcrumb-item>
-                <el-breadcrumb-item>测评任务管理</el-breadcrumb-item>
+                <template v-if="$store.getters.leftNavState === 'outside'">
+                    <el-breadcrumb-item><i class="el-icon-lx-goodsfill"></i> 测评管理</el-breadcrumb-item>
+                    <el-breadcrumb-item>测评记录管理</el-breadcrumb-item>
+                </template>
+                <template v-if="$store.getters.leftNavState === 'finacial'">
+                    <el-breadcrumb-item><i class="el-icon-lx-goodsfill"></i> 财务管理</el-breadcrumb-item>
+                    <el-breadcrumb-item>测评报表管理</el-breadcrumb-item>
+                </template>
             </el-breadcrumb>
         </div>
         <div class="container">

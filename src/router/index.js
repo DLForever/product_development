@@ -41,7 +41,7 @@ export default new Router({
                 {
                     path: '/productmanageOper',
                     component: resolve => require(['../components/page/developer/ProductManage.vue'], resolve),
-                    meta: { title: '产品管理' }
+                    meta: { title: '产品管理(运营)' }
                 },
                 {
                     path: '/productmanageeBay',
@@ -51,7 +51,7 @@ export default new Router({
                 {
                     path: '/productmanageeBayOper',
                     component: resolve => require(['../components/page/developer/ProductManageEBAY.vue'], resolve),
-                    meta: { title: 'eBay产品' }
+                    meta: { title: 'eBay产品(运营)' }
                 },
                 {
                     path: '/productmanagewish',
@@ -61,7 +61,7 @@ export default new Router({
                 {
                     path: '/productmanagewishOper',
                     component: resolve => require(['../components/page/developer/ProductManageWISH.vue'], resolve),
-                    meta: { title: 'wish产品' }
+                    meta: { title: 'wish产品(运营)' }
                 },
                 {
                     path: '/checkproductmanage',
@@ -183,7 +183,7 @@ export default new Router({
                     path: '/reviewersinfomanagefina',
                     component: resolve => require(['../components/page/outsider/ReviewersInfoManage.vue'], resolve),
                     name: 'Reviewersinfomanage',
-                    meta: { title: '测评记录(财务)' }
+                    meta: { title: '测评报表' }
                 },
                 {
                     path: '/fansmanage',
@@ -194,6 +194,16 @@ export default new Router({
                     path: '/designmanage',
                     component: resolve => require(['../components/page/designer/DesignManage.vue'], resolve),
                     meta: { title: '制图管理' }
+                },
+                {
+                    path: '/addPurchase',
+                    component: resolve => require(['../components/page/purchaser/AddPurchase.vue'], resolve),
+                    meta: { title: '新建采购计划' }
+                },
+                {
+                    path: '/purchaseManage',
+                    component: resolve => require(['../components/page/purchaser/purchaseManage.vue'], resolve),
+                    meta: { title: '采购计划管理' }
                 },
                 {
                     path: '/notifications',
@@ -506,7 +516,7 @@ export default new Router({
                     index: 'addSuppliers',
                     name: '供应商管理',
                     menuShow: true,
-                    icon: 'el-icon-lx-goods',
+                    icon: 'el-icon-lx-global',
                     children: [
                         {
                             path: '/addSuppliers',
@@ -531,7 +541,7 @@ export default new Router({
                     index: 'addSamples',
                     name: '样品管理',
                     menuShow: true,
-                    icon: 'el-icon-lx-goods',
+                    icon: 'el-icon-date',
                     children: [
                         {
                             path: '/addSamples',
@@ -566,6 +576,31 @@ export default new Router({
                             leaf: true,
                         },
                     ]
+                },
+                {
+                    path: '/addPurchase',
+                    index: 'addPurchase',
+                    name: '采购管理',
+                    menuShow: true,
+                    icon: 'el-icon-date',
+                    children: [
+                        {
+                            path: '/addPurchase',
+                            // component: Design,
+                            index: 'addPurchase',
+                            name: '新建采购计划',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/purchaseManage',
+                            // component: Design,
+                            index: 'purchaseManage',
+                            name: '采购计划管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
                 }
             ],
         },
@@ -588,7 +623,7 @@ export default new Router({
                             path: '/reviewersinfomanagefina',
                             // component: Design,
                             index: 'reviewersinfomanagefina',
-                            name: '测评记录管理',
+                            name: '测评报表管理',
                             menuShow: true,
                             leaf: true,
                         },
@@ -596,6 +631,111 @@ export default new Router({
                 }
             ]
         },
+        {
+            path: '/adminDepartment',
+            index: 'addusers',
+            type: 'admin',
+            name: 'admin',
+            // component: Home,
+            redirect: 'addusers',
+            children: [
+                {
+                    path: '/addusers',
+                    index: 'addusers',
+                    name: '用户管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-group',
+                    children: [
+                        {
+                            path: '/addusers',
+                            // component: Design,
+                            index: 'addusers',
+                            name: '创建用户',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/addroles',
+                            // component: Design,
+                            index: 'addroles',
+                            name: '创建角色',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/usersmanage',
+                            // component: Design,
+                            index: 'usersmanage',
+                            name: '用户管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/rolesmanage',
+                            // component: Design,
+                            index: 'rolesmanage',
+                            name: '角色管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                }
+            ]
+        },
+        // {
+        //     path: '/storehouseDepartment',
+        //     index: 'reviewersinfomanagefina',
+        //     type: 'storehouse',
+        //     name: 'storehouse',
+        //     // component: Home,
+        //     redirect: 'reviewersinfomanagefina',
+        //     children: [
+        //         {
+        //             path: '/reviewersinfomanagefina',
+        //             index: 'reviewersinfomanagefina',
+        //             name: '仓储管理',
+        //             menuShow: true,
+        //             icon: 'el-icon-lx-goods',
+        //             children: [
+        //                 {
+        //                     path: '/reviewersinfomanagefina',
+        //                     // component: Design,
+        //                     index: 'reviewersinfomanagefina',
+        //                     name: '仓储管理',
+        //                     menuShow: true,
+        //                     leaf: true,
+        //                 },
+        //             ]
+        //         }
+        //     ]
+        // },
+        // {
+        //     path: '/logisticsDepartment',
+        //     index: 'reviewersinfomanagefina',
+        //     type: 'logistics',
+        //     name: 'logistics',
+        //     // component: Home,
+        //     redirect: 'reviewersinfomanagefina',
+        //     children: [
+        //         {
+        //             path: '/reviewersinfomanagefina',
+        //             index: 'reviewersinfomanagefina',
+        //             name: '物流管理',
+        //             menuShow: true,
+        //             icon: 'el-icon-lx-goods',
+        //             children: [
+        //                 {
+        //                     path: '/reviewersinfomanagefina',
+        //                     // component: Design,
+        //                     index: 'reviewersinfomanagefina',
+        //                     name: '物流管理',
+        //                     menuShow: true,
+        //                     leaf: true,
+        //                 },
+        //             ]
+        //         }
+        //     ]
+        // },
         {
             path: '/login',
             component: resolve => require(['../components/page/Login.vue'], resolve)

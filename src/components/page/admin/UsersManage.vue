@@ -19,7 +19,8 @@
             </div>
             <br><br>
             <el-table v-loading="table_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
-                <el-table-column type="selection" width="55"></el-table-column>
+                <!-- <el-table-column type="selection" width="55"></el-table-column> -->
+                <el-table-column type="index" width="55"></el-table-column>
                 <el-table-column prop="username" label="用户名" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="name" label="姓名" show-overflow-tooltip>
