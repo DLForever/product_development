@@ -8,7 +8,9 @@
         </div>
         <div class="container">
             <div class="handle-box">
-                <el-button type="primary" @click="exportFans">导出粉丝</el-button>
+                <el-button type="primary">
+                    <a style="color:#fff;" :href="$axios.defaults.baseURL + '/fans/export_url?token=' + export_token">导出粉丝</a>
+                </el-button>
                 <div class="fnsku_filter">
                     粉丝号:
                     <el-input style="width:150px" placeholder="请输入粉丝号" v-model.trim="search_fan"></el-input>

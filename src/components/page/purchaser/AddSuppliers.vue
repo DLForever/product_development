@@ -26,6 +26,12 @@
 							<el-form-item label="邮箱">
 								<el-input v-model.trim="form.email"></el-input>
 							</el-form-item>
+							<!-- <el-form-item label="收款帐号">
+								<el-input v-model.trim="form.accountNumber"></el-input>
+							</el-form-item>
+							<el-form-item label="开户名">
+								<el-input v-model.trim="form.accountName"></el-input>
+							</el-form-item> -->
 							<el-form-item label="备注">
 								<el-input v-model.trim="form.remark"></el-input>
 							</el-form-item>
@@ -117,6 +123,8 @@
 				category_id: [],
 				options: [],
 				cur_page: 1,
+				accountNumber: '',
+				accountName: ''
 			}
 		},
 		beforeRouteEnter: (to, from, next) => {

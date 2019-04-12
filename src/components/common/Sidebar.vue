@@ -1,6 +1,6 @@
 <template>
     <div class="sidebar">
-        <!-- <el-menu class="sidebar-el-menu" :default-active="onRoutes" :collapse="collapse" unique-opened router>
+        <el-menu class="sidebar-el-menu" :default-active="onRoutes" :collapse="collapse" unique-opened router>
             <template v-for="item in items">
                 <template v-if="item.subs">
                     <el-submenu :index="item.index" :key="item.index">
@@ -26,9 +26,9 @@
                     </el-menu-item>
                 </template>
             </template>
-        </el-menu> -->
+        </el-menu>
 
-        <el-menu class="sidebar-el-menu" :default-active="onRoutes" router :collapse="collapse" unique-opened ref="leftNavigation">
+        <!-- <el-menu class="sidebar-el-menu" :default-active="onRoutes" router :collapse="collapse" unique-opened ref="leftNavigation">
             <template v-for="(issue,index) in $router.options.routes">
                 <template v-if="issue.name === $store.getters.leftNavState">
                     <template v-for="(item,index) in issue.children">
@@ -53,7 +53,7 @@
                     </template>
                 </template>
             </template>
-        </el-menu>
+        </el-menu> -->
     </div>
 </template>
 

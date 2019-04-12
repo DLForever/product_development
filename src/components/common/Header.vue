@@ -7,7 +7,7 @@
         <div class="logo">
             <a href="/" style="color: #fff;"><span>WZS管理系统</span></a>
         </div>
-        <div class="topbar-title">
+        <!-- <div class="topbar-title">
             <el-row>
                 <el-col :span="24">
                     <el-menu :default-active="defaultActiveIndex" class="el-menu-demo" mode="horizontal" :router="true">
@@ -16,15 +16,15 @@
                         <el-menu-item index="/designDepartment">设计部</el-menu-item>
                         <el-menu-item index="/purchaseDepartment">采购部</el-menu-item>
                         <el-menu-item index="/operationalDepartment">运营部</el-menu-item>
-                        <!-- <el-menu-item index="/storehouseDepartment">仓储部</el-menu-item>
-                        <el-menu-item index="/logisticsDepartment">物流部</el-menu-item> -->
-                        <el-menu-item index="/finacialDepartment">财务部</el-menu-item>
+                        <el-menu-item index="/storehouseDepartment">仓储部</el-menu-item>
+                        <el-menu-item index="/logisticsDepartment">物流部</el-menu-item>
                         <el-menu-item index="/outsideDepartment">站外部</el-menu-item>
+                        <el-menu-item index="/finacialDepartment">财务部</el-menu-item>
                         <el-menu-item v-if="roles === '管理员'" index="/adminDepartment">管理中心</el-menu-item>
                     </el-menu>
                 </el-col>
             </el-row>
-        </div>
+        </div> -->
         <div class="header-right">
             <div class="header-user-con">
                 <!-- 全屏显示 -->

@@ -10,6 +10,7 @@
             <div class="handle-box">
                 <el-button type="primary" @click="handleApply">申请查看详情</el-button>
                 <el-button type="default" @click="exportProduct">导出</el-button>
+                <!-- <el-button type="warning" @click="addPurchase">添加采购计划</el-button> -->
                 <div style="float: right;">
                     <el-select v-model="search_selects" multiple placeholder="展示其他搜索栏目" @change="showSearch">
                         <el-option v-for="item in search_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
@@ -575,6 +576,167 @@
                 <el-button type="primary" @click="saveDesign" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
+
+        <!-- 编辑弹出框 -->
+        <el-dialog title="编辑" :visible.sync="purchaseVisible" width="50%">
+            <el-form ref="form" :model="form" label-width="100px">
+                <el-form-item label="产品名称">
+                    <!-- <el-input v-model="form.name"></el-input> -->
+                    <span>{{form.name}}</span>
+                </el-form-item>
+                <el-form-item label="产品分类">
+                    <span>{{form.category_name}}</span>
+                    <!-- <el-cascader :options="options" v-model="category_id" expand-trigger="hover" change-on-select></el-cascader> -->
+                </el-form-item>
+                <el-form-item label="变体">
+                    <table class="table text-center">
+                        <tbody v-for="(attrs,index) in subject_attrs">
+                            <td>
+                                <el-input v-model.trim="subject_attrs[index]" placeholder="属性"></el-input>
+                            </td>
+                            <div v-if="index == 0">
+                                <i class="el-icon-remove" @click="subject_Del(index)"></i>
+                                <span>&nbsp</span>
+                                <i class="el-icon-circle-plus" @click="subject_Add(index)" :disabled="false"></i>
+                            </div>
+                            <div v-else>
+                                <i class="el-icon-remove" @click="subject_Del(index)"></i>
+                            </div>
+                        </tbody>
+                    </table>
+                </el-form-item>
+                <el-form-item label="平台">
+                    <el-checkbox label="wish" v-model="form.wish" border></el-checkbox>
+                    <el-checkbox label="eBay" v-model="form.ebay" border></el-checkbox>
+                </el-form-item>
+                <el-form-item label="英文名">
+                    <el-input v-model="form.english_name"></el-input>
+                </el-form-item>
+                <el-form-item label="产品标题">
+                    <el-input v-model="form.title"></el-input>
+                </el-form-item>
+                <el-form-item label="采购价">
+                    <el-input v-model="form.price"></el-input>
+                </el-form-item>
+                <el-form-item label="产品尺寸">
+                    <template slot-scope="scope">
+                        <el-col :span="7">
+                            <el-form-item prop="length">
+                                <el-input v-model.trim="form.length" placeholder="长(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col class="line" :span="1">-</el-col>
+                        <el-col :span="7">
+                            <el-form-item prop="width">
+                                <el-input v-model.trim="form.width" placeholder="宽(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col class="line" :span="1">-</el-col>
+                        <el-col :span="7">
+                            <el-form-item prop="height">
+                                <el-input v-model.trim="form.height" placeholder="高(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                </el-form-item>
+                <el-form-item label="产品重量(g)">
+                    <el-input v-model="form.weight"></el-input>
+                </el-form-item>
+                <el-form-item label="包装尺寸">
+                    <template slot-scope="scope">
+                        <el-col :span="7">
+                            <el-form-item prop="length">
+                                <el-input v-model.trim="form.package_length" placeholder="长(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col class="line" :span="1">-</el-col>
+                        <el-col :span="7">
+                            <el-form-item prop="width">
+                                <el-input v-model.trim="form.package_width" placeholder="宽(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col class="line" :span="1">-</el-col>
+                        <el-col :span="7">
+                            <el-form-item prop="height">
+                                <el-input v-model.trim="form.package_height" placeholder="高(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                </el-form-item>
+                <el-form-item label="包装重量(g)">
+                    <el-input v-model="form.package_weight"></el-input>
+                </el-form-item>
+                <el-form-item label="型号">
+                    <el-input v-model.trim="form.model_number"></el-input>
+                </el-form-item>
+                <el-form-item label="材质">
+                    <el-input v-model.trim="form.texture"></el-input>
+                </el-form-item>
+                <el-form-item label="产品特性">
+                    <el-select v-model="form.feature">
+                        <el-option v-for="item in feature_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="外箱规格">
+                    <template slot-scope="scope">
+                        <el-col :span="7">
+                            <el-form-item>
+                                <el-input v-model.trim="form.box_length" placeholder="长(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col class="line" :span="1">-</el-col>
+                        <el-col :span="7">
+                            <el-form-item>
+                                <el-input v-model.trim="form.box_width" placeholder="宽(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col class="line" :span="1">-</el-col>
+                        <el-col :span="7">
+                            <el-form-item>
+                                <el-input v-model.trim="form.box_height" placeholder="高(cm)"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                </el-form-item>
+                <el-form-item label="单箱实重">
+                    <el-input v-model.trim="form.box_weight"></el-input>
+                </el-form-item>
+                <el-form-item label="单箱数量">
+                    <el-input v-model.trim="form.box_sum"></el-input>
+                </el-form-item>
+                <el-form-item label="产品描述">
+                    <el-input v-model="form.desc"></el-input>
+                </el-form-item>
+                <el-form-item label="产品描述URL">
+                    <el-input v-model="form.desc_url" placeholder="需加入https://或http://前缀"></el-input>
+                </el-form-item>
+                <el-form-item label="来源URL">
+                    <el-input v-model="form.origin_url" placeholder="需加入https://或http://前缀"></el-input>
+                </el-form-item>
+                <el-form-item label="图片URL">
+                    <el-input v-model="form.picture_url" placeholder="需加入https://或http://前缀"></el-input>
+                </el-form-item>
+                 <el-form-item label="备注">
+                    <el-input v-model="form.remark"></el-input>
+                </el-form-item>
+                <!-- <el-form-item label="产品图片">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item> -->
+                <!-- <el-form-item label="外包装图片">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item> -->
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="purchaseVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -728,7 +890,8 @@
                 subject_attrs: [],
                 subject: [],
                 subject_temp: [],
-                img_index: 0
+                img_index: 0,
+                purchaseVisible: false
             }
         },
         created() {
@@ -1743,7 +1906,6 @@
                 this.subject_attrs.splice(index, 1)
             },
             setMainPicture(id) {
-                console.log(this.refs.elcarousel)
                 this.$confirm('将下图设置为主图, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
@@ -1768,6 +1930,13 @@
             // closeImg() {
             //     this.setActiveItem()
             // },
+            addPurchase() {
+                if(this.multipleSelection.length == 0){
+                    this.$message.error('请至少选择一个产品')
+                    return
+                }
+                this.purchaseVisible = true
+            },
             getStatusName(status) {
                 if(status == 1) {
                     return "未审核"

@@ -206,6 +206,11 @@ export default new Router({
                     meta: { title: '采购计划管理' }
                 },
                 {
+                    path: '/purchaseManageOp',
+                    component: resolve => require(['../components/page/purchaser/purchaseManage.vue'], resolve),
+                    meta: { title: '采购计划管理' }
+                },
+                {
                     path: '/notifications',
                     component: resolve => require(['../components/page/Tabs.vue'], resolve),
                     meta: { title: '未读消息' }
@@ -500,7 +505,24 @@ export default new Router({
                             leaf: true,
                         },
                     ]
-                }
+                },
+                // {
+                //     path: '/purchaseManageOp',
+                //     index: 'purchaseManageOp',
+                //     name: '采购计划管理',
+                //     menuShow: true,
+                //     icon: 'el-icon-lx-goods',
+                //     children: [
+                //         {
+                //             path: '/purchaseManageOp',
+                //             // component: Design,
+                //             index: 'purchaseManageOp',
+                //             name: '采购计划',
+                //             menuShow: true,
+                //             leaf: true,
+                //         },
+                //     ]
+                // }
             ]
         },
         {
@@ -577,31 +599,31 @@ export default new Router({
                         },
                     ]
                 },
-                {
-                    path: '/addPurchase',
-                    index: 'addPurchase',
-                    name: '采购管理',
-                    menuShow: true,
-                    icon: 'el-icon-date',
-                    children: [
-                        {
-                            path: '/addPurchase',
-                            // component: Design,
-                            index: 'addPurchase',
-                            name: '新建采购计划',
-                            menuShow: true,
-                            leaf: true,
-                        },
-                        {
-                            path: '/purchaseManage',
-                            // component: Design,
-                            index: 'purchaseManage',
-                            name: '采购计划管理',
-                            menuShow: true,
-                            leaf: true,
-                        },
-                    ]
-                }
+                // {
+                //     path: '/addPurchase',
+                //     index: 'addPurchase',
+                //     name: '采购管理',
+                //     menuShow: true,
+                //     icon: 'el-icon-date',
+                //     children: [
+                //         {
+                //             path: '/addPurchase',
+                //             // component: Design,
+                //             index: 'addPurchase',
+                //             name: '新建采购计划',
+                //             menuShow: true,
+                //             leaf: true,
+                //         },
+                //         {
+                //             path: '/purchaseManage',
+                //             // component: Design,
+                //             index: 'purchaseManage',
+                //             name: '采购计划管理',
+                //             menuShow: true,
+                //             leaf: true,
+                //         },
+                //     ]
+                // }
             ],
         },
         {
