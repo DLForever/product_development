@@ -10,7 +10,7 @@
             <div class="handle-box">
                 <el-button type="primary" @click="handleApply">申请查看详情</el-button>
                 <el-button type="default" @click="exportProduct">导出</el-button>
-                <!-- <el-button type="warning" @click="addPurchase">添加采购计划</el-button> -->
+                <el-button type="warning" @click="addPurchase">添加采购计划</el-button>
                 <div style="float: right;">
                     <el-select v-model="search_selects" multiple placeholder="展示其他搜索栏目" @change="showSearch">
                         <el-option v-for="item in search_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
@@ -577,18 +577,12 @@
             </span>
         </el-dialog>
 
-        <!-- 编辑弹出框 -->
+        <!-- 添加采购计划弹出框 -->
         <el-dialog title="编辑" :visible.sync="purchaseVisible" width="50%">
+            <!-- <el-button type="primary" @click="printImport">打印</el-button> -->
+            <div id="importStock">
             <el-form ref="form" :model="form" label-width="100px">
-                <el-form-item label="产品名称">
-                    <!-- <el-input v-model="form.name"></el-input> -->
-                    <span>{{form.name}}</span>
-                </el-form-item>
-                <el-form-item label="产品分类">
-                    <span>{{form.category_name}}</span>
-                    <!-- <el-cascader :options="options" v-model="category_id" expand-trigger="hover" change-on-select></el-cascader> -->
-                </el-form-item>
-                <el-form-item label="变体">
+                <!-- <el-form-item label="变体">
                     <table class="table text-center">
                         <tbody v-for="(attrs,index) in subject_attrs">
                             <td>
@@ -617,7 +611,7 @@
                 </el-form-item>
                 <el-form-item label="采购价">
                     <el-input v-model="form.price"></el-input>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="产品尺寸">
                     <template slot-scope="scope">
                         <el-col :span="7">
@@ -732,6 +726,7 @@
                     </el-upload>
                 </el-form-item> -->
             </el-form>
+        </div>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="purchaseVisible = false">取 消</el-button>
                 <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
@@ -741,6 +736,7 @@
 </template>
 
 <script>
+    import Print from 'print-js'
     import VueInfiniteLoading from "vue-infinite-loading"
     export default {
 //      name: 'product_manage',
@@ -928,6 +924,13 @@
             }
         },
         methods: {
+            printImport() {
+                Print({
+                    printable: 'importStock',
+                    type: 'html',
+                    targetStyle: ['text-align'],
+                })
+            },
         	handleSizeChange(val) {
         		this.pagesize = val;
                 this.getData()

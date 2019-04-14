@@ -211,6 +211,16 @@ export default new Router({
                     meta: { title: '采购计划管理' }
                 },
                 {
+                    path: '/purchaseOrdersManage',
+                    component: resolve => require(['../components/page/purchaser/purchaseOrdersManage.vue'], resolve),
+                    meta: { title: '采购订单管理' }
+                },
+                {
+                    path: '/inboundManage',
+                    component: resolve => require(['../components/page/storehouser/inboundManage.vue'], resolve),
+                    meta: { title: '入库订单管理' }
+                },
+                {
                     path: '/notifications',
                     component: resolve => require(['../components/page/Tabs.vue'], resolve),
                     meta: { title: '未读消息' }
@@ -521,6 +531,14 @@ export default new Router({
                 //             menuShow: true,
                 //             leaf: true,
                 //         },
+                //         {
+                //             path: '/purchaseManageOp',
+                //             // component: Design,
+                //             index: 'purchaseManageOp',
+                //             name: '出库计划',
+                //             menuShow: true,
+                //             leaf: true,
+                //         },
                 //     ]
                 // }
             ]
@@ -599,31 +617,36 @@ export default new Router({
                         },
                     ]
                 },
-                // {
-                //     path: '/addPurchase',
-                //     index: 'addPurchase',
-                //     name: '采购管理',
-                //     menuShow: true,
-                //     icon: 'el-icon-date',
-                //     children: [
-                //         {
-                //             path: '/addPurchase',
-                //             // component: Design,
-                //             index: 'addPurchase',
-                //             name: '新建采购计划',
-                //             menuShow: true,
-                //             leaf: true,
-                //         },
-                //         {
-                //             path: '/purchaseManage',
-                //             // component: Design,
-                //             index: 'purchaseManage',
-                //             name: '采购计划管理',
-                //             menuShow: true,
-                //             leaf: true,
-                //         },
-                //     ]
-                // }
+                {
+                    path: '/addPurchase',
+                    index: 'addPurchase',
+                    name: '采购管理',
+                    menuShow: true,
+                    icon: 'el-icon-date',
+                    children: [
+                        {
+                            path: '/addPurchase',
+                            index: 'addPurchase',
+                            name: '新建采购计划',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/purchaseManage',
+                            index: 'purchaseManage',
+                            name: '采购计划管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/purchaseOrdersManage',
+                            index: 'purchaseOrdersManage',
+                            name: '采购订单管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                }
             ],
         },
         {
@@ -704,33 +727,41 @@ export default new Router({
                 }
             ]
         },
-        // {
-        //     path: '/storehouseDepartment',
-        //     index: 'reviewersinfomanagefina',
-        //     type: 'storehouse',
-        //     name: 'storehouse',
-        //     // component: Home,
-        //     redirect: 'reviewersinfomanagefina',
-        //     children: [
-        //         {
-        //             path: '/reviewersinfomanagefina',
-        //             index: 'reviewersinfomanagefina',
-        //             name: '仓储管理',
-        //             menuShow: true,
-        //             icon: 'el-icon-lx-goods',
-        //             children: [
-        //                 {
-        //                     path: '/reviewersinfomanagefina',
-        //                     // component: Design,
-        //                     index: 'reviewersinfomanagefina',
-        //                     name: '仓储管理',
-        //                     menuShow: true,
-        //                     leaf: true,
-        //                 },
-        //             ]
-        //         }
-        //     ]
-        // },
+        {
+            path: '/storehouseDepartment',
+            index: 'inboundManage',
+            type: 'storehouse',
+            name: 'storehouse',
+            // component: Home,
+            redirect: 'inboundManage',
+            children: [
+                {
+                    path: '/inboundManage',
+                    index: 'inboundManage',
+                    name: '仓储管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-goods',
+                    children: [
+                        {
+                            path: '/inboundManage',
+                            // component: Design,
+                            index: 'inboundManage',
+                            name: '入库管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        {
+                            path: '/inboundManage',
+                            // component: Design,
+                            index: 'inboundManage',
+                            name: '库存管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                }
+            ]
+        },
         // {
         //     path: '/logisticsDepartment',
         //     index: 'reviewersinfomanagefina',
