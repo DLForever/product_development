@@ -678,11 +678,11 @@ export default new Router({
         },
         {
             path: '/adminDepartment',
-            index: 'addusers',
+            index: 'usersmanage',
             type: 'admin',
             name: 'admin',
             // component: Home,
-            redirect: 'addusers',
+            redirect: 'usersmanage',
             children: [
                 {
                     path: '/addusers',
