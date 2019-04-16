@@ -10,7 +10,8 @@
             <div class="handle-box">
                 <el-button type="primary" @click="handleApply">申请查看详情</el-button>
                 <el-button type="default" @click="exportProduct">导出</el-button>
-                <el-button type="warning" @click="addPurchase">添加采购计划</el-button>
+                <el-button type="primary" @click="addPurchaseQueue">添加到采购队列</el-button>
+                <el-button type="warning" @click="addPurchase" :disabled="purchaseData.length === 0">添加采购计划</el-button>
                 <div style="float: right;">
                     <el-select v-model="search_selects" multiple placeholder="展示其他搜索栏目" @change="showSearch">
                         <el-option v-for="item in search_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
@@ -50,6 +51,23 @@
                 </div>
             </div>
             <br><br>
+            <template v-if="purchaseData.length != 0">
+                <div style="margin-bottom:10px;">
+                    <el-button type="danger" @click="clearQueue">清空队列</el-button>
+                    <span style="text-align: center;display: block;">采购队列</span>
+                </div>
+                    
+                <el-table :data="purchaseData" border style="width: 100%" ref="multiplePurchaseTable" @selection-change="handlePurQueChange">
+                    <el-table-column type="selection" width="55"></el-table-column>
+                    <el-table-column fixed prop="sku" label="SKU" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="username" label="开发人员" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
+                    </el-table-column>
+                </el-table>
+            <br><br>
+            </template>
             <el-table v-loading="table_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column fixed prop="sku" label="SKU" width="120" show-overflow-tooltip>
@@ -578,158 +596,58 @@
         </el-dialog>
 
         <!-- 添加采购计划弹出框 -->
-        <el-dialog title="编辑" :visible.sync="purchaseVisible" width="50%">
-            <!-- <el-button type="primary" @click="printImport">打印</el-button> -->
-            <div id="importStock">
-            <el-form ref="form" :model="form" label-width="100px">
-                <!-- <el-form-item label="变体">
-                    <table class="table text-center">
-                        <tbody v-for="(attrs,index) in subject_attrs">
-                            <td>
-                                <el-input v-model.trim="subject_attrs[index]" placeholder="属性"></el-input>
-                            </td>
-                            <div v-if="index == 0">
-                                <i class="el-icon-remove" @click="subject_Del(index)"></i>
-                                <span>&nbsp</span>
-                                <i class="el-icon-circle-plus" @click="subject_Add(index)" :disabled="false"></i>
-                            </div>
-                            <div v-else>
-                                <i class="el-icon-remove" @click="subject_Del(index)"></i>
-                            </div>
-                        </tbody>
-                    </table>
-                </el-form-item>
-                <el-form-item label="平台">
-                    <el-checkbox label="wish" v-model="form.wish" border></el-checkbox>
-                    <el-checkbox label="eBay" v-model="form.ebay" border></el-checkbox>
-                </el-form-item>
-                <el-form-item label="英文名">
-                    <el-input v-model="form.english_name"></el-input>
-                </el-form-item>
-                <el-form-item label="产品标题">
-                    <el-input v-model="form.title"></el-input>
-                </el-form-item>
-                <el-form-item label="采购价">
-                    <el-input v-model="form.price"></el-input>
-                </el-form-item> -->
-                <el-form-item label="产品尺寸">
+        <el-dialog title="采购计划" :visible.sync="purchaseVisible" width="80%">
+            <el-table :data="purchaseForm" border style="width: 100%" ref="multipleTable">
+                <el-table-column prop="name" label="产品名称">
                     <template slot-scope="scope">
-                        <el-col :span="7">
-                            <el-form-item prop="length">
-                                <el-input v-model.trim="form.length" placeholder="长(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="width">
-                                <el-input v-model.trim="form.width" placeholder="宽(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="height">
-                                <el-input v-model.trim="form.height" placeholder="高(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
+                        <span>{{scope.row.name}}</span>
                     </template>
-                </el-form-item>
-                <el-form-item label="产品重量(g)">
-                    <el-input v-model="form.weight"></el-input>
-                </el-form-item>
-                <el-form-item label="包装尺寸">
+                </el-table-column>
+                <el-table-column prop="sum" label="入库方式">
                     <template slot-scope="scope">
-                        <el-col :span="7">
-                            <el-form-item prop="length">
-                                <el-input v-model.trim="form.package_length" placeholder="长(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="width">
-                                <el-input v-model.trim="form.package_width" placeholder="宽(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="height">
-                                <el-input v-model.trim="form.package_height" placeholder="高(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
+                        <el-select v-model="scope.row.dist_type">
+                            <el-option v-for="item in dist_type_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                        </el-select>
                     </template>
-                </el-form-item>
-                <el-form-item label="包装重量(g)">
-                    <el-input v-model="form.package_weight"></el-input>
-                </el-form-item>
-                <el-form-item label="型号">
-                    <el-input v-model.trim="form.model_number"></el-input>
-                </el-form-item>
-                <el-form-item label="材质">
-                    <el-input v-model.trim="form.texture"></el-input>
-                </el-form-item>
-                <el-form-item label="产品特性">
-                    <el-select v-model="form.feature">
-                        <el-option v-for="item in feature_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="外箱规格">
+                </el-table-column>
+                <el-table-column prop="sum" label="好评卡数">
                     <template slot-scope="scope">
-                        <el-col :span="7">
-                            <el-form-item>
-                                <el-input v-model.trim="form.box_length" placeholder="长(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item>
-                                <el-input v-model.trim="form.box_width" placeholder="宽(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item>
-                                <el-input v-model.trim="form.box_height" placeholder="高(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
+                        <el-input-number v-model="scope.row.put_card_sum" :step="5" :min="0"></el-input-number>
                     </template>
-                </el-form-item>
-                <el-form-item label="单箱实重">
-                    <el-input v-model.trim="form.box_weight"></el-input>
-                </el-form-item>
-                <el-form-item label="单箱数量">
-                    <el-input v-model.trim="form.box_sum"></el-input>
-                </el-form-item>
-                <el-form-item label="产品描述">
-                    <el-input v-model="form.desc"></el-input>
-                </el-form-item>
-                <el-form-item label="产品描述URL">
-                    <el-input v-model="form.desc_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                <el-form-item label="来源URL">
-                    <el-input v-model="form.origin_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                <el-form-item label="图片URL">
-                    <el-input v-model="form.picture_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                 <el-form-item label="备注">
-                    <el-input v-model="form.remark"></el-input>
-                </el-form-item>
-                <!-- <el-form-item label="产品图片">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
-                </el-form-item> -->
-                <!-- <el-form-item label="外包装图片">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
-                </el-form-item> -->
-            </el-form>
-        </div>
+                </el-table-column>
+                <el-table-column prop="sku" label="是否需要发票">
+                    <template slot-scope="scope">
+                        <el-checkbox v-model="scope.row.is_need_invoice">是</el-checkbox>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="数量">
+                    <template slot-scope="scope">
+                        <el-input-number v-model="scope.row.sum" :step="100" :min="0"></el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="中转地址">
+                    <template slot-scope="scope">
+                        <el-input v-model.trim="scope.row.address" placeholder="请输入中转地址" :disabled="!(scope.row.dist_type === 3)"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="备注">
+                    <template slot-scope="scope">
+                        <el-input v-model.trim="scope.row.remark" placeholder="请输入备注"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="好评卡图片" width="200">
+                    <template slot-scope="scope">
+                        <el-upload id="upload-pur" action="" :file-list="scope.row.pictures" :on-remove="(res, file)=>{return handleRemovePurchase(res, file, scope.$index)}" :auto-upload="false" :on-change="(res, file)=>{return changeFilePurchase(res, file, scope.$index)}" multiple>
+                            <el-button slot="trigger" size="small" type="primary">选取好评卡图片</el-button>
+                        </el-upload>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <br>
+            <el-input v-model.trim="remark" placeholder="请输入备注"></el-input>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="purchaseVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
+                <el-button type="primary" @click="savePurchase" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
     </div>
@@ -887,7 +805,20 @@
                 subject: [],
                 subject_temp: [],
                 img_index: 0,
-                purchaseVisible: false
+                purchaseVisible: false,
+                // purchaseForm: {
+                //     product_id: '',
+                //     dist_type: '',
+                //     put_card_sum: 0,
+                //     is_need_invoice: '',
+                //     sum: 0,
+                //     address: '',
+                //     remark: ''
+                // },
+                purchaseForm: [],
+                purchaseData: [],
+                multiplePurchaseSelection: [],
+                dist_type_options: [{value: 1, label: '入国内仓'}, {value: 2, label: '不入仓'}, {value: 3, label: '中转'}],
             }
         },
         created() {
@@ -1237,6 +1168,18 @@
                 this.multipleSelection = [];
             },
             handleSelectionChange(val) {
+                // val.some((data) => {
+                //     if (this.purchaseData.length === 0) {
+                //         this.purchaseData.unshift(data)
+                //     }
+                //     this.purchaseData.some((data2, index) => {
+                //         if(data.id === data2.id) {
+                //             return true
+                //         } else {
+                //             this.purchaseData.unshift(data)
+                //         }
+                //     })
+                // })
                 this.multipleSelection = val;
             },
             // 保存编辑
@@ -1933,12 +1876,101 @@
             // closeImg() {
             //     this.setActiveItem()
             // },
-            addPurchase() {
+            handlePurQueChange(val) {
+                this.multiplePurchaseSelection = val
+            },
+            addPurchaseQueue() {
+                // this.purchaseForm = []
                 if(this.multipleSelection.length == 0){
                     this.$message.error('请至少选择一个产品')
                     return
                 }
+                this.multipleSelection.some((data) => {
+                    if (this.purchaseData.length === 0) {
+                        this.purchaseData.unshift(data)
+                    }
+                    if (!(this.purchaseData.find(data2 => data2.id === data.id))) {
+                        this.purchaseData.unshift(data)
+                    }
+                    // let tempIndex = this.purchaseData.findIndex(data2 => (data2.id === data.id))
+                    // if (tempIndex === -1) {
+                    //     this.purchaseData.unshift(data)
+                    // }
+                })
+            },
+            addPurchase() {
+                this.remark = ''
+                this.purchaseForm = []
+                if(this.multiplePurchaseSelection.length == 0){
+                    this.$message.error('请选择队列里面的数据')
+                    return
+                }
+                this.multiplePurchaseSelection.forEach((data) => {
+                    this.purchaseForm.push({name: data.name, product_id: data.id, dist_type: '', put_card_sum: '', is_need_invoice: '', sum: 0, address: '', pictures: []})
+                })
                 this.purchaseVisible = true
+            },
+            clearQueue() {
+                this.purchaseData = []
+                this.$refs.multiplePurchaseTable.clearSelection()
+            },
+            handleRemovePurchase(res, file, index) {
+                this.purchaseForm[index].pictures = file
+            },
+            changeFilePurchase(res, file, index) {
+                // console.log(this.purchaseData[index])
+                this.purchaseForm[index].pictures.push(res)
+                // console.log('lyh666')
+                // console.log(res)
+                // console.log(file)
+                // console.log(index)
+                // this.purchaseForm[index]
+            },
+            savePurchase() {
+                let temp = 0
+                // this.fileList.forEach((item) => {
+                //     if(!(item.raw.type.match(/image/))){
+                //         temp = 1
+                //     }
+                // })
+                // if(temp) {
+                //     this.$message.error('请上传正确的图片格式!')
+                //     return
+                // }
+                // this.subject = this.subject.concat(this.subject_attrs).join('-')
+                // this.submitDisabled = true
+                // let params = {
+                //     remark: this.form.remark,
+                // }
+                let formData = new FormData()
+                this.purchaseForm.forEach((data) => {
+                    formData.append('purchase_plan[][product_id]', data.product_id)
+                    formData.append('purchase_plan[][dist_type]', data.dist_type)
+                    formData.append('purchase_plan[][remark]', data.remark)
+                    formData.append('purchase_plan[][put_card_sum]', data.put_card_sum)
+                    if (data.is_need_invoice === true) {
+                        formData.append('purchase_plan[][is_need_invoice]', 1)
+                    }else {
+                        formData.append('purchase_plan[][is_need_invoice]', 0)
+                    }
+                    formData.append('purchase_plan[][sum]', data.sum)
+                    formData.append('purchase_plan[][address]', data.address)
+                    data.pictures.forEach((data2) => {
+                        formData.append('purchase_plan[][pictures][]', data2.raw)
+                    })
+                })
+                formData.append('remark', this.remark)
+                this.$axios.post('/purchase_plans', formData).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('成功添加计划，待审核！')
+                        this.getData()
+                        this.purchaseVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
             },
             getStatusName(status) {
                 if(status == 1) {
@@ -2040,5 +2072,19 @@
     }
     .img_carousel {
         max-width: 35rem;
+    }
+
+    #upload-pur .el-upload--text{
+        background-color: #fff;
+        border: 0px;
+        border-radius: 6px;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        width: 120px;
+        height: 32px;
+        text-align: center;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
     }
 </style>

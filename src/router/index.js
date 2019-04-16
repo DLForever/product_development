@@ -516,31 +516,31 @@ export default new Router({
                         },
                     ]
                 },
-                // {
-                //     path: '/purchaseManageOp',
-                //     index: 'purchaseManageOp',
-                //     name: '采购计划管理',
-                //     menuShow: true,
-                //     icon: 'el-icon-lx-goods',
-                //     children: [
-                //         {
-                //             path: '/purchaseManageOp',
-                //             // component: Design,
-                //             index: 'purchaseManageOp',
-                //             name: '采购计划',
-                //             menuShow: true,
-                //             leaf: true,
-                //         },
-                //         {
-                //             path: '/purchaseManageOp',
-                //             // component: Design,
-                //             index: 'purchaseManageOp',
-                //             name: '出库计划',
-                //             menuShow: true,
-                //             leaf: true,
-                //         },
-                //     ]
-                // }
+                {
+                    path: '/purchaseManageOp',
+                    index: 'purchaseManageOp',
+                    name: '采购计划管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-goods',
+                    children: [
+                        {
+                            path: '/purchaseManageOp',
+                            // component: Design,
+                            index: 'purchaseManageOp',
+                            name: '采购计划',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        // {
+                        //     path: '/purchaseManageOp',
+                        //     // component: Design,
+                        //     index: 'purchaseManageOp',
+                        //     name: '出库计划',
+                        //     menuShow: true,
+                        //     leaf: true,
+                        // },
+                    ]
+                }
             ]
         },
         {
