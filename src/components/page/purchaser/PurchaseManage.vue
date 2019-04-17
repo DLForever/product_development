@@ -103,109 +103,6 @@
             </div>
         </div>
 
-        <!-- 编辑弹出框 -->
-        <el-dialog title="编辑" :visible.sync="editVisible" width="50%" @close="closeEdit">
-            <el-form ref="form" :model="form" label-width="100px">
-                <el-form-item label="样品名称">
-                    <el-input v-model="form.name"></el-input>
-                </el-form-item>
-                <el-form-item label="样品标题">
-                    <el-input v-model="form.title"></el-input>
-                </el-form-item>
-                <el-form-item label="样品分类">
-                    <el-cascader :options="options" v-model="category_id" @change="getCatetory2" expand-trigger="hover" change-on-select></el-cascader>
-                </el-form-item>
-                <el-form-item label="供应商">
-                    <el-select v-model="form.supplier_id" placeholder="请选择">
-                        <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="采购价">
-                    <el-input v-model="form.price"></el-input>
-                </el-form-item>
-                <el-form-item label="产品尺寸">
-                    <template slot-scope="scope">
-                        <el-col :span="7">
-                            <el-form-item prop="length">
-                                <el-input v-model.trim="form.length" placeholder="长(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="width">
-                                <el-input v-model.trim="form.width" placeholder="宽(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="height">
-                                <el-input v-model.trim="form.height" placeholder="高(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                    </template>
-                </el-form-item>
-                <el-form-item label="产品重量(g)">
-                    <el-input v-model="form.weight"></el-input>
-                </el-form-item>
-                <el-form-item label="包装尺寸">
-                    <template slot-scope="scope">
-                        <el-col :span="7">
-                            <el-form-item prop="length">
-                                <el-input v-model.trim="form.package_length" placeholder="长(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="width">
-                                <el-input v-model.trim="form.package_width" placeholder="宽(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="height">
-                                <el-input v-model.trim="form.package_height" placeholder="高(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                    </template>
-                </el-form-item>
-                <el-form-item label="包装重量(g)">
-                    <el-input v-model="form.package_weight"></el-input>
-                </el-form-item>
-                <el-form-item label="产品描述">
-                    <el-input v-model="form.desc"></el-input>
-                </el-form-item>
-                <el-form-item label="产品描述URL">
-                    <el-input v-model="form.desc_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                <el-form-item label="来源URL">
-                    <el-input v-model="form.origin_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                <el-form-item label="图片URL">
-                    <el-input v-model="form.picture_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                 <el-form-item label="备注">
-                    <el-input v-model="form.remark"></el-input>
-                </el-form-item>
-                <el-form-item label="产品图片">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
-                </el-form-item>
-                <!-- <el-form-item label="外包装图片">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
-                </el-form-item> -->
-            </el-form>
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="editVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
-            </span>
-        </el-dialog>
-
         <!-- 删除提示框 -->
         <el-dialog title="提示" :visible.sync="delVisible" width="300px" center>
             <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
@@ -323,7 +220,7 @@
             </span>
         </el-dialog>
 
-        <!-- 添加采购计划弹出框 -->
+        <!-- 编辑采购计划弹出框 -->
         <el-dialog title="采购计划" :visible.sync="purchaseVisible" width="80%">
             <el-table :data="purchaseForm" border style="width: 100%" ref="multipleTable">
                 <el-table-column prop="name" label="产品名称">
