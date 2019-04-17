@@ -10,8 +10,10 @@
             <div class="handle-box">
                 <el-button type="primary" @click="handleApply">申请查看详情</el-button>
                 <el-button type="default" @click="exportProduct">导出</el-button>
-                <el-button type="primary" @click="addPurchaseQueue">添加到采购队列</el-button>
-                <el-button type="warning" @click="addPurchase" :disabled="purchaseData.length === 0">添加采购计划</el-button>
+                <template v-if="$store.getters.leftNavState === 'operational'">
+                    <el-button type="primary" @click="addPurchaseQueue">添加到采购队列</el-button>
+                    <el-button type="warning" @click="addPurchase" :disabled="purchaseData.length === 0">新建采购计划</el-button>
+                </template>
                 <div style="float: right;">
                     <el-select v-model="search_selects" multiple placeholder="展示其他搜索栏目" @change="showSearch">
                         <el-option v-for="item in search_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
@@ -61,9 +63,9 @@
                     <el-table-column type="selection" width="55"></el-table-column>
                     <el-table-column fixed prop="sku" label="SKU" show-overflow-tooltip>
                     </el-table-column>
-                    <el-table-column prop="username" label="开发人员" show-overflow-tooltip>
-                    </el-table-column>
                     <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
+                    </el-table-column>
+                    <el-table-column prop="username" label="开发人员" show-overflow-tooltip>
                     </el-table-column>
                 </el-table>
             <br><br>
@@ -598,6 +600,11 @@
         <!-- 添加采购计划弹出框 -->
         <el-dialog title="采购计划" :visible.sync="purchaseVisible" width="80%">
             <el-table :data="purchaseForm" border style="width: 100%" ref="multipleTable">
+                <el-table-column prop="sku" label="SKU">
+                    <template slot-scope="scope">
+                        <span>{{scope.row.sku}}</span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="name" label="产品名称">
                     <template slot-scope="scope">
                         <span>{{scope.row.name}}</span>
@@ -1906,7 +1913,7 @@
                     return
                 }
                 this.multiplePurchaseSelection.forEach((data) => {
-                    this.purchaseForm.push({name: data.name, product_id: data.id, dist_type: '', put_card_sum: '', is_need_invoice: '', sum: 0, address: '', pictures: []})
+                    this.purchaseForm.push({sku: data.sku, name: data.name, product_id: data.id, dist_type: '', put_card_sum: '', is_need_invoice: '', sum: 0, address: '', remark: '' , pictures: []})
                 })
                 this.purchaseVisible = true
             },
@@ -1918,16 +1925,10 @@
                 this.purchaseForm[index].pictures = file
             },
             changeFilePurchase(res, file, index) {
-                // console.log(this.purchaseData[index])
                 this.purchaseForm[index].pictures.push(res)
-                // console.log('lyh666')
-                // console.log(res)
-                // console.log(file)
-                // console.log(index)
-                // this.purchaseForm[index]
             },
             savePurchase() {
-                let temp = 0
+                // let temp = 0
                 // this.fileList.forEach((item) => {
                 //     if(!(item.raw.type.match(/image/))){
                 //         temp = 1
@@ -1964,6 +1965,8 @@
                     if(res.data.code == 200) {
                         this.$message.success('成功添加计划，待审核！')
                         this.getData()
+                        this.purchaseData = []
+                        this.$refs.multiplePurchaseTable.clearSelection()
                         this.purchaseVisible = false
                     }
                 }).catch((res) => {

@@ -624,13 +624,13 @@ export default new Router({
                     menuShow: true,
                     icon: 'el-icon-date',
                     children: [
-                        {
-                            path: '/addPurchase',
-                            index: 'addPurchase',
-                            name: '新建采购计划',
-                            menuShow: true,
-                            leaf: true,
-                        },
+                        // {
+                        //     path: '/addPurchase',
+                        //     index: 'addPurchase',
+                        //     name: '新建采购计划',
+                        //     menuShow: true,
+                        //     leaf: true,
+                        // },
                         {
                             path: '/purchaseManage',
                             index: 'purchaseManage',

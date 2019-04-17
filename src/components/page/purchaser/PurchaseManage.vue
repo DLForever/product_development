@@ -9,7 +9,7 @@
         <div class="container">
             <div class="handle-box">
                 <div class="fnsku_filter">
-                    日期:
+                    <!-- 日期:
                     <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
                      分类:
                     <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" @change="getCatetory" change-on-select class="handle-select mr10"></el-cascader>
@@ -24,7 +24,7 @@
                         <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
                     </el-select>
                     SKU:
-                    <el-input style="width:150px" placeholder="请输入SKU"></el-input>
+                    <el-input style="width:150px" placeholder="请输入SKU"></el-input> -->
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
                 </div>
@@ -32,11 +32,16 @@
             <br><br>
             <el-table v-loading="table_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column fixed prop="sku" label="SKU" show-overflow-tooltip>
+                <el-table-column fixed prop="apply_username" label="申请人" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column  prop="name" label="产品名称" show-overflow-tooltip>
+                <el-table-column fixed prop="username" label="审核人" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="图片" width="120">
+                <el-table-column prop="status" label="状态">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status, scope.row.done_direct)}}</el-tag>
+                    </template>
+                </el-table-column>
+                <!-- <el-table-column label="图片" width="120">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0">无</span>
@@ -45,38 +50,13 @@
                         </el-badge>
                         <span v-else>无</span>
                     </template>
-                </el-table-column>
-                <el-table-column prop="title" label="产品标题" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="category_name" label="分类" width="120" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="price" label="申报价值">
-                </el-table-column>
-                <el-table-column prop="desc" label="描述" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="desc_url" label="描述URL" width="80">
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.desc_url != null && scope.row.desc_url != '' && scope.row.desc_url != 'null'" :href="scope.row.desc_url" target="_blank">查看描述</a>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="origin_url" label="来源URL" width="80">
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.origin_url != null && scope.row.origin_url != '' && scope.row.origin_url != 'null'" :href="scope.row.origin_url" target="_blank">查看来源</a>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="picture_url" label="图片URL" width="80">
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.picture_url != null && scope.row.picture_url != '' && scope.row.picture_url != 'null'" :href="scope.row.picture_url" target="_blank">查看图片</a>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable width="140">
-                </el-table-column>
-                <!-- <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable width="140">
                 </el-table-column> -->
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable>
+                </el-table-column>
+                <!-- <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable width="140">
+                </el-table-column> -->
                 <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">
                         <el-dropdown>
@@ -85,26 +65,32 @@
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
-                                    <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp情</el-button>
+                                    <el-button @click="handleDetails(scope.$index, scope.row)" type="text">详&nbsp情</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleCheck(scope.$index, scope.row)" type="text">审&nbsp核</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleCheck(scope.$index, scope.row)" type="text">下采购单</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleEdit(scope.$index, scope.row)" type="text">编&nbsp辑</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleDelete(scope.$index, scope.row)" type="text">删&nbsp除</el-button>
                                 </el-dropdown-item>
                                 <!-- <el-dropdown-item>
                                     <el-button @click="showProduct(scope.$index, scope.row)" type="text">&nbsp样品图片</el-button>
-                                </el-dropdown-item> -->
+                                </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleStock(scope.$index, scope.row)" type="text">添加库存</el-button>
                                 </el-dropdown-item>
-                               <!--  <el-dropdown-item>
+                                <el-dropdown-item>
                                     <el-button @click="handleApply(scope.$index, scope.row)" type="text">借出样品</el-button>
-                                </el-dropdown-item> -->
+                                </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleApply(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp借&nbsp出</el-button>
-                                </el-dropdown-item>
-                                <el-dropdown-item>
-                                    <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp编&nbsp&nbsp辑</el-button>
-                                </el-dropdown-item>
-                                <el-dropdown-item>
-                                    <el-button @click="handleDelete(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp删&nbsp&nbsp除</el-button>
-                                </el-dropdown-item>
+                                </el-dropdown-item> -->
                             </el-dropdown-menu>
                         </el-dropdown>
                     </template>
@@ -273,36 +259,40 @@
 
         <!-- 详情提示 -->
         <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
-            <el-table :data="products_details" border style="width: 100%">
-                <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
+            <el-table :data="purchase_details" border style="width: 100%">
+                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
+                <el-table-column prop="dist_type" label="入库方式"  show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <el-tag type="success" v-if="scope.row.dist_type === 1">入国内仓</el-tag>
+                        <el-tag type="primary" v-else-if="scope.row.dist_type === 2">不入仓</el-tag>
+                        <el-tag type="warning" v-else-if="scope.row.dist_type === 3">中转</el-tag>
+                    </template>
                 </el-table-column>
-                <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
+                <el-table-column prop="put_card_sum" label="好评卡数量" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
+                <el-table-column prop="sum" label="数量" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="price" label="采购价">
+                <el-table-column prop="address" label="中转地址">
                 </el-table-column>
-                <el-table-column prop="size" label="尺寸(长*宽*高)" width="100">
+                <el-table-column label="好评卡图片" width="120">
+                    <template slot-scope="scope">
+                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
+                            <span v-if="scope.row.pictures.length === 0">无</span>
+                            <img style="cursor: pointer;" class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"@click="showProduct(scope.$index, scope.row)"/>
+                            <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
+                        </el-badge>
+                        <span v-else>无</span>
+                    </template>
                 </el-table-column>
-                <el-table-column prop="weight" label="重量">
+                <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="package_size" label="包装尺寸(长*宽*高)" width="130">
+                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at">
                 </el-table-column>
-                <el-table-column prop="package_weight" label="包装重量">
-                </el-table-column>
-                <el-table-column prop="desc" label="描述" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
-                </el-table-column>
-                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
-                </el-table-column>
-                <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
             </el-table>
         </el-dialog>
         <!-- 查看产品图片 -->
-        <el-dialog title="样品图片" :visible.sync="productVisible" width="70%">
+        <el-dialog title="好评卡图片" :visible.sync="productVisible" width="70%">
             <el-carousel height="600px" type="card" v-if="picturesProductList.length != 0">
                 <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
                     <img @click="handleDeletePro(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
@@ -319,6 +309,75 @@
         </span>
         </el-dialog>
         
+        <!-- 审核提示框 -->
+        <el-dialog title="审核" :visible.sync="checkVisible" width="50%">
+            <el-form label-width="150px">
+                <el-form-item label="备注">
+                    <el-input v-model="remark" placeholder="请输入备注"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="checkVisible = false">取 消</el-button>
+                <el-button type="warning" @click="saveCheck(0)">拒 绝</el-button>
+                <el-button type="primary" @click="saveCheck(1)">通 过</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 添加采购计划弹出框 -->
+        <el-dialog title="采购计划" :visible.sync="purchaseVisible" width="80%">
+            <el-table :data="purchaseForm" border style="width: 100%" ref="multipleTable">
+                <el-table-column prop="name" label="产品名称">
+                    <template slot-scope="scope">
+                        <span>{{scope.row.name}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="入库方式">
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.dist_type">
+                            <el-option v-for="item in dist_type_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                        </el-select>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="好评卡数">
+                    <template slot-scope="scope">
+                        <el-input-number v-model="scope.row.put_card_sum" :step="5" :min="0"></el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sku" label="是否需要发票">
+                    <template slot-scope="scope">
+                        <el-checkbox v-model="scope.row.is_need_invoice">是</el-checkbox>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="数量">
+                    <template slot-scope="scope">
+                        <el-input-number v-model="scope.row.sum" :step="100" :min="0"></el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="中转地址">
+                    <template slot-scope="scope">
+                        <el-input v-model.trim="scope.row.address" placeholder="请输入中转地址" :disabled="!(scope.row.dist_type === 3)"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="备注">
+                    <template slot-scope="scope">
+                        <el-input v-model.trim="scope.row.remark" placeholder="请输入备注"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="好评卡图片" width="200">
+                    <template slot-scope="scope">
+                        <el-upload id="upload-pur" action="" :file-list="scope.row.pictures" :on-remove="(res, file)=>{return handleRemovePurchase(res, file, scope.$index)}" :auto-upload="false" :on-change="(res, file)=>{return changeFilePurchase(res, file, scope.$index)}" multiple>
+                            <el-button slot="trigger" size="small" type="primary">选取好评卡图片</el-button>
+                        </el-upload>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <br>
+            <el-input v-model.trim="remark" placeholder="请输入备注"></el-input>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="purchaseVisible = false">取 消</el-button>
+                <el-button type="primary" @click="savePurchase" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -435,7 +494,13 @@
               out_type: 0,
               returnVisible: false,
               return_remark: '',
-              table_loading: true
+              table_loading: true,
+              checkVisible: false,
+              remark: '',
+              purchaseVisible: false,
+              purchaseForm: [],
+              dist_type_options: [{value: 1, label: '入国内仓'}, {value: 2, label: '不入仓'}, {value: 3, label: '中转'}],
+              purchase_details: []
             }
         },
         created() {
@@ -445,20 +510,35 @@
             this.getCategories()
             // this.getSuppliersEdit()
         },
+        filters: {
+            //类型转换
+            statusFilter(status) {
+                const statusMap = {
+                    1: 'warning',
+                    2: 'primary',
+                    3: 'danger',
+                    4: 'danger',
+                    5: 'primary',
+                    6: 'success',
+                }
+                return statusMap[status]
+            },
+        },
         watch: {
         	"$route": "getData"
         },
         computed: {
             data() {
                 return this.tableData.filter((d) => {
-                    let is_del = false;
-                    if (!is_del) {
-                        if ((d.name.indexOf(this.select_word) > -1 ||
-                                d.fnsku.indexOf(this.select_word) > -1)
-                        ) {
-                            return d;
-                        }
-                    }
+                    return d;
+                    // let is_del = false;
+                    // if (!is_del) {
+                    //     if ((d.name.indexOf(this.select_word) > -1 ||
+                    //             d.fnsku.indexOf(this.select_word) > -1)
+                    //     ) {
+                    //         return d;
+                    //     }
+                    // }
                 })
             }
         },
@@ -492,9 +572,6 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.img_count = data.pictures.length
-                            data.size = data.length + '*' + data.width + '*' + data.height
-                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -525,9 +602,6 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.img_count = data.pictures.length
-                            data.size = data.length + '*' + data.width + '*' + data.height
-                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -634,40 +708,6 @@
             filterTag(value, row) {
                 return row.tag === value;
             },
-            handleEdit(index, row) {
-                this.supplier_page_edit = 1
-                this.supplier_options_edit = []
-                this.getSuppliersEdit()
-                this.idx = index;
-                const item = this.tableData[index];
-                this.form = {
-                    id: item.id,
-                    name: item.name,
-                    title: item.title,
-                    price: item.price,
-                    length: item.length,
-                    width: item.width,
-                    height: item.height,
-                    weight: item.weight,
-                    package_length: item.package_length,
-                    package_width: item.package_width,
-                    package_height: item.package_height,
-                    package_weight: item.package_weight,
-                    desc: item.desc,
-                    desc_url: item.desc_url,
-                    origin_url: item.origin_url,
-                    picture_url: item.picture_url,
-                    remark: item.remark,
-                    supplier_id: item.supplier_id
-                }
-                let temp = item.category_name.split('>')
-                this.options.unshift({value: row.category_id, label: temp[temp.length-1]})
-                // this.options5.unshift({value: row.category_id, label: temp[temp.length-1]})
-                this.category_id = this.category_id.concat(item.category_id)
-                // this.getCategories()
-                this.categories_loop(item.category_id)
-                this.editVisible = true;
-            },
             categories_loop(c) {
                 this.categories_options.forEach((data) => {
                     if(c==data.id) {
@@ -677,10 +717,6 @@
                         }
                     }
                 })
-            },
-            handleDelete(index, row) {
-                this.idx = index;
-                this.delVisible = true;
             },
             delAll() {
                 const length = this.multipleSelection.length;
@@ -858,7 +894,10 @@
                 })
             },
             handleDetails(index, row) {
-                this.products_details = [row]
+                this.purchase_details = row.purchase_plan_products
+                this.purchase_details.forEach((data) => {
+                    data.img_count = data.pictures.length
+                })
                 this.detailVisible = true
             },
             onInfinite_suppliers(obj) {
@@ -940,11 +979,9 @@
             showProduct(index, row) {
                 this.picturesProductList = []
                 this.product_id = row.id
-                const item = this.tableData[index]
+                const item = row
                 item.pictures.forEach((data) => {
-                    if(data.remark == 'main') {
-                        this.picturesProductList.push(data)
-                    }
+                    this.picturesProductList.push(data)
                 })
                 this.productVisible = true;
             },
@@ -1037,7 +1074,117 @@
                     this.getSuppliers()
                 }
             },
-            
+            handleCheck(index, row) {
+                this.form.id = row.id
+                this.remark = ''
+                this.checkVisible = true
+            },
+            saveCheck(pass) {
+                this.submitDisabled = true
+                let params = {
+                    remark: this.remark,
+                    pass: pass
+                }
+                this.$axios.post('/purchase_plans/' + this.form.id + '/check', params).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('处理成功！')
+                        this.getData()
+                        this.checkVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
+            handleEdit(index, row) {
+                this.form.id = row.id
+                this.remark = ''
+                this.purchaseForm = []
+                this.idx = index;
+                let item = this.tableData[index].purchase_plan_products
+                item.forEach((data) => {
+                    this.purchaseForm.push({name: data.name, product_id: data.id, dist_type: data.dist_type, put_card_sum: data.put_card_sum, is_need_invoice: data.is_need_invoice, sum: data.sum, address: data.address, remark: data.remark, pictures: []})
+                })
+                this.remark = row.remark
+                this.purchaseVisible = true;
+            },
+            handleRemovePurchase(res, file, index) {
+                this.purchaseForm[index].pictures = file
+            },
+            changeFilePurchase(res, file, index) {
+                this.purchaseForm[index].pictures.push(res)
+            },
+            savePurchase() {
+                let formData = new FormData()
+                this.purchaseForm.forEach((data) => {
+                    formData.append('purchase_plan[][product_id]', data.product_id)
+                    formData.append('purchase_plan[][dist_type]', data.dist_type)
+                    formData.append('purchase_plan[][remark]', data.remark)
+                    formData.append('purchase_plan[][put_card_sum]', data.put_card_sum)
+                    if (data.is_need_invoice === true) {
+                        formData.append('purchase_plan[][is_need_invoice]', 1)
+                    }else {
+                        formData.append('purchase_plan[][is_need_invoice]', 0)
+                    }
+                    formData.append('purchase_plan[][sum]', data.sum)
+                    formData.append('purchase_plan[][address]', data.address)
+                    data.pictures.forEach((data2) => {
+                        formData.append('purchase_plan[][pictures][]', data2.raw)
+                    })
+                })
+                formData.append('remark', this.remark)
+                this.$axios.patch('/purchase_plans/' + this.form.id, formData).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('成功更新计划！')
+                        this.getData()
+                        this.purchaseVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
+            handleDelete(index, row) {
+                this.$prompt('请输入删除备注', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'danger'
+                }).then(( {value} ) => {
+                    let params = {
+                        remark: value
+                    }
+                    this.$axios.delete('/purchase_plans/' + row.id, params
+                    ).then((res) => {
+                        if(res.data.code == 200) {
+                            this.getData()
+                            this.$message.success("删除成功")
+                        }
+                    }).catch(() => {
+                        
+                    })
+                }).catch(() => {
+                    // this.$message.info('已取消拒绝')
+                })
+            },
+            getStatusName(status, done_direct) {
+                if(status == 1) {
+                    return "待审核"
+                } else if(status == 2) {
+                    return "已审核"
+                } else if(status == 3) {
+                    return "已拒绝"
+                }else if(status == 4) {
+                    return "已删除"
+                }else if(status == 5) {
+                    return "正在计划"
+                }else if(status == 6) {
+                    return "已完成"
+                }else {
+                    return '其他'
+                }
+            },
         },
         components: {
             "infinite-loading": VueInfiniteLoading
@@ -1046,7 +1193,7 @@
 
 </script>
 
-<style scoped>
+<style>
     .handle-box {
         margin-bottom: 20px;
     }
@@ -1081,5 +1228,19 @@
     .item {
       margin-top: 10px;
       margin-right: 40px;
+    }
+
+    #upload-pur .el-upload--text{
+        background-color: #fff;
+        border: 0px;
+        border-radius: 6px;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        width: 120px;
+        height: 32px;
+        text-align: center;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
     }
 </style>
