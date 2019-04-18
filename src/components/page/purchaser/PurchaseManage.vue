@@ -9,10 +9,8 @@
         <div class="container">
             <div class="handle-box">
                 <div class="fnsku_filter">
-                    <!-- 日期:
+                    日期:
                     <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
-                     分类:
-                    <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" @change="getCatetory" change-on-select class="handle-select mr10"></el-cascader>
                     开发人员:
                     <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
                         <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
@@ -24,7 +22,7 @@
                         <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
                     </el-select>
                     SKU:
-                    <el-input style="width:150px" placeholder="请输入SKU"></el-input> -->
+                    <el-input style="width:150px" placeholder="请输入SKU"></el-input>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
                 </div>
@@ -55,8 +53,6 @@
                 </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable>
                 </el-table-column>
-                <!-- <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable width="140">
-                </el-table-column> -->
                 <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">
                         <el-dropdown>
@@ -103,109 +99,6 @@
             </div>
         </div>
 
-        <!-- 编辑弹出框 -->
-        <el-dialog title="编辑" :visible.sync="editVisible" width="50%" @close="closeEdit">
-            <el-form ref="form" :model="form" label-width="100px">
-                <el-form-item label="样品名称">
-                    <el-input v-model="form.name"></el-input>
-                </el-form-item>
-                <el-form-item label="样品标题">
-                    <el-input v-model="form.title"></el-input>
-                </el-form-item>
-                <el-form-item label="样品分类">
-                    <el-cascader :options="options" v-model="category_id" @change="getCatetory2" expand-trigger="hover" change-on-select></el-cascader>
-                </el-form-item>
-                <el-form-item label="供应商">
-                    <el-select v-model="form.supplier_id" placeholder="请选择">
-                        <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="采购价">
-                    <el-input v-model="form.price"></el-input>
-                </el-form-item>
-                <el-form-item label="产品尺寸">
-                    <template slot-scope="scope">
-                        <el-col :span="7">
-                            <el-form-item prop="length">
-                                <el-input v-model.trim="form.length" placeholder="长(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="width">
-                                <el-input v-model.trim="form.width" placeholder="宽(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="height">
-                                <el-input v-model.trim="form.height" placeholder="高(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                    </template>
-                </el-form-item>
-                <el-form-item label="产品重量(g)">
-                    <el-input v-model="form.weight"></el-input>
-                </el-form-item>
-                <el-form-item label="包装尺寸">
-                    <template slot-scope="scope">
-                        <el-col :span="7">
-                            <el-form-item prop="length">
-                                <el-input v-model.trim="form.package_length" placeholder="长(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="width">
-                                <el-input v-model.trim="form.package_width" placeholder="宽(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="height">
-                                <el-input v-model.trim="form.package_height" placeholder="高(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                    </template>
-                </el-form-item>
-                <el-form-item label="包装重量(g)">
-                    <el-input v-model="form.package_weight"></el-input>
-                </el-form-item>
-                <el-form-item label="产品描述">
-                    <el-input v-model="form.desc"></el-input>
-                </el-form-item>
-                <el-form-item label="产品描述URL">
-                    <el-input v-model="form.desc_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                <el-form-item label="来源URL">
-                    <el-input v-model="form.origin_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                <el-form-item label="图片URL">
-                    <el-input v-model="form.picture_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                 <el-form-item label="备注">
-                    <el-input v-model="form.remark"></el-input>
-                </el-form-item>
-                <el-form-item label="产品图片">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
-                </el-form-item>
-                <!-- <el-form-item label="外包装图片">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
-                </el-form-item> -->
-            </el-form>
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="editVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
-            </span>
-        </el-dialog>
-
         <!-- 删除提示框 -->
         <el-dialog title="提示" :visible.sync="delVisible" width="300px" center>
             <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
@@ -214,51 +107,9 @@
                 <el-button type="primary" @click="deleteRow">确 定</el-button>
             </span>
         </el-dialog>
-        <!-- 添加库存提示框 -->
-        <el-dialog title="添加库存" :visible.sync="stockVisible" width="50%" center>
-            <el-form label-width="100px">
-                <el-form-item label="数量">
-                    <el-input placeholder="请输入数量" v-model.trim="stock_sum"></el-input>
-                </el-form-item>
-                <el-form-item label="入库方式">
-                    <el-radio v-model="in_type" label="1" border>购买</el-radio>
-                    <el-radio v-model="in_type" label="2" border>赠品</el-radio>
-                </el-form-item>
-                <el-form-item label="购买价格">
-                    <el-input placeholder="请输入购买时的价格" v-model.trim="price"></el-input>
-                </el-form-item>
-                <el-form-item label="备注">
-                    <el-input placeholder="请输入备注" v-model.trim="stock_remark"></el-input>
-                </el-form-item>
-            </el-form>
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="stockVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveStock" :disabled="submitDisabled">确 定</el-button>
-            </span>
-        </el-dialog>
-        <!-- 申请借样提示框 -->
-        <el-dialog title="编辑" :visible.sync="applyVisible" width="50%" center>
-            <el-form label-width="100px">
-                <el-form-item label="数量">
-                    <el-input placeholder="请输入数量" v-model.trim="apply_stocksum"></el-input>
-                </el-form-item>
-                <el-form-item label="出库方式">
-                    <el-radio v-model="out_type" label="1" border>借出</el-radio>
-                    <el-radio v-model="out_type" label="2" border>赠品</el-radio>
-                    <el-radio v-model="out_type" label="3" border>销售</el-radio>
-                </el-form-item>
-                <el-form-item label="备注">
-                    <el-input placeholder="请输入备注" v-model.trim="apply_stockremark"></el-input>
-                </el-form-item>
-            </el-form>
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="applyVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveApply" :disabled="submitDisabled">确 定</el-button>
-            </span>
-        </el-dialog>
 
         <!-- 详情提示 -->
-        <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
+        <el-dialog title="详情" :visible.sync="detailVisible" width="98%">
             <el-table :data="purchase_details" border style="width: 100%">
                 <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
                 </el-table-column>
@@ -275,6 +126,10 @@
                 </el-table-column>
                 <el-table-column prop="address" label="中转地址">
                 </el-table-column>
+                <el-table-column prop="scheduled_card_sum" label="好评卡使用数" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="scheduled_sum" label="采购数量" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column label="好评卡图片" width="120">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
@@ -290,6 +145,108 @@
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at">
                 </el-table-column>
             </el-table>
+            <el-select style="margin-bottom:10px;margin-top:20px;" v-model="supplier_id" placeholder="请选择供应商" @visible-change="supplierselectVisble">
+                <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
+            </el-select>
+            <el-table :data="purchaseOrders" border style="width: 100%">
+                <!-- <el-table-column prop="supplier" label="供应商" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.supplier" placeholder="供应商" @visible-change="supplierselectVisble">
+                            <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                            <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
+                        </el-select>
+                    </template>
+                </el-table-column> -->
+                <el-table-column prop="sku" label="SKU" width="150">
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.sku">
+                            <el-option v-for="item in purchase_skus" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                        </el-select>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="入库方式">
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.dist_type">
+                            <el-option v-for="item in dist_type_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                        </el-select>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="好评卡数" width="120">
+                    <template slot-scope="scope">
+                        <el-input-number style="width:100px" size="mini" controls-position="right" v-model="scope.row.put_card_sum" :step="5" :min="0"></el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sku" label="需要发票?" width="80">
+                    <template slot-scope="scope">
+                        <el-checkbox v-model="scope.row.is_need_invoice">是</el-checkbox>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="数量" width="120">
+                    <template slot-scope="scope">
+                        <el-input-number style="width:100px" size="mini" controls-position="right" v-model="scope.row.sum" :step="100" :min="0"></el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="price" label="价格" width="120">
+                    <template slot-scope="scope">
+                        <el-input-number style="width:100px" size="mini" controls-position="right" v-model="scope.row.price" :step="10" :min="0"></el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="process_peroid" label="做货周期" width="120">
+                    <template slot-scope="scope">
+                        <el-input-number style="width:100px" size="mini" controls-position="right" v-model="scope.row.process_peroid" :step="2" :min="0"></el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="process_peroid" label="交货时间" width="150">
+                    <template slot-scope="scope">
+                        <el-date-picker v-model.trim="scope.row.delivery_date" placeholder="选择日期" size="mini" type="date" style="width:125px"></el-date-picker>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="process_peroid" label="到达时间" width="150">
+                    <template slot-scope="scope">
+                        <el-date-picker v-model.trim="scope.row.arrive_date" placeholder="选择日期" size="mini" type="date" style="width:125px"></el-date-picker>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="中转地址">
+                    <template slot-scope="scope">
+                        <el-input v-model.trim="scope.row.address" placeholder="中转地址" :disabled="!(scope.row.dist_type === 3)"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="供应商账户" width="90">
+                    <template slot-scope="scope">
+                        <el-button v-if="scope.row.account_id === ''" type="warning" v-model.trim="scope.row.account_id" @click="update_account(supplier_id, scope.$index)" :disabled="supplier_id === ''">未选择</el-button>
+                        <el-button v-if="scope.row.account_id != ''" type="success" v-model.trim="scope.row.account_id" @click="update_account(supplier_id, scope.$index)">已选择</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="供应商条款" width="90">
+                    <template slot-scope="scope">
+                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.sku, scope.$index)" :disabled="supplier_id === ''">未选择</el-button>
+                        <el-button v-if="scope.row.term_id != ''" type="success" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.sku, scope.$index)">已选择</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="备注">
+                    <template slot-scope="scope">
+                        <el-input v-model.trim="scope.row.remark" placeholder="请输入备注"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="好评卡图片" width="200">
+                    <template slot-scope="scope">
+                        <el-upload id="upload-pur" action="" :file-list="scope.row.pictures" :on-remove="(res, file)=>{return handleRemovePurchaseOrder(res, file, scope.$index)}" :auto-upload="false" :on-change="(res, file)=>{return changePurchaseOrder(res, file, scope.$index)}" multiple>
+                            <el-button slot="trigger" size="small" type="primary">选取好评卡图片</el-button>
+                        </el-upload>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div class="add_purchadse_sku">
+                <el-button type="primary" icon="el-icon-plus" @click="addPurchaseSku">新增</el-button>
+                <el-button type="danger" icon="el-icon-delete" :disabled="purchaseOrders.length === 1" @click="deletePurchaseSku">撤销</el-button>
+            </div>
+            
+            <el-input v-model.trim="remark" placeholder="请输入备注"></el-input>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="detailVisible = false">取 消</el-button>
+                <el-button type="primary" @click="savePurchaseOrder" :disabled="submitDisabled">创建采购单</el-button>
+            </span>
         </el-dialog>
         <!-- 查看产品图片 -->
         <el-dialog title="好评卡图片" :visible.sync="productVisible" width="70%">
@@ -323,12 +280,12 @@
             </span>
         </el-dialog>
 
-        <!-- 添加采购计划弹出框 -->
+        <!-- 编辑采购计划弹出框 -->
         <el-dialog title="采购计划" :visible.sync="purchaseVisible" width="80%">
             <el-table :data="purchaseForm" border style="width: 100%" ref="multipleTable">
-                <el-table-column prop="name" label="产品名称">
+                <el-table-column prop="sku" label="SKU">
                     <template slot-scope="scope">
-                        <span>{{scope.row.name}}</span>
+                        <span>{{scope.row.sku}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="sum" label="入库方式">
@@ -376,6 +333,86 @@
             <span slot="footer" class="dialog-footer">
                 <el-button @click="purchaseVisible = false">取 消</el-button>
                 <el-button type="primary" @click="savePurchase" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 编辑供应商账户 -->
+        <el-dialog title="编辑供应商账户" :visible.sync="updateAccountVisible" width="50%">
+            <el-form ref="update_accountForm" :model="update_accountForm" label-width="150px">
+                <el-form-item label="收款账号">
+                    <el-input v-model="update_accountForm.collection_account"></el-input>
+                </el-form-item>
+                <el-form-item label="收款账号姓名">
+                    <el-input v-model="update_accountForm.account_name"></el-input>
+                </el-form-item>
+                <el-form-item label="外币收款账号">
+                    <el-input v-model="update_accountForm.us_collection_account"></el-input>
+                </el-form-item>
+                <el-form-item label="外币收款账号姓名">
+                    <el-input v-model="update_accountForm.english_name"></el-input>
+                </el-form-item>
+                <el-form-item label="账期天数">
+                    <el-input v-model="update_accountForm.payment_day"></el-input>
+                </el-form-item>
+                <el-form-item label="结算方式">
+                    <el-input v-model="update_accountForm.clearing_form"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="updateAccountVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveupdateAccount" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 编辑供应商条款 -->
+        <el-dialog title="编辑供应商条款" :visible.sync="updateTermVisible" width="50%">
+            <el-form ref="update_termForm" :model="update_termForm" label-width="150px">
+                <el-form-item label="货币">
+                    <el-input v-model="update_termForm.currency"></el-input>
+                </el-form-item>
+                <el-form-item label="合同条款">
+                    <el-input v-model="update_termForm.contract_term"></el-input>
+                </el-form-item>
+                <el-form-item label="质量要求">
+                    <el-input v-model="update_termForm.quality_request"></el-input>
+                </el-form-item>
+                <el-form-item label="运输方式">
+                    <el-input v-model="update_termForm.shipping_type"></el-input>
+                </el-form-item>
+                <el-form-item label="费用承担">
+                    <el-input v-model="update_termForm.shipping_bear_fee"></el-input>
+                </el-form-item>
+                <el-form-item label="包装标准">
+                    <el-input v-model="update_termForm.package_standard"></el-input>
+                </el-form-item>
+                <el-form-item label="验收方式">
+                    <el-input v-model="update_termForm.acceptance_method"></el-input>
+                </el-form-item>
+                <el-form-item label="违约责任">
+                    <el-input v-model="update_termForm.liability_for_breach"></el-input>
+                </el-form-item>
+                <el-form-item label="解决合同纠纷的方式">
+                    <el-input v-model="update_termForm.dissolution_method"></el-input>
+                </el-form-item>
+                <el-form-item label="其他约定事项">
+                    <el-input v-model="update_termForm.covenant"></el-input>
+                </el-form-item>
+                <el-form-item label="开票税点">
+                    <el-input v-model="update_termForm.tax"></el-input>
+                </el-form-item>
+                <el-form-item label="出口退税点">
+                    <el-input v-model="update_termForm.exit_tax"></el-input>
+                </el-form-item>
+                <el-form-item label="不良率">
+                    <el-input v-model="update_termForm.reject_ratio"></el-input>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-input v-model="update_termForm.term_remark"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="updateTermVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveupdateTerm" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
     </div>
@@ -500,15 +537,60 @@
               purchaseVisible: false,
               purchaseForm: [],
               dist_type_options: [{value: 1, label: '入国内仓'}, {value: 2, label: '不入仓'}, {value: 3, label: '中转'}],
-              purchase_details: []
+              purchase_details: [],
+              purchaseOrders: [{
+                supplier_id: '',
+                product_id: '',
+                dist_type: '',
+                put_card_sum: '',
+                is_need_invoice: '',
+                sum: 0,
+                price: 0,
+                address: '',
+                pictures: [],
+                process_peroid: 0,
+                delivery_date: '',
+                arrive_date: '',
+                remark: '',
+                supplier_remark: '',
+                account_id: '',
+                term_id: '',
+              }],
+              purchase_skus: [],
+              update_accountForm: {
+                collection_account: '',
+                account_name: '',
+                us_collection_account: '',
+                english_name: '',
+                payment_day: '',
+                clearing_form: ''
+              },
+              update_termForm: {
+                currency: '',
+                currency_term: '',
+                quality_request: '',
+                shipping_type: '',
+                shipping_bear_fee: '',
+                package_standard: '',
+                acceptance_method: '',
+                liability_for_breach: '',
+                dissolution_method: '',
+                term_remark: '',
+                covenant: '',
+                tax: '',
+                exit_tax: '',
+                reject_ratio: ''
+              },
+              updateAccountVisible: false,
+              updateTermVisible: false,
+              supplier_id: '',
+              update_index: '',
+              purchase_plan_id: ''
             }
         },
         created() {
-            this.getData();
-            // this.getUsers()
-            // this.getSuppliers()
-            this.getCategories()
-            // this.getSuppliersEdit()
+            this.getData()
+            this.getSuppliers()
         },
         filters: {
             //类型转换
@@ -643,55 +725,6 @@
                 }).catch((res) => {
 
                 })
-            },
-            getCategories() {
-                if (process.env.NODE_ENV === 'development') {
-                };
-                this.$axios.get( '/categories?page='+this.category_page
-                ).then((res) => {
-                    if(res.data.code == 200) {
-                        this.options3 = res.data.data
-                        this.options5 = this.options3
-                        this.getCatetoryLoop(1)
-                        // this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
-                        // for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
-                        //     this.getCatetoryLoop(i+1)
-                        // }
-                        // this.total = res.data.count
-                    }
-                }).catch((res) => {
-                    console.log('error')
-                })
-            },
-            getCatetoryLoop(page) {
-                this.$axios.get( '/categories?page='+page
-                ).then((res) => {
-                    if(res.data.code == 200) {
-                        this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
-                        this.options4 = this.options
-                        this.categories_options = this.categories_options.concat(res.data.data)
-                        // this.total = res.data.count
-                    }
-                }).catch((res) => {
-                    console.log('error')
-                })
-            },
-            getCategoryTree(categories,id){
-                let result = []
-                for (var i = 0; i < categories.length; i++){
-                    if(categories[i].parent_id == id || categories[i].parent_id == null){
-                        result.push({value:categories[i].id,label:categories[i].name,children:this.getTree(categories,categories[i].id)})
-                    }
-                }
-                return result
-            },
-            getTree(categories,id){
-                let tmp =  categories.filter((s) => {
-                    return s.parent_id == id
-                    })
-                return tmp.map((s) => {
-                    return {value:s.id,label:s.name,children:this.getTree(categories,s.id)}
-               })
             },
             formatter_created_at(row, column) {
 				return row.created_at.substr(0, 19);
@@ -894,9 +927,31 @@
                 })
             },
             handleDetails(index, row) {
+                this.supplier_id = ''
+                this.purchase_plan_id = row.id
+                this.purchase_skus = []
+                this.purchaseOrders = [{
+                    supplier_id: '',
+                    product_id: '',
+                    dist_type: '',
+                    put_card_sum: '',
+                    is_need_invoice: '',
+                    sum: 0,
+                    price: 0,
+                    address: '',
+                    pictures: [],
+                    process_peroid: 0,
+                    delivery_date: '',
+                    arrive_date: '',
+                    remark: '',
+                    supplier_remark: '',
+                    account_id: '',
+                    term_id: '',
+                }]
                 this.purchase_details = row.purchase_plan_products
                 this.purchase_details.forEach((data) => {
                     data.img_count = data.pictures.length
+                    this.purchase_skus.push({label: data.sku, value: data.product_id})
                 })
                 this.detailVisible = true
             },
@@ -1006,66 +1061,6 @@
 
                 })
             },
-            getCatetory() {
-                this.$axios.get( '/categories?parent_id=' + this.category_id_filter[this.category_id_filter.length -1]
-                ).then((res) => {
-                    if(res.data.code == 200) {
-                        this.options = []
-                        let temp_options = []
-                        if(this.category_id_filter.length == 1) {
-                            this.options_len1 = this.options3
-                            this.options_len1 = this.options_len1.concat(res.data.data)
-                            temp_options = this.options_len1
-                        }else if(this.category_id_filter.length == 2) {
-                            this.options_len2 = this.options_len1
-                            this.options_len2 = this.options_len2.concat(res.data.data)
-                            temp_options = this.options_len2
-                        }else if(this.category_id_filter.length == 3) {
-                            this.options_len3 = this.options_len2
-                            this.options_len3 = this.options_len3.concat(res.data.data)
-                            temp_options = this.options_len3
-                        }else if(this.category_id_filter.length == 4) {
-                            this.options_len4 = this.options_len3
-                            this.options_len4 = this.options_len4.concat(res.data.data)
-                            temp_options = this.options_len4
-                        }
-                        this.options = this.options.concat(this.getCategoryTree(temp_options,0))
-                    }
-                }).catch((res) => {
-                    console.log('error')
-                })
-            },
-            getCatetory2() {
-                this.$axios.get( '/categories?parent_id=' + this.category_id[this.category_id.length -1]
-                ).then((res) => {
-                    if(res.data.code == 200) {
-                        this.options = []
-                        let temp_options = []
-                        if(this.category_id.length == 1) {
-                            this.options_len1 = this.options3
-                            this.options_len1 = this.options_len1.concat(res.data.data)
-                            temp_options = this.options_len1
-                        }else if(this.category_id.length == 2) {
-                            this.options_len2 = this.options_len1
-                            this.options_len2 = this.options_len2.concat(res.data.data)
-                            temp_options = this.options_len2
-                        }else if(this.category_id.length == 3) {
-                            this.options_len3 = this.options_len2
-                            this.options_len3 = this.options_len3.concat(res.data.data)
-                            temp_options = this.options_len3
-                        }else if(this.category_id.length == 4) {
-                            this.options_len4 = this.options_len3
-                            this.options_len4 = this.options_len4.concat(res.data.data)
-                            temp_options = this.options_len4
-                        }else{
-
-                        }
-                        this.options = this.options.concat(this.getCategoryTree(temp_options,0))
-                    }
-                }).catch((res) => {
-                    console.log('error')
-                })
-            },
             supplierselectVisble(visible) {
                 this.supplier_options = []
                 this.supplier_page = 1
@@ -1104,7 +1099,7 @@
                 this.idx = index;
                 let item = this.tableData[index].purchase_plan_products
                 item.forEach((data) => {
-                    this.purchaseForm.push({name: data.name, product_id: data.id, dist_type: data.dist_type, put_card_sum: data.put_card_sum, is_need_invoice: data.is_need_invoice, sum: data.sum, address: data.address, remark: data.remark, pictures: []})
+                    this.purchaseForm.push({sku: data.sku, product_id: data.id, dist_type: data.dist_type, put_card_sum: data.put_card_sum, is_need_invoice: data.is_need_invoice, sum: data.sum, address: data.address, remark: data.remark, pictures: []})
                 })
                 this.remark = row.remark
                 this.purchaseVisible = true;
@@ -1116,6 +1111,7 @@
                 this.purchaseForm[index].pictures.push(res)
             },
             savePurchase() {
+                this.submitDisabled = true
                 let formData = new FormData()
                 this.purchaseForm.forEach((data) => {
                     formData.append('purchase_plan[][product_id]', data.product_id)
@@ -1167,6 +1163,185 @@
                 }).catch(() => {
                     // this.$message.info('已取消拒绝')
                 })
+            },
+            handleRemovePurchaseOrder(res, file, index) {
+                this.purchaseOrders[index].pictures = file
+            },
+            changePurchaseOrder(res, file, index) {
+                this.purchaseOrders[index].pictures.push(res)
+            },
+            update_account(supplier_id, index) {
+                this.update_index = index
+                this.supplier_id = supplier_id
+                this.$axios.get('/suppliers/' + supplier_id + '/search_account'
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        if (res.data.data.length != 0) {
+                            let item = res.data.data[0]
+                            this.update_accountForm.collection_account = item.collection_account
+                            this.update_accountForm.account_name = item.account_name
+                            this.update_accountForm.us_collection_account = item.us_collection_account
+                            this.update_accountForm.english_name = item.english_name
+                            this.update_accountForm.payment_day = item.payment_day
+                            this.update_accountForm.clearing_form = item.clearing_form
+                        } else {
+                            this.update_accountForm.collection_account = ''
+                            this.update_accountForm.account_name = ''
+                            this.update_accountForm.us_collection_account = ''
+                            this.update_accountForm.english_name = ''
+                            this.update_accountForm.payment_day = ''
+                            this.update_accountForm.clearing_form = ''
+                        }
+                        this.updateAccountVisible = true
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                })
+            },
+            update_term(supplier_id, product_id, index) {
+                this.update_index = index
+                this.supplier_id = supplier_id
+                this.product_id = product_id
+                this.$axios.get('/suppliers/' + supplier_id + '/search_term'
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        if (res.data.data.length != 0) {
+                            let item = res.data.data[0]
+                            this.update_termForm.currency = item.currency
+                            this.update_termForm.contract_term = item.contract_term
+                            this.update_termForm.quality_request = item.quality_request
+                            this.update_termForm.shipping_type = item.shipping_type
+                            this.update_termForm.shipping_bear_fee = item.shipping_bear_fee
+                            this.update_termForm.package_standard = item.package_standard
+                            this.update_termForm.acceptance_method = item.acceptance_method
+                            this.update_termForm.liability_for_breach = item.liability_for_breach
+                            this.update_termForm.dissolution_method = item.dissolution_method
+                            this.update_termForm.term_remark = item.term_remark
+                            this.update_termForm.covenant = item.covenant
+                            this.update_termForm.tax = item.tax
+                            this.update_termForm.exit_tax = item.exit_tax
+                            this.update_termForm.reject_ratio = item.reject_ratio
+                        } else {
+                            this.update_termForm.currency = ''
+                            this.update_termForm.contract_term = ''
+                            this.update_termForm.quality_request = ''
+                            this.update_termForm.shipping_type = ''
+                            this.update_termForm.shipping_bear_fee = ''
+                            this.update_termForm.package_standard = ''
+                            this.update_termForm.acceptance_method = ''
+                            this.update_termForm.liability_for_breach = ''
+                            this.update_termForm.dissolution_method = ''
+                            this.update_termForm.term_remark = ''
+                            this.update_termForm.covenant = ''
+                            this.update_termForm.tax = ''
+                            this.update_termForm.exit_tax = ''
+                            this.update_termForm.reject_ratio = ''
+                        }
+                        this.updateTermVisible = true
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                })
+            },
+            saveupdateAccount() {
+                this.submitDisabled = true
+                let params = {
+                    collection_account: this.update_accountForm.collection_account,
+                    account_name: this.update_accountForm.account_name,
+                    us_collection_account   : this.update_accountForm.us_collection_account ,
+                    english_name: this.update_accountForm.english_name,
+                    payment_day: this.update_accountForm.payment_day,
+                    clearing_form: this.update_accountForm.clearing_form,
+                }
+                this.$axios.post('/suppliers/' + this.supplier_id + '/update_account', params).then((res) => {
+                    if(res.data.code == 200) {
+                        this.purchaseOrders[this.update_index].account_id = res.data.data
+                        this.$message.success('更新成功！')
+                        this.updateAccountVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
+            saveupdateTerm() {
+                this.submitDisabled = true
+                let params = {
+                    product_id: this.product_id,
+                    currency: this.update_termForm.currency,
+                    contract_term: this.update_termForm.contract_term,
+                    quality_request: this.update_termForm.quality_request,
+                    shipping_type: this.update_termForm.shipping_type,
+                    shipping_bear_fee: this.update_termForm.shipping_bear_fee,
+                    package_standard: this.update_termForm.package_standard,
+                    acceptance_method: this.update_termForm.acceptance_method,
+                    liability_for_breach: this.update_termForm.liability_for_breach,
+                    dissolution_method: this.update_termForm.dissolution_method,
+                    term_remark: this.update_termForm.term_remark,
+                    covenant: this.update_termForm.covenant,
+                    tax: this.update_termForm.tax,
+                    exit_tax: this.update_termForm.exit_tax,
+                    reject_ratio: this.update_termForm.reject_ratio,
+                }
+                this.$axios.post('/suppliers/' + this.supplier_id + '/update_term', params).then((res) => {
+                    if(res.data.code == 200) {
+                        this.purchaseOrders[this.update_index].term_id = res.data.data
+                        this.$message.success('更新成功！')
+                        this.updateTermVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
+            savePurchaseOrder() {
+                this.submitDisabled = true
+                let formData = new FormData()
+                formData.append('purchase_plan_id', this.purchase_plan_id)
+                formData.append('supplier_id', this.supplier_id)
+                this.purchaseOrders.forEach((data) => {
+                    formData.append('product_id[]', data.product_id)
+                    formData.append('dist_type[]', data.dist_type)
+                    formData.append('put_card_sum[]', data.put_card_sum)
+                    if (data.is_need_invoice === true) {
+                        formData.append('is_need_invoice[]', 1)
+                    }else {
+                        formData.append('is_need_invoice[]', 0)
+                    }
+                    formData.append('sum[]', data.sum)
+                    formData.append('address[]', data.address)
+                    formData.append('price[]', data.price)
+                    formData.append('process_peroid[]', data.process_peroid)
+                    formData.append('delivery_date[]', data.delivery_date)
+                    formData.append('arrive_date[]', data.arrive_date)
+                    formData.append('remark[]', data.remark)
+                    formData.append('account_id[]', data.account_id)
+                    formData.append('term_id[]', data.term_id)
+                    data.pictures.forEach((data2) => {
+                        formData.append('pictures[][]', data2.raw)
+                    })
+                })
+                formData.append('supplier_remark', this.remark)
+                this.$axios.post('/purchase_orders', formData).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('成功创建采购单,待审核！')
+                        this.getData()
+                        this.detailVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
+            addPurchaseSku() {
+                let tempArr = JSON.parse(JSON.stringify(this.purchaseOrders[this.purchaseOrders.length-1]))
+                this.purchaseOrders.push(tempArr)
+            },
+            deletePurchaseSku() {
+                this.purchaseOrders.pop()
             },
             getStatusName(status, done_direct) {
                 if(status == 1) {
@@ -1242,5 +1417,11 @@
         cursor: pointer;
         position: relative;
         overflow: hidden;
+    }
+
+    .add_purchadse_sku {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        text-align: center;
     }
 </style>

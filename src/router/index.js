@@ -750,14 +750,14 @@ export default new Router({
                             menuShow: true,
                             leaf: true,
                         },
-                        {
-                            path: '/inboundManage',
-                            // component: Design,
-                            index: 'inboundManage',
-                            name: '库存管理',
-                            menuShow: true,
-                            leaf: true,
-                        },
+                        // {
+                        //     path: '/inboundManage',
+                        //     // component: Design,
+                        //     index: 'inboundManage',
+                        //     name: '库存管理',
+                        //     menuShow: true,
+                        //     leaf: true,
+                        // },
                     ]
                 }
             ]
