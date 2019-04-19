@@ -327,8 +327,16 @@
                         </el-upload>
                     </template>
                 </el-table-column>
+                <el-table-column prop="sum" label="操作">
+                    <template slot-scope="scope">
+                        <el-button type="danger" icon="el-icon-delete" @click="deletePurchasePlan(scope.$index)" :disabled="purchaseForm.length === 1">删除</el-button>
+                    </template>
+                </el-table-column>
             </el-table>
-            <br>
+            <div class="add_purchadse_sku">
+                <el-button type="primary" icon="el-icon-plus" @click="addPurchaseSkuForm">新增</el-button>
+                <!-- <el-button type="danger" icon="el-icon-delete" :disabled="purchaseOrders.length === 1" @click="deletePurchaseSkuForm">撤销</el-button> -->
+            </div>
             <el-input v-model.trim="remark" placeholder="请输入备注"></el-input>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="purchaseVisible = false">取 消</el-button>
@@ -585,7 +593,7 @@
               updateTermVisible: false,
               supplier_id: '',
               update_index: '',
-              purchase_plan_id: ''
+              purchase_plan_id: '',
             }
         },
         created() {
@@ -951,7 +959,9 @@
                 this.purchase_details = row.purchase_plan_products
                 this.purchase_details.forEach((data) => {
                     data.img_count = data.pictures.length
-                    this.purchase_skus.push({label: data.sku, value: data.product_id})
+                    if (!(this.purchase_skus.find(data2 => data2.label === data.sku))) {
+                        this.purchase_skus.push({label: data.sku, value: data.product_id})
+                    }
                 })
                 this.detailVisible = true
             },
@@ -1099,7 +1109,7 @@
                 this.idx = index;
                 let item = this.tableData[index].purchase_plan_products
                 item.forEach((data) => {
-                    this.purchaseForm.push({sku: data.sku, product_id: data.id, dist_type: data.dist_type, put_card_sum: data.put_card_sum, is_need_invoice: data.is_need_invoice, sum: data.sum, address: data.address, remark: data.remark, pictures: []})
+                    this.purchaseForm.push({sku: data.sku, product_id: data.product_id, id: data.id, dist_type: data.dist_type, put_card_sum: data.put_card_sum, is_need_invoice: data.is_need_invoice, sum: data.sum, address: data.address, remark: data.remark, pictures: []})
                 })
                 this.remark = row.remark
                 this.purchaseVisible = true;
@@ -1114,6 +1124,7 @@
                 this.submitDisabled = true
                 let formData = new FormData()
                 this.purchaseForm.forEach((data) => {
+                    formData.append('purchase_plan[][id]', data.id)
                     formData.append('purchase_plan[][product_id]', data.product_id)
                     formData.append('purchase_plan[][dist_type]', data.dist_type)
                     formData.append('purchase_plan[][remark]', data.remark)
@@ -1297,12 +1308,13 @@
                 })
             },
             savePurchaseOrder() {
+                console.log(this.purchaseOrders)
                 this.submitDisabled = true
                 let formData = new FormData()
                 formData.append('purchase_plan_id', this.purchase_plan_id)
                 formData.append('supplier_id', this.supplier_id)
                 this.purchaseOrders.forEach((data) => {
-                    formData.append('product_id[]', data.product_id)
+                    formData.append('product_id[]', data.sku)
                     formData.append('dist_type[]', data.dist_type)
                     formData.append('put_card_sum[]', data.put_card_sum)
                     if (data.is_need_invoice === true) {
@@ -1319,8 +1331,9 @@
                     formData.append('remark[]', data.remark)
                     formData.append('account_id[]', data.account_id)
                     formData.append('term_id[]', data.term_id)
-                    data.pictures.forEach((data2) => {
-                        formData.append('pictures[][]', data2.raw)
+                    data.pictures.forEach((data2, index) => {
+                        let temp = 'pictures[]' + '[' + index + ']'
+                        formData.append(temp, data2.raw)
                     })
                 })
                 formData.append('supplier_remark', this.remark)
@@ -1338,10 +1351,28 @@
             },
             addPurchaseSku() {
                 let tempArr = JSON.parse(JSON.stringify(this.purchaseOrders[this.purchaseOrders.length-1]))
+                tempArr.pictures = []
+                this.purchaseOrders[this.purchaseOrders.length-1].pictures.forEach((data) => {
+                    tempArr.pictures.push(data)
+                })
                 this.purchaseOrders.push(tempArr)
             },
             deletePurchaseSku() {
                 this.purchaseOrders.pop()
+            },
+            deletePurchasePlan(index) {
+                this.purchaseForm.splice(index, 1)
+            },
+            addPurchaseSkuForm() {
+                let tempArr = JSON.parse(JSON.stringify(this.purchaseForm[this.purchaseForm.length-1]))
+                tempArr.pictures = []
+                this.purchaseForm[this.purchaseForm.length-1].pictures.forEach((data) => {
+                    tempArr.pictures.push(data)
+                })
+                this.purchaseForm.push(tempArr)
+            },
+            deletePurchaseSkuForm() {
+                this.purchaseForm.pop()
             },
             getStatusName(status, done_direct) {
                 if(status == 1) {

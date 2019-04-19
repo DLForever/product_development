@@ -598,7 +598,7 @@
         </el-dialog>
 
         <!-- 添加采购计划弹出框 -->
-        <el-dialog title="采购计划" :visible.sync="purchaseVisible" width="80%">
+        <el-dialog title="采购计划" :visible.sync="purchaseVisible" width="90%">
             <el-table :data="purchaseForm" border style="width: 100%" ref="multipleTable">
                 <el-table-column prop="sku" label="SKU">
                     <template slot-scope="scope">
@@ -647,6 +647,12 @@
                         <el-upload id="upload-pur" action="" :file-list="scope.row.pictures" :on-remove="(res, file)=>{return handleRemovePurchase(res, file, scope.$index)}" :auto-upload="false" :on-change="(res, file)=>{return changeFilePurchase(res, file, scope.$index)}" multiple>
                             <el-button slot="trigger" size="small" type="primary">选取好评卡图片</el-button>
                         </el-upload>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="操作" width="190">
+                    <template slot-scope="scope">
+                        <el-button type="success" icon="el-icon-plus" @click="addPurchasePlan(scope.$index)">复制</el-button>
+                        <el-button type="danger" icon="el-icon-delete" @click="deletePurchasePlan(scope.$index)" :disabled="purchaseForm.length === 1">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -1974,6 +1980,17 @@
                 }).finally((res) => {
                     this.submitDisabled = false
                 })
+            },
+            addPurchasePlan(index) {
+                let tempArr = JSON.parse(JSON.stringify(this.purchaseForm[index]))
+                tempArr.pictures = []
+                this.purchaseForm[index].pictures.forEach((data) => {
+                    tempArr.pictures.push(data)
+                })
+                this.purchaseForm.splice(index+1, 0, tempArr)
+            },
+            deletePurchasePlan(index) {
+                this.purchaseForm.splice(index, 1)
             },
             getStatusName(status) {
                 if(status == 1) {
