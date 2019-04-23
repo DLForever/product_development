@@ -50,6 +50,11 @@
                 </el-table-column>
                 <el-table-column prop="order_number" label="订单号" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="status" label="状态">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status, scope.row.done_direct)}}</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable width="140">
                 </el-table-column>
                 <!-- <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable width="140">
@@ -64,20 +69,20 @@
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
-                                    <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp情</el-button>
+                                    <el-button @click="handleDetails(scope.$index, scope.row)" type="text">详情</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleCheck(scope.$index, scope.row)" type="text">审核</el-button>
                                 </el-dropdown-item>
                                 <!-- <el-dropdown-item>
-                                    <el-button @click="handleStock(scope.$index, scope.row)" type="text">添加库存</el-button>
-                                </el-dropdown-item>
-                                <el-dropdown-item>
                                     <el-button @click="handleApply(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp借&nbsp出</el-button>
-                                </el-dropdown-item>
-                                <el-dropdown-item>
-                                    <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp编&nbsp&nbsp辑</el-button>
-                                </el-dropdown-item>
-                                <el-dropdown-item>
-                                    <el-button @click="handleDelete(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp删&nbsp&nbsp除</el-button>
                                 </el-dropdown-item> -->
+                                <el-dropdown-item>
+                                    <el-button @click="handleEdit(scope.$index, scope.row)" type="text">编辑</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button @click="handleDelete(scope.$index, scope.row)" type="text">删除</el-button>
+                                </el-dropdown-item>
                             </el-dropdown-menu>
                         </el-dropdown>
                     </template>
@@ -92,101 +97,142 @@
 
         <!-- 编辑弹出框 -->
         <el-dialog title="编辑" :visible.sync="editVisible" width="50%" @close="closeEdit">
-            <el-form ref="form" :model="form" label-width="100px">
-                <el-form-item label="样品名称">
-                    <el-input v-model="form.name"></el-input>
-                </el-form-item>
-                <el-form-item label="样品标题">
-                    <el-input v-model="form.title"></el-input>
-                </el-form-item>
-                <el-form-item label="供应商">
-                    <el-select v-model="form.supplier_id" placeholder="请选择">
-                        <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="采购价">
-                    <el-input v-model="form.price"></el-input>
-                </el-form-item>
-                <el-form-item label="产品尺寸">
+            <el-table :data="purchase_details" border style="width: 100%">
+                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="dist_type" label="入库方式"  show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <el-col :span="7">
-                            <el-form-item prop="length">
-                                <el-input v-model.trim="form.length" placeholder="长(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="width">
-                                <el-input v-model.trim="form.width" placeholder="宽(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="height">
-                                <el-input v-model.trim="form.height" placeholder="高(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
+                        <el-tag type="success" v-if="scope.row.dist_type === 1">入国内仓</el-tag>
+                        <el-tag type="primary" v-else-if="scope.row.dist_type === 2">不入仓</el-tag>
+                        <el-tag type="warning" v-else-if="scope.row.dist_type === 3">中转</el-tag>
                     </template>
-                </el-form-item>
-                <el-form-item label="产品重量(g)">
-                    <el-input v-model="form.weight"></el-input>
-                </el-form-item>
-                <el-form-item label="包装尺寸">
+                </el-table-column>
+                <el-table-column prop="put_card_sum" label="好评卡数量" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="sum" label="数量" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="address" label="中转地址">
+                </el-table-column>
+                <el-table-column prop="scheduled_card_sum" label="好评卡使用数" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="scheduled_sum" label="采购数量" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column label="好评卡图片" width="120">
                     <template slot-scope="scope">
-                        <el-col :span="7">
-                            <el-form-item prop="length">
-                                <el-input v-model.trim="form.package_length" placeholder="长(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="width">
-                                <el-input v-model.trim="form.package_width" placeholder="宽(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="height">
-                                <el-input v-model.trim="form.package_height" placeholder="高(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
+                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
+                            <span v-if="scope.row.pictures.length === 0">无</span>
+                            <img style="cursor: pointer;" class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"@click="showProduct(scope.$index, scope.row)"/>
+                            <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
+                        </el-badge>
+                        <span v-else>无</span>
                     </template>
-                </el-form-item>
-                <el-form-item label="包装重量(g)">
-                    <el-input v-model="form.package_weight"></el-input>
-                </el-form-item>
-                <el-form-item label="产品描述">
-                    <el-input v-model="form.desc"></el-input>
-                </el-form-item>
-                <el-form-item label="产品描述URL">
-                    <el-input v-model="form.desc_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                <el-form-item label="来源URL">
-                    <el-input v-model="form.origin_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                <el-form-item label="图片URL">
-                    <el-input v-model="form.picture_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                 <el-form-item label="备注">
-                    <el-input v-model="form.remark"></el-input>
-                </el-form-item>
-                <el-form-item label="产品图片">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
-                </el-form-item>
-                <!-- <el-form-item label="外包装图片">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
-                </el-form-item> -->
-            </el-form>
+                </el-table-column>
+                <el-table-column prop="remark" label="备注" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at">
+                </el-table-column>
+            </el-table>
+            <!-- <el-select style="margin-bottom:10px;margin-top:20px;" v-model="supplier_id" placeholder="请选择供应商" @visible-change="supplierselectVisble">
+                <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
+            </el-select> -->
+            <el-table :data="purchaseOrders" border style="width: 100%">
+                <!-- <el-table-column prop="supplier" label="供应商" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.supplier" placeholder="供应商" @visible-change="supplierselectVisble">
+                            <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                            <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
+                        </el-select>
+                    </template>
+                </el-table-column> -->
+                <el-table-column prop="sku" label="SKU" width="150">
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.sku">
+                            <el-option v-for="item in purchase_skus" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                        </el-select>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="入库方式">
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.dist_type">
+                            <el-option v-for="item in dist_type_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                        </el-select>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="好评卡数" width="120">
+                    <template slot-scope="scope">
+                        <el-input-number style="width:100px" size="mini" controls-position="right" v-model="scope.row.put_card_sum" :step="5" :min="0"></el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sku" label="需要发票?" width="80">
+                    <template slot-scope="scope">
+                        <el-checkbox v-model="scope.row.is_need_invoice">是</el-checkbox>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="数量" width="120">
+                    <template slot-scope="scope">
+                        <el-input-number style="width:100px" size="mini" controls-position="right" v-model="scope.row.sum" :step="100" :min="0"></el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="price" label="价格" width="120">
+                    <template slot-scope="scope">
+                        <el-input-number style="width:100px" size="mini" controls-position="right" v-model="scope.row.price" :step="10" :min="0"></el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="process_peroid" label="做货周期" width="120">
+                    <template slot-scope="scope">
+                        <el-input-number style="width:100px" size="mini" controls-position="right" v-model="scope.row.process_peroid" :step="2" :min="0"></el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="process_peroid" label="交货时间" width="150">
+                    <template slot-scope="scope">
+                        <el-date-picker v-model.trim="scope.row.delivery_date" placeholder="选择日期" size="mini" type="date" style="width:125px"></el-date-picker>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="process_peroid" label="到达时间" width="150">
+                    <template slot-scope="scope">
+                        <el-date-picker v-model.trim="scope.row.arrive_date" placeholder="选择日期" size="mini" type="date" style="width:125px"></el-date-picker>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="中转地址">
+                    <template slot-scope="scope">
+                        <el-input v-model.trim="scope.row.address" placeholder="中转地址" :disabled="!(scope.row.dist_type === 3)"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="供应商账户" width="90">
+                    <template slot-scope="scope">
+                        <el-button v-if="scope.row.account_id === ''" type="warning" v-model.trim="scope.row.account_id" @click="update_account(supplier_id, scope.$index)" :disabled="supplier_id === ''">未选择</el-button>
+                        <el-button v-if="scope.row.account_id != ''" type="success" v-model.trim="scope.row.account_id" @click="update_account(supplier_id, scope.$index)">已选择</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="供应商条款" width="90">
+                    <template slot-scope="scope">
+                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.sku, scope.$index)" :disabled="scope.row.sku === '' || supplier_id === ''">未选择</el-button>
+                        <el-button v-if="scope.row.term_id != ''" type="success" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.sku, scope.$index)">已选择</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="备注">
+                    <template slot-scope="scope">
+                        <el-input v-model.trim="scope.row.remark" placeholder="请输入备注"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sum" label="好评卡图片" width="200">
+                    <template slot-scope="scope">
+                        <el-upload id="upload-pur" action="" :file-list="scope.row.pictures" :on-remove="(res, file)=>{return handleRemovePurchaseOrder(res, file, scope.$index)}" :auto-upload="false" :on-change="(res, file)=>{return changePurchaseOrder(res, file, scope.$index)}" multiple>
+                            <el-button slot="trigger" size="small" type="primary">选取好评卡图片</el-button>
+                        </el-upload>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <!-- <div class="add_purchadse_sku">
+                <el-button type="primary" icon="el-icon-plus" @click="addPurchaseSku">新增</el-button>
+                <el-button type="danger" icon="el-icon-delete" :disabled="purchaseOrders.length === 1" @click="deletePurchaseSku">撤销</el-button>
+            </div> -->
+            
+            <el-input v-model.trim="remark" placeholder="请输入备注"></el-input>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="editVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
+                <el-button @click="detailVisible = false">取 消</el-button>
+                <!-- <el-button type="primary" @click="savePurchaseOrder" :disabled="submitDisabled">创建采购单</el-button> -->
             </span>
         </el-dialog>
 
@@ -236,7 +282,19 @@
             <el-button type="danger" @click="deleteProductImg">确 定</el-button>
         </span>
         </el-dialog>
-        
+        <!-- 审核提示框 -->
+        <el-dialog title="审核" :visible.sync="checkVisible" width="50%">
+            <el-form label-width="50px">
+                <el-form-item label="备注">
+                    <el-input v-model="remark" placeholder="请输入备注"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="checkVisible = false">取 消</el-button>
+                <el-button type="warning" @click="saveCheck(0)">拒 绝</el-button>
+                <el-button type="primary" @click="saveCheck(1)">通 过</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -347,7 +405,11 @@
               out_type: 0,
               returnVisible: false,
               return_remark: '',
-              table_loading: true
+              table_loading: true,
+              checkVisible: false,
+              remark: '',
+              purchase_details: [],
+              purchaseOrders: ''
             }
         },
         created() {
@@ -356,6 +418,20 @@
             // this.getSuppliers()
             this.getCategories()
             // this.getSuppliersEdit()
+        },
+        filters: {
+            //类型转换
+            statusFilter(status) {
+                const statusMap = {
+                    1: 'warning',
+                    2: 'primary',
+                    3: 'danger',
+                    4: 'danger',
+                    5: 'primary',
+                    6: 'success',
+                }
+                return statusMap[status]
+            },
         },
         watch: {
         	"$route": "getData"
@@ -573,12 +649,6 @@
                     remark: item.remark,
                     supplier_id: item.supplier_id
                 }
-                let temp = item.category_name.split('>')
-                this.options.unshift({value: row.category_id, label: temp[temp.length-1]})
-                // this.options5.unshift({value: row.category_id, label: temp[temp.length-1]})
-                this.category_id = this.category_id.concat(item.category_id)
-                // this.getCategories()
-                this.categories_loop(item.category_id)
                 this.editVisible = true;
             },
             categories_loop(c) {
@@ -590,10 +660,6 @@
                         }
                     }
                 })
-            },
-            handleDelete(index, row) {
-                this.idx = index;
-                this.delVisible = true;
             },
             delAll() {
                 const length = this.multipleSelection.length;
@@ -887,7 +953,68 @@
                     this.getSuppliers()
                 }
             },
-            
+            handleCheck(index, row) {
+                this.form.id = row.id
+                this.remark = ''
+                this.checkVisible = true
+            },
+            saveCheck(pass) {
+                this.submitDisabled = true
+                let params = {
+                    remark: this.remark,
+                    pass: pass
+                }
+                this.$axios.post('/purchase_orders/' + this.form.id + '/check', params).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('处理成功！')
+                        this.getData()
+                        this.checkVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
+            handleDelete(index, row) {
+                this.$prompt('请输入删除备注', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'danger'
+                }).then(( {value} ) => {
+                    let params = {
+                        remark: value
+                    }
+                    this.$axios.delete('/purchase_orders/' + row.id, params
+                    ).then((res) => {
+                        if(res.data.code == 200) {
+                            this.getData()
+                            this.$message.success("删除成功")
+                        }
+                    }).catch(() => {
+                        
+                    })
+                }).catch(() => {
+                    // this.$message.info('已取消拒绝')
+                })
+            },
+            getStatusName(status, done_direct) {
+                if(status == 1) {
+                    return "待审核"
+                } else if(status == 2) {
+                    return "已审核"
+                } else if(status == 3) {
+                    return "已拒绝"
+                }else if(status == 4) {
+                    return "已删除"
+                }else if(status == 5) {
+                    return "正在计划"
+                }else if(status == 6) {
+                    return "已完成"
+                }else {
+                    return '其他'
+                }
+            },
         },
         components: {
             "infinite-loading": VueInfiniteLoading

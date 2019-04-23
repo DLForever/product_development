@@ -224,7 +224,7 @@
                 </el-table-column>
                 <el-table-column prop="sum" label="供应商条款" width="90">
                     <template slot-scope="scope">
-                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.sku, scope.$index)" :disabled="supplier_id === ''">未选择</el-button>
+                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.sku, scope.$index)" :disabled="scope.row.sku === '' || supplier_id === ''">未选择</el-button>
                         <el-button v-if="scope.row.term_id != ''" type="success" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.sku, scope.$index)">已选择</el-button>
                     </template>
                 </el-table-column>
@@ -571,6 +571,7 @@
                 supplier_remark: '',
                 account_id: '',
                 term_id: '',
+                sku: ''
               }],
               purchase_skus: [],
               update_accountForm: {
@@ -968,6 +969,7 @@
                     supplier_remark: '',
                     account_id: '',
                     term_id: '',
+                    sku: ''
                 }]
                 this.purchase_details = row.purchase_plan_products
                 this.purchase_details.forEach((data) => {
@@ -1228,7 +1230,10 @@
                 this.update_index = index
                 this.supplier_id = supplier_id
                 this.product_id = product_id
-                this.$axios.get('/suppliers/' + supplier_id + '/search_term'
+                let params = {
+                    product_id: product_id
+                }
+                this.$axios.get('/suppliers/' + supplier_id + '/search_term',{params: params}
                 ).then((res) => {
                     if(res.data.code == 200) {
                         if (res.data.data.length != 0) {
@@ -1323,7 +1328,6 @@
                 })
             },
             savePurchaseOrder() {
-                console.log(this.purchaseOrders)
                 this.submitDisabled = true
                 let formData = new FormData()
                 formData.append('purchase_plan_id', this.purchase_plan_id)
