@@ -676,7 +676,7 @@
               search_selects: [],
               search_show: [{'dateDis' : false}, {'fanDis' : false}, {'shopDis' : false}, {'userDis' : false}],
               search_show2: ['dateDis', 'fanDis', 'shopDis', 'userDis'],
-              site_options: ['US', 'UK', 'DE', 'JP'],
+              site_options: ['US', 'UK', 'DE', 'JP', 'FR'],
               site_filter: '',
               filter_name: '',
               filter_shopname: '',

@@ -638,7 +638,7 @@
                 plan_sum: 0,
                 plan_date: '',
                 isaddPlan: false,
-                site_options: ['US', 'UK', 'DE', 'JP'],
+                site_options: ['US', 'UK', 'DE', 'JP','FR'],
                 paytype_options: ['PayPal', '微信'],
                 currency_options: ['美金', '英镑', '欧元', '日元'],
                 keyword_options: [],
