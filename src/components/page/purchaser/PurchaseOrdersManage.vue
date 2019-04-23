@@ -32,11 +32,11 @@
             <br><br>
             <el-table v-loading="table_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column fixed prop="sku" label="SKU" show-overflow-tooltip>
+                <el-table-column fixed prop="apply_username" label="申请人" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column  prop="name" label="产品名称" show-overflow-tooltip>
+                <el-table-column  prop="username" label="审核人" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column label="图片" width="120">
+                <!-- <el-table-column label="图片" width="120">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0">无</span>
@@ -45,31 +45,10 @@
                         </el-badge>
                         <span v-else>无</span>
                     </template>
+                </el-table-column> -->
+                <el-table-column prop="supplier_name" label="公司名称" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="title" label="产品标题" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="category_name" label="分类" width="120" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="price" label="申报价值">
-                </el-table-column>
-                <el-table-column prop="desc" label="描述" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="desc_url" label="描述URL" width="80">
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.desc_url != null && scope.row.desc_url != '' && scope.row.desc_url != 'null'" :href="scope.row.desc_url" target="_blank">查看描述</a>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="origin_url" label="来源URL" width="80">
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.origin_url != null && scope.row.origin_url != '' && scope.row.origin_url != 'null'" :href="scope.row.origin_url" target="_blank">查看来源</a>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="picture_url" label="图片URL" width="80">
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.picture_url != null && scope.row.picture_url != '' && scope.row.picture_url != 'null'" :href="scope.row.picture_url" target="_blank">查看图片</a>
-                    </template>
+                <el-table-column prop="order_number" label="订单号" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable width="140">
                 </el-table-column>
@@ -88,14 +67,8 @@
                                     <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp情</el-button>
                                 </el-dropdown-item>
                                 <!-- <el-dropdown-item>
-                                    <el-button @click="showProduct(scope.$index, scope.row)" type="text">&nbsp样品图片</el-button>
-                                </el-dropdown-item> -->
-                                <el-dropdown-item>
                                     <el-button @click="handleStock(scope.$index, scope.row)" type="text">添加库存</el-button>
                                 </el-dropdown-item>
-                               <!--  <el-dropdown-item>
-                                    <el-button @click="handleApply(scope.$index, scope.row)" type="text">借出样品</el-button>
-                                </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="handleApply(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp借&nbsp出</el-button>
                                 </el-dropdown-item>
@@ -104,7 +77,7 @@
                                 </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleDelete(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp删&nbsp&nbsp除</el-button>
-                                </el-dropdown-item>
+                                </el-dropdown-item> -->
                             </el-dropdown-menu>
                         </el-dropdown>
                     </template>
@@ -229,31 +202,21 @@
         <!-- 详情提示 -->
         <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
             <el-table :data="products_details" border style="width: 100%">
-                <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
+                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="title" label="产品标题"  show-overflow-tooltip>
+                <el-table-column prop="sum" label="数量"  show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
+                <el-table-column prop="put_card_sum" label="好评卡数量" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
+                <el-table-column prop="price" label="价格" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="price" label="采购价">
+                <el-table-column prop="process_peroid" label="做货周期">
                 </el-table-column>
-                <el-table-column prop="size" label="尺寸(长*宽*高)" width="100">
+                <el-table-column prop="arrive_date" label="到达时间">
                 </el-table-column>
-                <el-table-column prop="weight" label="重量">
+                <el-table-column prop="delivery_date" label="交货时间">
                 </el-table-column>
-                <el-table-column prop="package_size" label="包装尺寸(长*宽*高)" width="130">
-                </el-table-column>
-                <el-table-column prop="package_weight" label="包装重量">
-                </el-table-column>
-                <el-table-column prop="desc" label="描述" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
-                </el-table-column>
-                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
-                </el-table-column>
-                <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="remark" label="备注" show-overflow-tooltip></el-table-column>
             </el-table>
         </el-dialog>
         <!-- 查看产品图片 -->
@@ -400,14 +363,15 @@
         computed: {
             data() {
                 return this.tableData.filter((d) => {
-                    let is_del = false;
-                    if (!is_del) {
-                        if ((d.name.indexOf(this.select_word) > -1 ||
-                                d.fnsku.indexOf(this.select_word) > -1)
-                        ) {
-                            return d;
-                        }
-                    }
+                    return d
+                    // let is_del = false;
+                    // if (!is_del) {
+                    //     if ((d.name.indexOf(this.select_word) > -1 ||
+                    //             d.fnsku.indexOf(this.select_word) > -1)
+                    //     ) {
+                    //         return d;
+                    //     }
+                    // }
                 })
             }
         },
@@ -441,9 +405,9 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.img_count = data.pictures.length
-                            data.size = data.length + '*' + data.width + '*' + data.height
-                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                            // data.img_count = data.pictures.length
+                            // data.size = data.length + '*' + data.width + '*' + data.height
+                            // data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -474,9 +438,9 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.img_count = data.pictures.length
-                            data.size = data.length + '*' + data.width + '*' + data.height
-                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
+                            // data.img_count = data.pictures.length
+                            // data.size = data.length + '*' + data.width + '*' + data.height
+                            // data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -775,7 +739,7 @@
                 })
             },
             handleDetails(index, row) {
-                this.products_details = [row]
+                this.products_details = row.purchase_order_products
                 this.detailVisible = true
             },
             onInfinite_suppliers(obj) {

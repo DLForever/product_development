@@ -34,6 +34,10 @@
                 </el-table-column>
                 <el-table-column fixed prop="username" label="审核人" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column fixed prop="total_sum" label="总数量" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column fixed prop="purchase_sum" label="已采购数量" show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column prop="status" label="状态">
                     <template slot-scope="scope">
                         <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status, scope.row.done_direct)}}</el-tag>
@@ -66,9 +70,9 @@
                                 <el-dropdown-item>
                                     <el-button @click="handleCheck(scope.$index, scope.row)" type="text">审&nbsp核</el-button>
                                 </el-dropdown-item>
-                                <el-dropdown-item>
+                                <!-- <el-dropdown-item>
                                     <el-button @click="handleCheck(scope.$index, scope.row)" type="text">下采购单</el-button>
-                                </el-dropdown-item>
+                                </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">编&nbsp辑</el-button>
                                 </el-dropdown-item>
@@ -285,7 +289,11 @@
             <el-table :data="purchaseForm" border style="width: 100%" ref="multipleTable">
                 <el-table-column prop="sku" label="SKU">
                     <template slot-scope="scope">
-                        <span>{{scope.row.sku}}</span>
+                        <el-select v-if="scope.row.is_add === true" v-model="scope.row.product_id" filterable remote :loading="loading3" @visible-change="selectVisble3" :remote-method="remoteMethod3" placeholder="选择SKU" clearable class="handle-select mr10">
+                            <el-option v-for="item in sku_options" :key="item.id" :label="item.sku" :value="item.id"></el-option>
+                            <infinite-loading :on-infinite="onInfinite_sku" ref="infiniteLoading3"></infinite-loading>
+                        </el-select>
+                        <span v-else>{{scope.row.sku}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="sum" label="入库方式">
@@ -594,6 +602,11 @@
               supplier_id: '',
               update_index: '',
               purchase_plan_id: '',
+              loading3: false,
+              sku_options: [],
+              query3: undefined,
+              sku_page: 1,
+              sku_total: 0,
             }
         },
         created() {
@@ -1124,7 +1137,9 @@
                 this.submitDisabled = true
                 let formData = new FormData()
                 this.purchaseForm.forEach((data) => {
-                    formData.append('purchase_plan[][id]', data.id)
+                    if (data.is_add != true) {
+                        formData.append('purchase_plan[][id]', data.id)
+                    }
                     formData.append('purchase_plan[][product_id]', data.product_id)
                     formData.append('purchase_plan[][dist_type]', data.dist_type)
                     formData.append('purchase_plan[][remark]', data.remark)
@@ -1365,7 +1380,7 @@
             },
             addPurchaseSkuForm() {
                 let tempArr = JSON.parse(JSON.stringify(this.purchaseForm[this.purchaseForm.length-1]))
-                tempArr.pictures = []
+                tempArr.pictures = [], tempArr.is_add = true, tempArr.product_id = ''
                 this.purchaseForm[this.purchaseForm.length-1].pictures.forEach((data) => {
                     tempArr.pictures.push(data)
                 })
@@ -1373,6 +1388,54 @@
             },
             deletePurchaseSkuForm() {
                 this.purchaseForm.pop()
+            },
+            onInfinite_sku(obj, index) {
+                if((this.sku_page * 20) < this.sku_total) {
+                    this.sku_page += 1
+                    // this.getUsers(obj.loaded)
+                    this.remoteMethod3(this.query3,obj.loaded)
+                } else {
+                    obj.complete()
+                }
+            },
+            selectVisble3(visible) {
+                if(visible) {
+                    this.query3 = undefined
+                    this.remoteMethod3("")
+                }
+            },
+            remoteMethod3(query, callback = undefined) {
+                if(query != "" || this.query3 != "" || callback) {
+                    let reload = false
+                    if(this.query3 != query) {
+                        this.loading3 = true
+                        this.sku_page = 1
+                        this.query3 = query
+                        reload = true
+                        if(this.$refs.infiniteLoading3.isComplete) {
+                            this.$refs.infiniteLoading3.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/products/?page=" + this.sku_page + '&sub_sku=' + query.trim()
+                    ).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading3 = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                let tempOptions = []
+                                this.sku_options = tempOptions.concat(res.data.data)
+                            } else {
+                                this.sku_options = this.sku_options.concat(res.data.data)
+                            }
+                            this.sku_total = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
             },
             getStatusName(status, done_direct) {
                 if(status == 1) {
