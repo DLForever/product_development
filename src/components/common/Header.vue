@@ -7,7 +7,7 @@
         <div class="logo">
             <a href="/" style="color: #fff;"><span>WZS管理系统</span></a>
         </div>
-        <div class="topbar-title">
+        <!-- <div class="topbar-title">
             <el-row>
                 <el-col :span="24">
                     <el-menu :default-active="defaultActiveIndex" class="el-menu-demo" mode="horizontal" :router="true">
@@ -24,7 +24,7 @@
                     </el-menu>
                 </el-col>
             </el-row>
-        </div>
+        </div> -->
         <div class="header-right">
             <div class="header-user-con">
                 <!-- 全屏显示 -->
