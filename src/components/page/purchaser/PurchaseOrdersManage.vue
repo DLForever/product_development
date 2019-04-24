@@ -96,7 +96,7 @@
         </div>
 
         <!-- 编辑弹出框 -->
-        <el-dialog title="编辑" :visible.sync="editVisible" width="50%" @close="closeEdit">
+        <el-dialog title="编辑" :visible.sync="editVisible" width="98%">
             <el-table :data="purchase_details" border style="width: 100%">
                 <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
                 </el-table-column>
@@ -113,9 +113,9 @@
                 </el-table-column>
                 <el-table-column prop="address" label="中转地址">
                 </el-table-column>
-                <el-table-column prop="scheduled_card_sum" label="好评卡使用数" show-overflow-tooltip>
+                <el-table-column prop="scheduled_card_sum" label="已计划好评卡数量" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="scheduled_sum" label="采购数量" show-overflow-tooltip>
+                <el-table-column prop="scheduled_sum" label="已计划采购数量" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column label="好评卡图片" width="120">
                     <template slot-scope="scope">
@@ -129,13 +129,11 @@
                 </el-table-column>
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at">
-                </el-table-column>
             </el-table>
-            <!-- <el-select style="margin-bottom:10px;margin-top:20px;" v-model="supplier_id" placeholder="请选择供应商" @visible-change="supplierselectVisble">
-                <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
-            </el-select> -->
+            <el-select style="margin-bottom:10px;margin-top:20px;" v-model="supplier_id" placeholder="请选择供应商" @visible-change="supplierselectVisbleEdit">
+                <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
+            </el-select>
             <el-table :data="purchaseOrders" border style="width: 100%">
                 <!-- <el-table-column prop="supplier" label="供应商" show-overflow-tooltip>
                     <template slot-scope="scope">
@@ -147,7 +145,7 @@
                 </el-table-column> -->
                 <el-table-column prop="sku" label="SKU" width="150">
                     <template slot-scope="scope">
-                        <el-select v-model="scope.row.sku">
+                        <el-select v-model="scope.row.product_id">
                             <el-option v-for="item in purchase_skus" :key="item.value" :label="item.label" :value="item.value"></el-option>
                         </el-select>
                     </template>
@@ -207,8 +205,8 @@
                 </el-table-column>
                 <el-table-column prop="sum" label="供应商条款" width="90">
                     <template slot-scope="scope">
-                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.sku, scope.$index)" :disabled="scope.row.sku === '' || supplier_id === ''">未选择</el-button>
-                        <el-button v-if="scope.row.term_id != ''" type="success" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.sku, scope.$index)">已选择</el-button>
+                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.product_id, scope.$index)" :disabled="scope.row.sku === '' || supplier_id === ''">未选择</el-button>
+                        <el-button v-if="scope.row.term_id != ''" type="success" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.product_id, scope.$index)">已选择</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="sum" label="备注">
@@ -224,15 +222,15 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <!-- <div class="add_purchadse_sku">
+            <div class="add_purchadse_sku">
                 <el-button type="primary" icon="el-icon-plus" @click="addPurchaseSku">新增</el-button>
                 <el-button type="danger" icon="el-icon-delete" :disabled="purchaseOrders.length === 1" @click="deletePurchaseSku">撤销</el-button>
-            </div> -->
+            </div>
             
             <el-input v-model.trim="remark" placeholder="请输入备注"></el-input>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="detailVisible = false">取 消</el-button>
-                <!-- <el-button type="primary" @click="savePurchaseOrder" :disabled="submitDisabled">创建采购单</el-button> -->
+                <el-button @click="editVisible = false">取 消</el-button>
+                <el-button type="primary" @click="savePurchaseOrder" :disabled="submitDisabled">更新采购单</el-button>
             </span>
         </el-dialog>
 
@@ -262,11 +260,70 @@
                 </el-table-column>
                 <el-table-column prop="delivery_date" label="交货时间">
                 </el-table-column>
+                <el-table-column label="好评卡图片" width="120">
+                    <template slot-scope="scope">
+                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
+                            <span v-if="scope.row.pictures.length === 0">无</span>
+                            <img style="cursor: pointer;" class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"@click="showProduct(scope.$index, scope.row)"/>
+                            <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
+                        </el-badge>
+                        <span v-else>无</span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip></el-table-column>
+            </el-table>
+            <br>
+            <el-table :data="supplier_account_detail" border style="width: 100%">
+                <el-table-column prop="supplier_account.collection_account" label="收款账号" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_account.account_name" label="收款账号姓名"  show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_account.us_collection_account" label="外币收款账号" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_account.english_name" label="外币收款账号姓名" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_account.payment_day" label="账期天数">
+                </el-table-column>
+                <el-table-column prop="supplier_account.clearing_form" label="结算方式">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.supplier_account.clearing_form | statusFilter">{{getStatusClearing_Form(scope.row.supplier_account.clearing_form)}}</el-tag>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <br>
+            <el-table :data="supplier_term_detail" border style="width: 100%">
+                <el-table-column prop="supplier_term.currency" label="货币" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_term.contract_term" label="合同条款"  show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_term.quality_request" label="合同要求" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_term.shipping_type" label="运输方式" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_term.shipping_bear_fee" label="费用承担">
+                </el-table-column>
+                <el-table-column prop="supplier_term.package_standard" label="包装标准">
+                </el-table-column>
+                <el-table-column prop="supplier_term.acceptance_method" label="验收方式" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_term.liability_for_breach" label="违约责任"  show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_term.dissolution_method" label="解决合同纠纷的方式" width="140" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_term.covenant" label="其他约定事项" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="supplier_term.tax" label="开票税点">
+                </el-table-column>
+                <el-table-column prop="supplier_term.exit_tax" label="出口退税点">
+                </el-table-column>
+                <el-table-column prop="supplier_term.reject_ratio" label="不良率">
+                </el-table-column>
+                <el-table-column prop="supplier_term.remark" label="备注">
+                </el-table-column>
             </el-table>
         </el-dialog>
         <!-- 查看产品图片 -->
-        <el-dialog title="样品图片" :visible.sync="productVisible" width="70%">
+        <el-dialog title="图片" :visible.sync="productVisible" width="70%">
             <el-carousel height="600px" type="card" v-if="picturesProductList.length != 0">
                 <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
                     <img @click="handleDeletePro(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
@@ -293,6 +350,87 @@
                 <el-button @click="checkVisible = false">取 消</el-button>
                 <el-button type="warning" @click="saveCheck(0)">拒 绝</el-button>
                 <el-button type="primary" @click="saveCheck(1)">通 过</el-button>
+            </span>
+        </el-dialog>
+        <!-- 编辑供应商账户 -->
+        <el-dialog title="编辑供应商账户" :visible.sync="updateAccountVisible" width="50%">
+            <el-form ref="update_accountForm" :model="update_accountForm" label-width="150px">
+                <el-form-item label="收款账号">
+                    <el-input v-model="update_accountForm.collection_account"></el-input>
+                </el-form-item>
+                <el-form-item label="收款账号姓名">
+                    <el-input v-model="update_accountForm.account_name"></el-input>
+                </el-form-item>
+                <el-form-item label="外币收款账号">
+                    <el-input v-model="update_accountForm.us_collection_account"></el-input>
+                </el-form-item>
+                <el-form-item label="外币收款账号姓名">
+                    <el-input v-model="update_accountForm.english_name"></el-input>
+                </el-form-item>
+                <el-form-item label="账期天数">
+                    <el-input-number v-model="update_accountForm.payment_day" :min="0" :step="2"></el-input-number>
+                </el-form-item>
+                <el-form-item label="结算方式">
+                    <el-select v-model="update_accountForm.clearing_form">
+                        <el-option v-for="item in clearing_form_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="updateAccountVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveupdateAccount" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 编辑供应商条款 -->
+        <el-dialog title="编辑供应商条款" :visible.sync="updateTermVisible" width="50%">
+            <el-form ref="update_termForm" :model="update_termForm" label-width="150px">
+                <el-form-item label="货币">
+                    <el-input v-model="update_termForm.currency"></el-input>
+                </el-form-item>
+                <el-form-item label="合同条款">
+                    <el-input v-model="update_termForm.contract_term"></el-input>
+                </el-form-item>
+                <el-form-item label="质量要求">
+                    <el-input v-model="update_termForm.quality_request"></el-input>
+                </el-form-item>
+                <el-form-item label="运输方式">
+                    <el-input v-model="update_termForm.shipping_type"></el-input>
+                </el-form-item>
+                <el-form-item label="费用承担">
+                    <el-input v-model="update_termForm.shipping_bear_fee"></el-input>
+                </el-form-item>
+                <el-form-item label="包装标准">
+                    <el-input v-model="update_termForm.package_standard"></el-input>
+                </el-form-item>
+                <el-form-item label="验收方式">
+                    <el-input v-model="update_termForm.acceptance_method"></el-input>
+                </el-form-item>
+                <el-form-item label="违约责任">
+                    <el-input v-model="update_termForm.liability_for_breach"></el-input>
+                </el-form-item>
+                <el-form-item label="解决合同纠纷的方式">
+                    <el-input v-model="update_termForm.dissolution_method"></el-input>
+                </el-form-item>
+                <el-form-item label="其他约定事项">
+                    <el-input v-model="update_termForm.covenant"></el-input>
+                </el-form-item>
+                <el-form-item label="开票税点">
+                    <el-input-number v-model="update_termForm.tax" :precision="2" :step="0.01" :max="1"></el-input-number>
+                </el-form-item>
+                <el-form-item label="出口退税点">
+                    <el-input-number v-model="update_termForm.exit_tax" :precision="2" :step="0.01" :max="1"></el-input-number>
+                </el-form-item>
+                <el-form-item label="不良率">
+                    <el-input-number v-model="update_termForm.reject_ratio" :precision="2" :step="0.01" :max="1"></el-input-number>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-input v-model="update_termForm.term_remark"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="updateTermVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveupdateTerm" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
     </div>
@@ -409,7 +547,40 @@
               checkVisible: false,
               remark: '',
               purchase_details: [],
-              purchaseOrders: ''
+              purchaseOrders: [],
+              dist_type_options: [{value: 1, label: '入国内仓'}, {value: 2, label: '不入仓'}, {value: 3, label: '中转'}],
+              purchase_skus: [],
+              supplier_id: '',
+              update_accountForm: {
+                collection_account: '',
+                account_name: '',
+                us_collection_account: '',
+                english_name: '',
+                payment_day: '',
+                clearing_form: ''
+              },
+              update_termForm: {
+                currency: '',
+                currency_term: '',
+                quality_request: '',
+                shipping_type: '',
+                shipping_bear_fee: '',
+                package_standard: '',
+                acceptance_method: '',
+                liability_for_breach: '',
+                dissolution_method: '',
+                term_remark: '',
+                covenant: '',
+                tax: '',
+                exit_tax: '',
+                reject_ratio: ''
+              },
+              updateAccountVisible: false,
+              updateTermVisible: false,
+              update_index: '',
+              clearing_form_options: [{value: 1, label: '先定金后尾款'}, {value: 2, label: '全款'}, {value: 3, label: '月结'}, {value: 4, label: '日结'}],
+              supplier_account_detail: [],
+              supplier_term_detail: []
             }
         },
         created() {
@@ -623,34 +794,6 @@
             filterTag(value, row) {
                 return row.tag === value;
             },
-            handleEdit(index, row) {
-                this.supplier_page_edit = 1
-                this.supplier_options_edit = []
-                this.getSuppliersEdit()
-                this.idx = index;
-                const item = this.tableData[index];
-                this.form = {
-                    id: item.id,
-                    name: item.name,
-                    title: item.title,
-                    price: item.price,
-                    length: item.length,
-                    width: item.width,
-                    height: item.height,
-                    weight: item.weight,
-                    package_length: item.package_length,
-                    package_width: item.package_width,
-                    package_height: item.package_height,
-                    package_weight: item.package_weight,
-                    desc: item.desc,
-                    desc_url: item.desc_url,
-                    origin_url: item.origin_url,
-                    picture_url: item.picture_url,
-                    remark: item.remark,
-                    supplier_id: item.supplier_id
-                }
-                this.editVisible = true;
-            },
             categories_loop(c) {
                 this.categories_options.forEach((data) => {
                     if(c==data.id) {
@@ -805,8 +948,26 @@
                 })
             },
             handleDetails(index, row) {
-                this.products_details = row.purchase_order_products
-                this.detailVisible = true
+                this.$axios.get('/purchase_orders/' + row.id
+                ).then((res) => {
+                    if(res.data.code==200) {
+                        // this.purchase_details = res.data.data[0].purchase_order_products
+                            
+                        if (res.data.data.length != 0) {
+                            this.supplier_account_detail = res.data.data[0].purchase_order_products
+                            this.supplier_term_detail = res.data.data[0].purchase_order_products
+                            this.products_details = res.data.data[0].purchase_order_products
+                            this.products_details.forEach((data) => {
+                                data.img_count = data.pictures.length
+                            })
+                        }
+                        this.detailVisible = true
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                })
+                
+                
             },
             onInfinite_suppliers(obj) {
                 if((this.supplier_page * 20) < this.supplier_total) {
@@ -839,7 +1000,12 @@
                 this.$axios.get('/suppliers?page=' + this.supplier_page_edit
                 ).then((res) => {
                     if(res.data.code==200) {
-                        this.supplier_options_edit = this.supplier_options_edit.concat(res.data.data)
+                        res.data.data.forEach((data) => {
+                            if(!(this.supplier_options_edit.find(data2 => data2.id === data.id))){
+                                this.supplier_options_edit.push(data)
+                            }
+                        })
+                        // this.supplier_options_edit = this.supplier_options_edit.concat(res.data.data)
                         this.supplier_total_edit = res.data.count
                     }
                 }).catch((res) => {
@@ -887,11 +1053,12 @@
             showProduct(index, row) {
                 this.picturesProductList = []
                 this.product_id = row.id
-                const item = this.tableData[index]
-                item.pictures.forEach((data) => {
-                    if(data.remark == 'main') {
-                        this.picturesProductList.push(data)
-                    }
+                // const item = this.tableData[index]
+                row.pictures.forEach((data) => {
+                    this.picturesProductList.push(data)
+                    // if(data.remark == 'main') {
+                    //     this.picturesProductList.push(data)
+                    // }
                 })
                 this.productVisible = true;
             },
@@ -953,6 +1120,14 @@
                     this.getSuppliers()
                 }
             },
+            supplierselectVisbleEdit(visible) {
+                this.supplier_options_edit = []
+                this.supplier_page_edit = 1
+                this.$refs.infiniteLoading3.stateChanger.reset()
+                if(visible) {
+                    this.getSuppliersEdit()
+                }
+            },
             handleCheck(index, row) {
                 this.form.id = row.id
                 this.remark = ''
@@ -985,7 +1160,7 @@
                     let params = {
                         remark: value
                     }
-                    this.$axios.delete('/purchase_orders/' + row.id, params
+                    this.$axios.delete('/purchase_orders/' + row.id, {data: params}
                     ).then((res) => {
                         if(res.data.code == 200) {
                             this.getData()
@@ -997,6 +1172,246 @@
                 }).catch(() => {
                     // this.$message.info('已取消拒绝')
                 })
+            },
+            addPurchaseSku() {
+                let tempArr = JSON.parse(JSON.stringify(this.purchaseOrders[this.purchaseOrders.length-1]))
+                tempArr.pictures = []
+                tempArr.is_add = true
+                this.purchaseOrders[this.purchaseOrders.length-1].pictures.forEach((data) => {
+                    tempArr.pictures.push(data)
+                })
+                this.purchaseOrders.push(tempArr)
+            },
+            deletePurchaseSku() {
+                this.purchaseOrders.pop()
+            },
+            savePurchaseOrder() {
+                this.submitDisabled = true
+                let formData = new FormData()
+                formData.append('purchase_plan_id', this.purchase_plan_id)
+                formData.append('supplier_id', this.supplier_id)
+                this.purchaseOrders.forEach((data) => {
+                    if (data.is_add != true) {
+                        formData.append('purchase_order[][sub_id]', data.sub_id)
+                    }
+                    formData.append('purchase_order[][product_id]', data.product_id)
+                    formData.append('purchase_order[][dist_type]', data.dist_type)
+                    formData.append('purchase_order[][put_card_sum]', data.put_card_sum)
+                    if (data.is_need_invoice === true) {
+                        formData.append('purchase_order[][is_need_invoice]', 1)
+                    }else {
+                        formData.append('purchase_order[][is_need_invoice]', 0)
+                    }
+                    formData.append('purchase_order[][sum]', data.sum)
+                    formData.append('purchase_order[][address]', data.address)
+                    formData.append('purchase_order[][price]', data.price)
+                    formData.append('purchase_order[][process_peroid]', data.process_peroid)
+                    formData.append('purchase_order[][delivery_date]', data.delivery_date)
+                    formData.append('purchase_order[][arrive_date]', data.arrive_date)
+                    formData.append('purchase_order[][remark]', data.remark)
+                    formData.append('purchase_order[][account_id]', data.account_id)
+                    formData.append('purchase_order[][term_id]', data.term_id)
+                    data.pictures.forEach((data2, index) => {
+                        let temp = 'purchase_order[][pictures['+ index + ']]'
+                        // let temp = 'purchase_order[][pictures]'+ '[' + index + ']'
+                        // let temp = 'purchase_order[]pictures[][]'
+                        formData.append(temp, data2.raw)
+                    })
+                })
+                formData.append('supplier_remark', this.remark)
+                this.$axios.patch('/purchase_orders/' + this.form.id, formData).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('更新成功！')
+                        this.getData()
+                        this.editVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
+            handleEdit(index, row) {
+                // this.getSuppliersEdit()
+                this.supplier_options_edit = []
+                this.supplier_options_edit.push({id: row.supplier_id, name: row.supplier_name})
+                this.form.id = row.id
+                this.supplier_id = row.supplier_id
+                this.purchase_plan_id = row.id
+                this.purchase_skus = []
+                this.purchaseOrders = []
+                row.purchase_order_products.forEach((data) => {
+                    this.purchaseOrders.push({product_id: data.product_id, dist_type: data.dist_type, put_card_sum: data.put_card_sum, is_need_invoice: data.is_need_invoice, sum: data.sum, price: data.price, address: data.address, process_peroid: data.process_peroid, delivery_date: data.delivery_date, arrive_date: data.arrive_date, remark: data.remark, supplier_remark: data.supplier_remark, account_id: data.supplier_account_id, term_id: data.supplier_term_id, sku: data.sku, pictures: [], sub_id: data.id})
+                })
+                // this.purchaseOrders = [{
+                //     supplier_id: '',
+                //     product_id: '',
+                //     dist_type: '',
+                //     put_card_sum: '',
+                //     is_need_invoice: '',
+                //     sum: 0,
+                //     price: 0,
+                //     address: '',
+                //     pictures: [],
+                //     process_peroid: 0,
+                //     delivery_date: '',
+                //     arrive_date: '',
+                //     remark: '',
+                //     supplier_remark: '',
+                //     account_id: '',
+                //     term_id: '',
+                //     sku: ''
+                // }]
+                this.$axios.get('/purchase_plans/' + row.purchase_plan_id
+                ).then((res) => {
+                    if(res.data.code==200) {
+                        this.purchase_details = res.data.data[0].purchase_plan_products
+                        this.purchase_details.forEach((data) => {
+                            data.img_count = data.pictures.length
+                            if (!(this.purchase_skus.find(data2 => data2.label === data.sku))) {
+                                this.purchase_skus.push({label: data.sku, value: data.product_id})
+                            }
+                        })
+                        this.editVisible = true;
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                })
+            },
+            update_account(supplier_id, index) {
+                this.update_index = index
+                this.supplier_id = supplier_id
+                this.$axios.get('/suppliers/' + supplier_id + '/search_account'
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        if (res.data.data.length != 0) {
+                            let item = res.data.data[0]
+                            this.update_accountForm.collection_account = item.collection_account
+                            this.update_accountForm.account_name = item.account_name
+                            this.update_accountForm.us_collection_account = item.us_collection_account
+                            this.update_accountForm.english_name = item.english_name
+                            this.update_accountForm.payment_day = item.payment_day
+                            this.update_accountForm.clearing_form = item.clearing_form
+                        } else {
+                            this.update_accountForm.collection_account = ''
+                            this.update_accountForm.account_name = ''
+                            this.update_accountForm.us_collection_account = ''
+                            this.update_accountForm.english_name = ''
+                            this.update_accountForm.payment_day = ''
+                            this.update_accountForm.clearing_form = ''
+                        }
+                        this.updateAccountVisible = true
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                })
+            },
+            update_term(supplier_id, product_id, index) {
+                this.update_index = index
+                this.supplier_id = supplier_id
+                this.product_id = product_id
+                let params = {
+                    product_id: product_id
+                }
+                this.$axios.get('/suppliers/' + supplier_id + '/search_term',{params: params}
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        if (res.data.data.length != 0) {
+                            let item = res.data.data[0]
+                            this.update_termForm.currency = item.currency
+                            this.update_termForm.contract_term = item.contract_term
+                            this.update_termForm.quality_request = item.quality_request
+                            this.update_termForm.shipping_type = item.shipping_type
+                            this.update_termForm.shipping_bear_fee = item.shipping_bear_fee
+                            this.update_termForm.package_standard = item.package_standard
+                            this.update_termForm.acceptance_method = item.acceptance_method
+                            this.update_termForm.liability_for_breach = item.liability_for_breach
+                            this.update_termForm.dissolution_method = item.dissolution_method
+                            this.update_termForm.term_remark = item.term_remark
+                            this.update_termForm.covenant = item.covenant
+                            this.update_termForm.tax = item.tax
+                            this.update_termForm.exit_tax = item.exit_tax
+                            this.update_termForm.reject_ratio = item.reject_ratio
+                        } else {
+                            this.update_termForm.currency = ''
+                            this.update_termForm.contract_term = ''
+                            this.update_termForm.quality_request = ''
+                            this.update_termForm.shipping_type = ''
+                            this.update_termForm.shipping_bear_fee = ''
+                            this.update_termForm.package_standard = ''
+                            this.update_termForm.acceptance_method = ''
+                            this.update_termForm.liability_for_breach = ''
+                            this.update_termForm.dissolution_method = ''
+                            this.update_termForm.term_remark = ''
+                            this.update_termForm.covenant = ''
+                            this.update_termForm.tax = ''
+                            this.update_termForm.exit_tax = ''
+                            this.update_termForm.reject_ratio = ''
+                        }
+                        this.updateTermVisible = true
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                })
+            },
+            saveupdateAccount() {
+                this.submitDisabled = true
+                let params = {
+                    collection_account: this.update_accountForm.collection_account,
+                    account_name: this.update_accountForm.account_name,
+                    us_collection_account   : this.update_accountForm.us_collection_account ,
+                    english_name: this.update_accountForm.english_name,
+                    payment_day: this.update_accountForm.payment_day,
+                    clearing_form: this.update_accountForm.clearing_form,
+                }
+                this.$axios.post('/suppliers/' + this.supplier_id + '/update_account', params).then((res) => {
+                    if(res.data.code == 200) {
+                        this.purchaseOrders[this.update_index].account_id = res.data.data
+                        this.$message.success('更新成功！')
+                        this.updateAccountVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
+            saveupdateTerm() {
+                this.submitDisabled = true
+                let params = {
+                    product_id: this.product_id,
+                    currency: this.update_termForm.currency,
+                    contract_term: this.update_termForm.contract_term,
+                    quality_request: this.update_termForm.quality_request,
+                    shipping_type: this.update_termForm.shipping_type,
+                    shipping_bear_fee: this.update_termForm.shipping_bear_fee,
+                    package_standard: this.update_termForm.package_standard,
+                    acceptance_method: this.update_termForm.acceptance_method,
+                    liability_for_breach: this.update_termForm.liability_for_breach,
+                    dissolution_method: this.update_termForm.dissolution_method,
+                    term_remark: this.update_termForm.term_remark,
+                    covenant: this.update_termForm.covenant,
+                    tax: this.update_termForm.tax,
+                    exit_tax: this.update_termForm.exit_tax,
+                    reject_ratio: this.update_termForm.reject_ratio,
+                }
+                this.$axios.post('/suppliers/' + this.supplier_id + '/update_term', params).then((res) => {
+                    if(res.data.code == 200) {
+                        this.purchaseOrders[this.update_index].term_id = res.data.data
+                        this.$message.success('更新成功！')
+                        this.updateTermVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
+            },
+            handleRemovePurchaseOrder(res, file, index) {
+                this.purchaseOrders[index].pictures = file
+            },
+            changePurchaseOrder(res, file, index) {
+                this.purchaseOrders[index].pictures.push(res)
             },
             getStatusName(status, done_direct) {
                 if(status == 1) {
@@ -1015,6 +1430,19 @@
                     return '其他'
                 }
             },
+            getStatusClearing_Form(status) {
+                if(status == 1) {
+                    return "先定金后尾款"
+                } else if(status == 2) {
+                    return "全款"
+                } else if(status == 3) {
+                    return "月结"
+                }else if(status == 4) {
+                    return "日结"
+                }else {
+                    return '其他'
+                }
+            },
         },
         components: {
             "infinite-loading": VueInfiniteLoading
@@ -1023,7 +1451,7 @@
 
 </script>
 
-<style scoped>
+<style>
     .handle-box {
         margin-bottom: 20px;
     }
@@ -1058,5 +1486,23 @@
     .item {
       margin-top: 10px;
       margin-right: 40px;
+    }
+    #upload-pur .el-upload--text{
+        background-color: #fff;
+        border: 0px;
+        border-radius: 6px;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        width: 120px;
+        height: 32px;
+        text-align: center;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .add_purchadse_sku {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        text-align: center;
     }
 </style>

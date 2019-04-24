@@ -130,9 +130,9 @@
                 </el-table-column>
                 <el-table-column prop="address" label="中转地址">
                 </el-table-column>
-                <el-table-column prop="scheduled_card_sum" label="好评卡使用数" show-overflow-tooltip>
+                <el-table-column prop="scheduled_card_sum" label="已计划好评卡数量" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="scheduled_sum" label="采购数量" show-overflow-tooltip>
+                <el-table-column prop="scheduled_sum" label="已计划采购数量" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column label="好评卡图片" width="120">
                     <template slot-scope="scope">
@@ -164,7 +164,7 @@
                 </el-table-column> -->
                 <el-table-column prop="sku" label="SKU" width="150">
                     <template slot-scope="scope">
-                        <el-select v-model="scope.row.sku">
+                        <el-select v-model="scope.row.product_id">
                             <el-option v-for="item in purchase_skus" :key="item.value" :label="item.label" :value="item.value"></el-option>
                         </el-select>
                     </template>
@@ -224,8 +224,8 @@
                 </el-table-column>
                 <el-table-column prop="sum" label="供应商条款" width="90">
                     <template slot-scope="scope">
-                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.sku, scope.$index)" :disabled="scope.row.sku === '' || supplier_id === ''">未选择</el-button>
-                        <el-button v-if="scope.row.term_id != ''" type="success" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.sku, scope.$index)">已选择</el-button>
+                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.product_id, scope.$index)" :disabled="scope.row.product_id === '' || supplier_id === ''">未选择</el-button>
+                        <el-button v-if="scope.row.term_id != ''" type="success" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.product_id, scope.$index)">已选择</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="sum" label="备注">
@@ -368,10 +368,12 @@
                     <el-input v-model="update_accountForm.english_name"></el-input>
                 </el-form-item>
                 <el-form-item label="账期天数">
-                    <el-input v-model="update_accountForm.payment_day"></el-input>
+                    <el-input-number v-model="update_accountForm.payment_day" :min="0" :step="2"></el-input-number>
                 </el-form-item>
                 <el-form-item label="结算方式">
-                    <el-input v-model="update_accountForm.clearing_form"></el-input>
+                    <el-select v-model="update_accountForm.clearing_form">
+                        <el-option v-for="item in clearing_form_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
@@ -414,13 +416,13 @@
                     <el-input v-model="update_termForm.covenant"></el-input>
                 </el-form-item>
                 <el-form-item label="开票税点">
-                    <el-input v-model="update_termForm.tax"></el-input>
+                    <el-input-number v-model="update_termForm.tax" :precision="2" :step="0.01" :max="1"></el-input-number>
                 </el-form-item>
                 <el-form-item label="出口退税点">
-                    <el-input v-model="update_termForm.exit_tax"></el-input>
+                    <el-input-number v-model="update_termForm.exit_tax" :precision="2" :step="0.01" :max="1"></el-input-number>
                 </el-form-item>
                 <el-form-item label="不良率">
-                    <el-input v-model="update_termForm.reject_ratio"></el-input>
+                    <el-input-number v-model="update_termForm.reject_ratio" :precision="2" :step="0.01" :max="1"></el-input-number>
                 </el-form-item>
                 <el-form-item label="备注">
                     <el-input v-model="update_termForm.term_remark"></el-input>
@@ -608,6 +610,7 @@
               query3: undefined,
               sku_page: 1,
               sku_total: 0,
+              clearing_form_options: [{value: 1, label: '先定金后尾款'}, {value: 2, label: '全款'}, {value: 3, label: '月结'}, {value: 4, label: '日结'}],
             }
         },
         created() {
@@ -1333,7 +1336,7 @@
                 formData.append('purchase_plan_id', this.purchase_plan_id)
                 formData.append('supplier_id', this.supplier_id)
                 this.purchaseOrders.forEach((data) => {
-                    formData.append('product_id[]', data.sku)
+                    formData.append('product_id[]', data.product_id)
                     formData.append('dist_type[]', data.dist_type)
                     formData.append('put_card_sum[]', data.put_card_sum)
                     if (data.is_need_invoice === true) {
