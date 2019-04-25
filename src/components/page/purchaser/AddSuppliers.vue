@@ -2,7 +2,7 @@
 	<div>
 		<div class="crumbs">
 			<el-breadcrumb separator="/">
-				<el-breadcrumb-item><i class="el-icon-date"></i> 供应商管理</el-breadcrumb-item>
+				<el-breadcrumb-item><i class="el-icon-lx-global"></i> 供应商管理</el-breadcrumb-item>
 				<el-breadcrumb-item>新建供应商</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>

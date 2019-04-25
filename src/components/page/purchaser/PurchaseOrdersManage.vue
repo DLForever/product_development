@@ -134,6 +134,9 @@
                 <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
                 <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
             </el-select>
+            供应商账户：
+            <el-button v-if="account_id === ''" type="warning" v-model.trim="account_id" @click="update_account(supplier_id)" :disabled="supplier_id === ''">未选择</el-button>
+            <el-button v-if="account_id != ''" type="success" v-model.trim="account_id" @click="update_account(supplier_id)">已选择</el-button>
             <el-table :data="purchaseOrders" border style="width: 100%">
                 <!-- <el-table-column prop="supplier" label="供应商" show-overflow-tooltip>
                     <template slot-scope="scope">
@@ -197,16 +200,16 @@
                         <el-input v-model.trim="scope.row.address" placeholder="中转地址" :disabled="!(scope.row.dist_type === 3)"></el-input>
                     </template>
                 </el-table-column>
-                <el-table-column prop="sum" label="供应商账户" width="90">
+                <!-- <el-table-column prop="sum" label="供应商账户" width="90">
                     <template slot-scope="scope">
                         <el-button v-if="scope.row.account_id === ''" type="warning" v-model.trim="scope.row.account_id" @click="update_account(supplier_id, scope.$index)" :disabled="supplier_id === ''">未选择</el-button>
                         <el-button v-if="scope.row.account_id != ''" type="success" v-model.trim="scope.row.account_id" @click="update_account(supplier_id, scope.$index)">已选择</el-button>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column prop="sum" label="供应商条款" width="90">
                     <template slot-scope="scope">
-                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.product_id, scope.$index)" :disabled="scope.row.sku === '' || supplier_id === ''">未选择</el-button>
-                        <el-button v-if="scope.row.term_id != ''" type="success" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.product_id, scope.$index)">已选择</el-button>
+                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.term_id, scope.$index)" :disabled="scope.row.sku === '' || supplier_id === ''">未选择</el-button>
+                        <el-button v-if="scope.row.term_id != ''" type="success" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.term_id, scope.$index)">已选择</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="sum" label="备注">
@@ -274,19 +277,19 @@
             </el-table>
             <br>
             <el-table :data="supplier_account_detail" border style="width: 100%">
-                <el-table-column prop="supplier_account.collection_account" label="收款账号" show-overflow-tooltip>
+                <el-table-column prop="collection_account" label="收款账号" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="supplier_account.account_name" label="收款账号姓名"  show-overflow-tooltip>
+                <el-table-column prop="account_name" label="收款账号姓名"  show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="supplier_account.us_collection_account" label="外币收款账号" show-overflow-tooltip>
+                <el-table-column prop="us_collection_account" label="外币收款账号" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="supplier_account.english_name" label="外币收款账号姓名" show-overflow-tooltip>
+                <el-table-column prop="english_name" label="外币收款账号姓名" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="supplier_account.payment_day" label="账期天数">
+                <el-table-column prop="payment_day" label="账期天数">
                 </el-table-column>
-                <el-table-column prop="supplier_account.clearing_form" label="结算方式">
+                <el-table-column prop="clearing_form" label="结算方式">
                     <template slot-scope="scope">
-                        <el-tag :type="scope.row.supplier_account.clearing_form | statusFilter">{{getStatusClearing_Form(scope.row.supplier_account.clearing_form)}}</el-tag>
+                        <el-tag :type="scope.row.clearing_form | statusFilter">{{getStatusClearing_Form(scope.row.clearing_form)}}</el-tag>
                     </template>
                 </el-table-column>
             </el-table>
@@ -318,7 +321,7 @@
                 </el-table-column>
                 <el-table-column prop="supplier_term.reject_ratio" label="不良率">
                 </el-table-column>
-                <el-table-column prop="supplier_term.remark" label="备注">
+                <el-table-column prop="supplier_term.term_remark" label="备注">
                 </el-table-column>
             </el-table>
         </el-dialog>
@@ -580,7 +583,8 @@
               update_index: '',
               clearing_form_options: [{value: 1, label: '先定金后尾款'}, {value: 2, label: '全款'}, {value: 3, label: '月结'}, {value: 4, label: '日结'}],
               supplier_account_detail: [],
-              supplier_term_detail: []
+              supplier_term_detail: [],
+              account_id: ''
             }
         },
         created() {
@@ -954,7 +958,7 @@
                         // this.purchase_details = res.data.data[0].purchase_order_products
                             
                         if (res.data.data.length != 0) {
-                            this.supplier_account_detail = res.data.data[0].purchase_order_products
+                            this.supplier_account_detail = [res.data.data[0].supplier_account]
                             this.supplier_term_detail = res.data.data[0].purchase_order_products
                             this.products_details = res.data.data[0].purchase_order_products
                             this.products_details.forEach((data) => {
@@ -1190,6 +1194,7 @@
                 let formData = new FormData()
                 formData.append('purchase_plan_id', this.purchase_plan_id)
                 formData.append('supplier_id', this.supplier_id)
+                formData.append('account_id', this.account_id)
                 this.purchaseOrders.forEach((data) => {
                     if (data.is_add != true) {
                         formData.append('purchase_order[][sub_id]', data.sub_id)
@@ -1209,7 +1214,7 @@
                     formData.append('purchase_order[][delivery_date]', data.delivery_date)
                     formData.append('purchase_order[][arrive_date]', data.arrive_date)
                     formData.append('purchase_order[][remark]', data.remark)
-                    formData.append('purchase_order[][account_id]', data.account_id)
+                    
                     formData.append('purchase_order[][term_id]', data.term_id)
                     data.pictures.forEach((data2, index) => {
                         let temp = 'purchase_order[][pictures['+ index + ']]'
@@ -1238,6 +1243,7 @@
                 this.form.id = row.id
                 this.supplier_id = row.supplier_id
                 this.purchase_plan_id = row.id
+                this.account_id = row.supplier_account_id
                 this.purchase_skus = []
                 this.purchaseOrders = []
                 row.purchase_order_products.forEach((data) => {
@@ -1278,8 +1284,8 @@
                     console.log(res)
                 })
             },
-            update_account(supplier_id, index) {
-                this.update_index = index
+            update_account(supplier_id) {
+                // this.update_index = index
                 this.supplier_id = supplier_id
                 this.$axios.get('/suppliers/' + supplier_id + '/search_account'
                 ).then((res) => {
@@ -1306,12 +1312,12 @@
                     console.log(res)
                 })
             },
-            update_term(supplier_id, product_id, index) {
+            update_term(supplier_id, term_id, index) {
                 this.update_index = index
                 this.supplier_id = supplier_id
-                this.product_id = product_id
+                // this.product_id = product_id
                 let params = {
-                    product_id: product_id
+                    term_id: term_id
                 }
                 this.$axios.get('/suppliers/' + supplier_id + '/search_term',{params: params}
                 ).then((res) => {
@@ -1366,7 +1372,8 @@
                 }
                 this.$axios.post('/suppliers/' + this.supplier_id + '/update_account', params).then((res) => {
                     if(res.data.code == 200) {
-                        this.purchaseOrders[this.update_index].account_id = res.data.data
+                        // this.purchaseOrders[this.update_index].account_id = res.data.data
+                        this.account_id = res.data.data
                         this.$message.success('更新成功！')
                         this.updateAccountVisible = false
                     }

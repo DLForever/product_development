@@ -7,7 +7,7 @@
                     <el-breadcrumb-item>测评记录管理</el-breadcrumb-item>
                 </template>
                 <template v-if="$store.getters.leftNavState === 'finacial'">
-                    <el-breadcrumb-item><i class="el-icon-lx-goodsfill"></i> 财务管理</el-breadcrumb-item>
+                    <el-breadcrumb-item><i class="el-icon-lx-goods"></i> 财务管理</el-breadcrumb-item>
                     <el-breadcrumb-item>测评报表管理</el-breadcrumb-item>
                 </template>
             </el-breadcrumb>
