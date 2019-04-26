@@ -511,7 +511,7 @@ export default new Router({
                         {
                             path: '/checkebaymanage',
                             index: 'checkebaymanage',
-                            name: '待审核产品',
+                            name: 'ebay产品',
                             menuShow: true,
                             children: [
                                 {
@@ -522,29 +522,35 @@ export default new Router({
                                     leaf: true,
                                 },
                                 {
-                                    path: '/checkwishmanage',
-                                    index: 'checkwishmanage',
-                                    name: 'wish待审核',
+                                    path: '/productmanageeBayOper',
+                                    index: 'productmanageeBayOper',
+                                    name: 'ebay产品',
                                     menuShow: true,
                                     leaf: true,
                                 },
                             ]
                         },
                         {
-                            path: '/productmanageeBayOper',
-                            // component: Design,
-                            index: 'productmanageeBayOper',
-                            name: 'eBay产品',
-                            menuShow: true,
-                            leaf: true,
-                        },
-                        {
-                            path: '/productmanagewishOper',
-                            // component: Design,
-                            index: 'productmanagewishOper',
+                            path: '/checkwishmanage',
+                            index: 'checkwishmanage',
                             name: 'wish产品',
                             menuShow: true,
-                            leaf: true,
+                            children: [
+                                {
+                                    path: '/checkwishmanage',
+                                    index: 'checkwishmanage',
+                                    name: 'wish待审核',
+                                    menuShow: true,
+                                    leaf: true,
+                                },
+                                {
+                                    path: '/productmanagewishOper',
+                                    index: 'productmanagewishOper',
+                                    name: 'wish产品',
+                                    menuShow: true,
+                                    leaf: true,
+                                },
+                            ]
                         },
                     ]
                 },
