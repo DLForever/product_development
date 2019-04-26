@@ -3,82 +3,46 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item><i class="el-icon-tickets"></i> 产品管理</el-breadcrumb-item>
-                <el-breadcrumb-item>产品管理</el-breadcrumb-item>
+                <el-breadcrumb-item>wish产品管理</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="container">
             <div class="handle-box">
-                <el-button type="primary" @click="handleApply">申请查看详情</el-button>
-                <el-button type="default" @click="exportProduct">导出</el-button>
-                <template v-if="$store.getters.leftNavState === 'operational'">
-                    <el-button type="primary" @click="addPurchaseQueue">添加到采购队列</el-button>
-                    <el-button type="warning" @click="addPurchase" :disabled="purchaseData.length === 0">新建采购计划</el-button>
-                </template>
+                <el-button type="primary" @click="handleCheck">审核</el-button>
+                <!-- <el-button type="primary" @click="handleApply">申请查看详情</el-button>
+                <el-button type="primary" @click="confirmDistribute">分配</el-button>
+                <el-button type="default" @click="exportProduct">导出</el-button> -->
                 <div style="float: right;">
-                    <el-select v-model="search_selects" multiple placeholder="展示其他搜索栏目" @change="showSearch">
+                    <!-- <el-select v-model="search_selects" multiple placeholder="展示其他搜索栏目" @change="showSearch">
                         <el-option v-for="item in search_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                    </el-select>
+                    </el-select> -->
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
                 </div>
                 <div class="fnsku_filter">
-                    <template v-if="search_show[1].dateDis">
-                        <!-- 日期: -->
-                        <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
-                    </template>
-                    <template v-if="search_show[2].classifyDis">
-                        分类:
-                        <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" change-on-select @change="getCatetory" class="handle-select mr10"></el-cascader>
-                    </template>
+                    分类:
+                    <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" @change="getCatetory" change-on-select class="handle-select mr10"></el-cascader>
+                    <!-- 产品名称:
+                    <el-input style="width:150px;" v-model.trim="filter_name" placeholder="请输入产品名称"></el-input> -->
                     开发人员:
-                    <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
+                    <el-select v-model="user_id_filter" filterable remote :loading="loading2" @visible-change="selectVisble2" :remote-method="remoteMethod2" placeholder="选择用户" class="handle-select mr10">
                         <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
                     </el-select>
-                    <template v-if="search_show[0].supplierDis">
-                        供应商:
-                        <el-select v-model="supplier_id_filter" placeholder="选择供应商" @visible-change="supplierselectVisble" class="handle-select mr10">
-                            <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                            <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
-                        </el-select>
-                    </template>
                     SKU:
-                    <el-input style="width:150px" v-model.trim="filter_sku" placeholder="请输入SKU"></el-input>
-                    状态:
-                    <el-select v-model="statusSelect" placeholder="请选择" class="handle-select mr10">
-                        <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                    </el-select>
-                    产品名称:
-                    <el-input style="width:150px;" v-model.trim="filter_name" placeholder="请输入产品名称"></el-input>
+                    <el-input style="width:150px" v-model="filter_sku" placeholder="请输入SKU"></el-input>
                 </div>
             </div>
+            
             <br><br>
-            <template v-if="purchaseData.length != 0">
-                <div style="margin-bottom:10px;">
-                    <el-button type="danger" @click="clearQueue">清空队列</el-button>
-                    <span style="text-align: center;display: block;">采购队列</span>
-                </div>
-                    
-                <el-table :data="purchaseData" border style="width: 100%" ref="multiplePurchaseTable" @selection-change="handlePurQueChange">
-                    <el-table-column type="selection" width="55"></el-table-column>
-                    <el-table-column fixed prop="sku" label="SKU" show-overflow-tooltip>
-                    </el-table-column>
-                    <el-table-column prop="name" label="产品名称" show-overflow-tooltip>
-                    </el-table-column>
-                    <el-table-column prop="username" label="开发人员" show-overflow-tooltip>
-                    </el-table-column>
-                </el-table>
-            <br><br>
-            </template>
             <el-table v-loading="table_loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="data" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column fixed prop="sku" label="SKU" width="120" show-overflow-tooltip>
+                <el-table-column  fixed prop="sku" label="SKU" width="120" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column label="图片" width="120">
                     <template slot-scope="scope">
                         <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
                             <span v-if="scope.row.pictures.length === 0 && scope.row.subject_pictures.length === 0">无</span>
-                            <!-- <img style="cursor: pointer;" v-else-if="scope.row.pictures[0] != undefined" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/> -->
                             <img style="cursor: pointer;" v-else-if="scope.row.pictures[0] != undefined && scope.row.pictures[0].url.thumb.url != null && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/>
                             <img style="cursor: pointer;" v-else-if="scope.row.subject_pictures[0] != undefined && scope.row.subject_pictures[0].url.thumb.url != null && !(scope.row.subject_pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.subject_pictures[0].url.thumb.url" @click="showPictures(scope.$index, scope.row)"/>
                             <span v-else>无</span>
@@ -86,7 +50,9 @@
                         <span v-else>无</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="username" label="开发人员" width="120" show-overflow-tooltip>
+                <el-table-column prop="operate_username" label="分配给" width="80" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="username" label="开发人员" width="80" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column label="主体" width="120">
                     <template slot-scope="scope">
@@ -95,42 +61,29 @@
                 </el-table-column>
                 <el-table-column prop="name" label="产品名称" width="230" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="category_name" label="分类" width="140" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="active_task_count" label="任务数" width="70" show-overflow-tooltip>
+                <el-table-column prop="category_name" label="分类" width="180" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="created_at_format" label="创建时间" sortable width="135">
                 </el-table-column>
-                <el-table-column prop="origin_url" label="来源URL" width="80">
+                <el-table-column prop="origin_url" label="来源URL" width="140">
                     <template slot-scope="scope">
                         <a v-if="scope.row.origin_url != null && scope.row.origin_url != '' && scope.row.origin_url != 'null'" :href="scope.row.origin_url" target="_blank">查看来源</a>
                     </template>
                 </el-table-column>
-                <el-table-column prop="status" label="状态" width="120">
-                    <template slot-scope="scope">
-                        <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status)}}</el-tag>
-                    </template>
-                </el-table-column>
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="desc_url" label="描述URL" width="80">
+                <!-- <el-table-column prop="desc_url" label="描述URL" width="80">
                     <template slot-scope="scope">
                         <a v-if="scope.row.desc_url != null && scope.row.desc_url != '' && scope.row.desc_url != 'null'" :href="scope.row.desc_url" target="_blank">查看描述</a>
                     </template>
-                </el-table-column>
-                <el-table-column fixed="right" label="操作" width="100">
+                </el-table-column> -->
+                <!-- <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">
                         <el-dropdown>
                             <el-button type="primary">
                                 操作<i class="el-icon-arrow-down el-icon--right"></i>
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
-                                <!-- <el-dropdown-item>
-                                    <el-button @click="showPictures(scope.$index, scope.row)" type="text">&nbsp查看图片</el-button>
-                                </el-dropdown-item> -->
-                                <!-- <el-dropdown-item>
-                                    <el-button @click="showSubjectPictures(scope.$index, scope.row)" type="text">&nbsp主体图片</el-button>
-                                </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp&nbsp情</el-button>
                                 </el-dropdown-item>
@@ -138,13 +91,7 @@
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp编&nbsp&nbsp辑</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
-                                    <el-button @click="handleEditSuppliers(scope.$index, scope.row)" type="text">修改供应商</el-button>
-                                </el-dropdown-item>
-                                <el-dropdown-item>
-                                    <el-button @click="handleAddPictures(scope.$index, scope.row)" type="text">&nbsp&nbsp添加图片</el-button>
-                                </el-dropdown-item>
-                                <el-dropdown-item>
-                                    <el-button @click="handleAddDesign(scope.$index, scope.row)" type="text">添加制图计划</el-button>
+                                    <el-button @click="handleAddPictures(scope.$index, scope.row)" type="text">&nbsp添加图片</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
                                     <el-button @click="handleDelete(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp删&nbsp&nbsp除</el-button>
@@ -152,7 +99,7 @@
                             </el-dropdown-menu>
                         </el-dropdown>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
             </el-table>
             </el-table>
             <div class="pagination">
@@ -193,6 +140,12 @@
                     <el-checkbox label="wish" v-model="form.wish" border></el-checkbox>
                     <el-checkbox label="eBay" v-model="form.ebay" border></el-checkbox>
                 </el-form-item>
+                <!-- <el-form-item label="供应商">
+                    <el-select v-model="supplier_id" multiple placeholder="请选择">
+                        <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
+                    </el-select>
+                </el-form-item> -->
                 <el-form-item label="英文名">
                     <el-input v-model="form.english_name"></el-input>
                 </el-form-item>
@@ -288,6 +241,7 @@
                 <el-form-item label="单箱数量">
                     <el-input v-model.trim="form.box_sum"></el-input>
                 </el-form-item>
+
                 <el-form-item label="产品描述">
                     <el-input v-model="form.desc"></el-input>
                 </el-form-item>
@@ -336,8 +290,7 @@
             <el-carousel height="600px" arrow="always" :autoplay="false" v-if="picturesProductList.length != 0" ref="elcarousel">
                 <span>产品图片</span>
                 <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
-                    <el-button type="primary" style="margin-bottom: 4px;" @click="setMainPicture(item.id)">将下图设为主图</el-button>
-                    <img class="img_carousel" @click="handleDeletePro(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" ref="image" @load="imageLoaded" />
+                    <img class="img_carousel" @click="handleDeletePro(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
             <br>
@@ -348,38 +301,12 @@
                 </el-carousel-item>
             </el-carousel>
         </el-dialog>
-            
-        <!-- 查看主体图片 -->
-        <el-dialog title="主体图片" :visible.sync="subjectPicturesVisible" width="20%">
-            <el-table :data="picturesSubjectsList" border style="width: 100%">
-                <el-table-column prop="sum" label="主体图片">
-                    <template slot-scope="scope">
-                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
-                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作" width="100">
-                    <template slot-scope="scope">
-                        <el-button type="danger" @click="handleDeleteSubjectPic(scope.$index, scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </span>
-        </el-dialog>
         <!-- 删除产品图片提示 -->
         <el-dialog title="删除产品图片" :visible.sync="confirmDelProVis" width="35%">
             <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
             <span slot="footer" class="dialog-footer">
             <el-button @click="confirmDelProVis = false">取 消</el-button>
             <el-button type="danger" @click="deleteProductImg">确 定</el-button>
-        </span>
-        </el-dialog>
-        <!-- 删除主体图片提示 -->
-        <el-dialog title="删除产品图片" :visible.sync="confirmDelSubjectPicVis" width="35%">
-            <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
-            <span slot="footer" class="dialog-footer">
-            <el-button @click="confirmDelSubjectPicVis = false">取 消</el-button>
-            <el-button type="danger" @click="DeleteSubjectPicture">确 定</el-button>
         </span>
         </el-dialog>
         <!-- 申请查看产品提示 -->
@@ -398,12 +325,10 @@
         <el-dialog title="导出产品" :visible.sync="exportVisible" width="35%" @close="closeExport">
             <el-form label-width="100px">
                 <el-form-item label="导出平台" required>
-                    <el-button type="primary">
-                        <a style="color:#fff;" :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Ebay'+ '&token=' + export_token">导出到Ebay</a>
-                    </el-button>
-                    <el-button type="primary">
-                        <a style="color:#fff;" :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Amazon'+ '&token=' + export_token">导出到Amazon</a>
-                    </el-button>
+                    <!-- <a :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Ebay'+ '&token=' + export_token">导出到Ebay</a>
+                    &nbsp&nbsp&nbsp&nbsp
+                    <a :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Amazon'+ '&token=' + export_token">导出到Amazon</a>
+                    &nbsp&nbsp&nbsp&nbsp -->
                     <el-button type="primary">
                         <a style="color:#fff;" :href="$axios.defaults.baseURL + '/products/export_url?ids=' + exportIds + '&platform=Wish'+ '&token=' + export_token">导出到Wish</a>
                     </el-button>
@@ -415,7 +340,7 @@
         <!-- 详情提示 -->
         <el-dialog title="详情" :visible.sync="detailVisible" width="90%">
             <el-table :data="products_details" border style="width: 100%">
-                <el-table-column prop="sku" label="SKU" width="90">
+                <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="username" label="开发人员" show-overflow-tooltip>
                 </el-table-column>
@@ -427,17 +352,17 @@
                 </el-table-column>
                 <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="category_name" label="分类" show-overflow-tooltip>
+                <el-table-column prop="category_name" label="分类" width="100" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="price" label="采购价">
                 </el-table-column>
-                <el-table-column prop="size" label="尺寸(长*宽*高cm)" width="180">
+                <el-table-column prop="size" label="尺寸(长*宽*高cm)" width="120">
                 </el-table-column>
                 <el-table-column prop="weight" label="重量(g)">
                 </el-table-column>
-                <el-table-column prop="package_size" label="包装尺寸(长*宽*高cm)" width="180">
+                <el-table-column prop="package_size" label="包装尺寸(长*宽*高cm)" width="140">
                 </el-table-column>
-                <el-table-column prop="package_weight" label="包装重量(g)" width="90">
+                <el-table-column prop="package_weight" label="包装重量(g)" width="100">
                 </el-table-column>
                 <el-table-column prop="model_number" label="型号"  show-overflow-tooltip>
                 </el-table-column>
@@ -461,8 +386,23 @@
                 </el-table-column>
                 <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
                 </el-table-column>
-                <el-table-column prop="remark" label="备注" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
             </el-table>
+        </el-dialog>
+        <!-- 分配提示 -->
+        <el-dialog title="确认分配" :visible.sync="distributeVisible" width="35%">
+            <el-form label-width="110px">
+                <el-form-item label="选择开发人员">
+                    <el-select v-model="distributeUser" placeholder="选择用户" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" class="handle-select mr10">
+                        <el-option v-for="item in distributeUserOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_dis_user" ref="infiniteLoading4"></infinite-loading>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+            <el-button @click="distributeVisible = false">取 消</el-button>
+            <el-button type="primary" @click="distributenProduct" :disabled="submitDisabled">确 定</el-button>
+        </span>
         </el-dialog>
         <!-- 删除变体提示 -->
         <el-dialog title="删除变体" :visible.sync="confirmDelChangePro" width="35%">
@@ -494,13 +434,13 @@
                 </el-table-column>
                 <el-table-column prop="price" label="采购价">
                 </el-table-column>
-                <el-table-column prop="size" label="尺寸(长*宽*高cm)" width="120">
+                <el-table-column prop="size" label="尺寸(长*宽*高)" width="100">
                 </el-table-column>
-                <el-table-column prop="weight" label="重量(g)">
+                <el-table-column prop="weight" label="重量">
                 </el-table-column>
-                <el-table-column prop="package_size" label="包装尺寸(长*宽*高cm)" width="140">
+                <el-table-column prop="package_size" label="包装尺寸(长*宽*高)" width="130">
                 </el-table-column>
-                <el-table-column prop="package_weight" label="包装重量(g)" width="90">
+                <el-table-column prop="package_weight" label="包装重量">
                 </el-table-column>
                 <el-table-column prop="model_number" label="型号"  show-overflow-tooltip>
                 </el-table-column>
@@ -520,10 +460,10 @@
                 </el-table-column>
                 <el-table-column prop="desc" label="描述" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="created_at_format" label="创建时间" width="140">
+                <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" width="140">
                 </el-table-column>
-                <!-- <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
-                </el-table-column> -->
+                <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" width="140">
+                </el-table-column>
                 <el-table-column prop="remark" label="备注" width="180" show-overflow-tooltip></el-table-column>
             </el-table>
             <div class="pagination">
@@ -547,127 +487,43 @@
                 <el-button type="danger" @click="submitAddPictures">确 定</el-button>
             </span>
         </el-dialog>
-        <!-- 修改供应商弹出框 -->
-        <el-dialog title="编辑" :visible.sync="editVisibleSuppliers" width="50%" @close="closeEditSuppliers">
-            <el-form ref="form" :model="form" label-width="100px">
-                <el-form-item label="供应商">
-                    <el-select v-model="supplier_ids" multiple placeholder="请选择">
-                        <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
-                    </el-select>
-                </el-form-item>
-            </el-form>
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="editVisibleSuppliers = false">取 消</el-button>
-                <el-button type="primary" @click="saveEditSuppliers" :disabled="submitDisabled">确 定</el-button>
-            </span>
-        </el-dialog>
-
-        <!-- 添加制图计划弹出框 -->
-        <el-dialog title="添加制图计划" :visible.sync="designVisible" width="50%">
-            <el-form ref="designForm" :model="designForm" label-width="100px">
-                <el-form-item label="制图要求">
-                    <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 10}" placeholder="请输入制图要求" v-model="designForm.demand"></el-input>
-                </el-form-item>
-                <el-form-item label="预计完成时间" prop="plan_date">
-                    <el-date-picker v-model="designForm.plan_date" type="datetime" placeholder="选择日期" ></el-date-picker>
-                </el-form-item>
-                <el-form-item label="样品">
-                    <el-select v-model="designForm.sampleSelect" filterable multiple remote :loading="loading2" @visible-change="selectVisble2" :remote-method="remoteMethod2" placeholder="选择样品" class="handle-select mr10">
-                        <el-option v-for="item in sample_Options" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_sample" ref="infiniteLoading3"></infinite-loading>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="样品情况">
-                    <el-input v-model="designForm.sampleInfo"></el-input>
-                </el-form-item>
-                <el-form-item label="参考链接">
-                    <el-input v-model="designForm.referUrl" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                <el-form-item label="图片">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
-                </el-form-item>
-            </el-form>
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="designVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveDesign" :disabled="submitDisabled">确 定</el-button>
-            </span>
-        </el-dialog>
-
-        <!-- 添加采购计划弹出框 -->
-        <el-dialog title="采购计划" :visible.sync="purchaseVisible" width="90%">
-            <el-table :data="purchaseForm" border style="width: 100%" ref="multipleTable">
-                <el-table-column prop="sku" label="SKU">
+        <!-- 查看主体图片 -->
+        <el-dialog title="主体图片" :visible.sync="subjectPicturesVisible" width="20%">
+            <el-table :data="picturesSubjectsList" border style="width: 100%">
+                <el-table-column prop="sum" label="主体图片">
                     <template slot-scope="scope">
-                        <span>{{scope.row.sku}}</span>
+                        <img class="img_fnsku" v-if="scope.row.url.url != undefined && !(scope.row.url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.url.url"/>
+                        <a v-else :href="$axios.defaults.baseURL+scope.row.url.url" target="_blank">{{scope.row.url.url.split('/').pop()}}</a>
                     </template>
                 </el-table-column>
-                <el-table-column prop="name" label="产品名称">
+                <el-table-column label="操作" width="100">
                     <template slot-scope="scope">
-                        <span>{{scope.row.name}}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="sum" label="入库方式">
-                    <template slot-scope="scope">
-                        <el-select v-model="scope.row.dist_type">
-                            <el-option v-for="item in dist_type_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                        </el-select>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="sum" label="好评卡数">
-                    <template slot-scope="scope">
-                        <el-input-number v-model="scope.row.put_card_sum" :step="5" :min="0"></el-input-number>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="sku" label="是否需要发票">
-                    <template slot-scope="scope">
-                        <el-checkbox v-model="scope.row.is_need_invoice">是</el-checkbox>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="sum" label="数量">
-                    <template slot-scope="scope">
-                        <el-input-number v-model="scope.row.sum" :step="100" :min="0"></el-input-number>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="sum" label="中转地址">
-                    <template slot-scope="scope">
-                        <el-input v-model.trim="scope.row.address" placeholder="请输入中转地址" :disabled="!(scope.row.dist_type === 3)"></el-input>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="sum" label="备注">
-                    <template slot-scope="scope">
-                        <el-input v-model.trim="scope.row.remark" placeholder="请输入备注"></el-input>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="sum" label="好评卡图片" width="200">
-                    <template slot-scope="scope">
-                        <el-upload id="upload-pur" action="" :file-list="scope.row.pictures" :on-remove="(res, file)=>{return handleRemovePurchase(res, file, scope.$index)}" :auto-upload="false" :on-change="(res, file)=>{return changeFilePurchase(res, file, scope.$index)}" multiple>
-                            <el-button slot="trigger" size="small" type="primary">选取好评卡图片</el-button>
-                        </el-upload>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="sum" label="操作" width="190">
-                    <template slot-scope="scope">
-                        <el-button type="success" icon="el-icon-plus" @click="addPurchasePlan(scope.$index)">复制</el-button>
-                        <el-button type="danger" icon="el-icon-delete" @click="deletePurchasePlan(scope.$index)" :disabled="purchaseForm.length === 1">删除</el-button>
+                        <el-button type="danger" @click="handleDeleteSubjectPic(scope.$index, scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
-            <br>
-            <el-input v-model.trim="remark" placeholder="请输入备注"></el-input>
+        </span>
+        </el-dialog>
+        <!-- 删除主体图片提示 -->
+        <el-dialog title="删除产品图片" :visible.sync="confirmDelSubjectPicVis" width="35%">
+            <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="purchaseVisible = false">取 消</el-button>
-                <el-button type="primary" @click="savePurchase" :disabled="submitDisabled">确 定</el-button>
+            <el-button @click="confirmDelSubjectPicVis = false">取 消</el-button>
+            <el-button type="danger" @click="DeleteSubjectPicture">确 定</el-button>
+        </span>
+        </el-dialog>
+        <!-- 审核提示框 -->
+        <el-dialog title="审核" :visible.sync="checkVisible" width="50%">
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="checkVisible = false">取 消</el-button>
+                <el-button type="warning" @click="saveCheck(0)">拒 绝</el-button>
+                <el-button type="primary" @click="saveCheck(1)">通 过</el-button>
             </span>
         </el-dialog>
     </div>
 </template>
 
 <script>
-    import Print from 'print-js'
     import VueInfiniteLoading from "vue-infinite-loading"
     export default {
 //      name: 'product_manage',
@@ -696,7 +552,6 @@
                     name: '',
                     date: '',
                     address: '',
-                    subject_attrs: []
                 },
                 idx: -1,
                 productVisible: false,
@@ -761,78 +616,62 @@
                   }
                 }]
               },
-                date_filter: [],
-                supplier_options_edit: [],
-                supplier_page_edit: 1,
-                supplier_total_edit: 0,
-                categories_options: [],
-                products_change_details: [],
-                filter_sku: '',
-                query: undefined,
-                loading: false,
-                multipleSelection2: [],
-                confirmDelChangePro: false,
-                change_detailsVisible: false,
-                options_len1: [],
-                options_len2: [],
-                options_len3: [],
-                options_len4: [],
-                options3: [],
-                subject_id: '',
-                subject_name: '',
-                addPictureVisible: false,
-                supplier_id: [],
-                suppliers_temp: [],
-                editVisibleSuppliers: false,
-                supplier_ids: [],
-                picturesSubjectsList: [],
-                subjectPicturesVisible: false,
-                confirmDelSubjectPicVis: false,
-                // statusOptions: [{value: 2, label: '未上架'}, {value: 4, label: 'wish上架'}, {value: 5, label: 'ebay上架'}, {value: 6, label: 'W+E上架'}, {value: 7, label: 'amazon上架'}, {value: 8, label: 'W+A上架'}, {value: 9, label: 'E+A上架'}, {value: 10, label: 'W+E+A上架'}],
-                statusOptions: [{value: 1, label: '未审核'}, {value: 2, label: '正常'}],
-                statusSelect: '',
-                cur_page2: 1,
-                totals2: 0,
-                paginationShow2: true,
-                filter_name: '',
-                feature_options: [{value: 0, label: '无'}, {value: 1, label: '含电'}, {value: 2, label: '液体'}, {value: 3, label: '粉末'}],
-                search_options: [{value: 'supplierDis', label: '供应商'}, {value: 'dateDis', label: '日期'}, {value: 'classifyDis', label: '分类'}],
-                search_selects: [],
-                search_show: [{'supplierDis' : false}, {'dateDis' : false}, {'classifyDis' : false}],
-                search_show2: ['supplierDis', 'dateDis', 'classifyDis'],
-                designVisible: false,
-                designForm: {
-                    demand: '',
-                    sampleInfo: '',
-                    referUrl: '',
-                    sampleSelect: [],
-                    plan_date: '',
-                    product_subject_id: ''
-                },
-                loading2: false,
-                query2: false,
-                sample_Options: [],
-                sample_page: 1,
-                sample_total: 0,
-                table_loading: true,
-                subject_attrs: [],
+              date_filter: [],
+              supplier_options_edit: [],
+              supplier_page_edit: 1,
+              supplier_total_edit: 0,
+              categories_options: [],
+              selfdata: false,
+              products_change_details: [],
+              distributeVisible: false,
+              distributeUser: '',
+              loading: false,
+              distributeUserOptions: [],
+              distributeUserOptions2: [],
+              dis_user_page: 1,
+              dis_user_total: 0,
+              query: undefined,
+              filter_sku: '',
+              query2: undefined,
+              loading2: false,
+              multipleSelection2: [],
+              confirmDelChangePro: false,
+              change_detailsVisible: false,
+              options_len1: [],
+              options_len2: [],
+              options_len3: [],
+              options_len4: [],
+              options3: [],
+              subject_id: '',
+              subject_name: '',
+              addPictureVisible: false,
+              supplier_id: [],
+              suppliers_temp: [],
+              picturesSubjectsList: [],
+              subjectPicturesVisible: false,
+              confirmDelSubjectPicVis: false,
+              statusOptions: [{value: 2, label: '未上架'}, {value: 4, label: 'wish上架'}, {value: 5, label: 'ebay上架'}, {value: 6, label: 'W+E上架'}, {value: 7, label: 'amazon上架'}, {value: 8, label: 'W+A上架'}, {value: 9, label: 'E+A上架'}, {value: 10, label: 'W+E+A上架'}],
+              statusSelect: '',
+              loading3: false,
+              query3: undefined,
+              user_options3: [],
+              dis_user_total2: 0,
+              dis_user_page2: 1,
+              operate_user_id: '',
+              cur_page2: 1,
+              totals2: 0,
+              paginationShow2: true,
+              filter_name: '',
+              feature_options: [{value: 0, label: '无'}, {value: 1, label: '含电'}, {value: 2, label: '液体'}, {value: 3, label: '粉末'}],
+              search_options: [{value: 'supplierDis', label: '供应商'}, {value: 'dateDis', label: '日期'}, {value: 'classifyDis', label: '分类'}, {value: 'userDis', label: '开发人员'}],
+              search_selects: [],
+              search_show: [{'supplierDis' : false}, {'dateDis' : false}, {'classifyDis' : false}, {'userDis' : false}],
+              search_show2: ['supplierDis', 'dateDis', 'classifyDis', 'userDis'],
+              table_loading: true,
+              subject_attrs: [],
                 subject: [],
                 subject_temp: [],
-                img_index: 0,
-                purchaseVisible: false,
-                // purchaseForm: {
-                //     product_id: '',
-                //     dist_type: '',
-                //     put_card_sum: 0,
-                //     is_need_invoice: '',
-                //     sum: 0,
-                //     address: '',
-                //     remark: ''
-                // },
-                purchaseForm: [],
-                purchaseData: [],
-                multiplePurchaseSelection: [],
-                dist_type_options: [{value: 1, label: '入国内仓'}, {value: 2, label: '不入仓'}, {value: 3, label: '中转'}],
+                checkVisible: false
             }
         },
         created() {
@@ -847,7 +686,7 @@
             statusFilter(status) {
                 const statusMap = {
                     1: 'danger',
-                    2: 'success',
+                    2: 'warning',
                     3: 'success',
                     4: 'success',
                     5: 'primary',
@@ -869,13 +708,6 @@
             }
         },
         methods: {
-            printImport() {
-                Print({
-                    printable: 'importStock',
-                    type: 'html',
-                    targetStyle: ['text-align'],
-                })
-            },
         	handleSizeChange(val) {
         		this.pagesize = val;
                 this.getData()
@@ -906,12 +738,15 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                // this.$axios.get( '/products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku, {
-                this.$axios.get( '/products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&page_size=' + this.pagesize + '&status=' + this.statusSelect + '&name=' + this.filter_name
+                this.$axios.get( '/wish_products/check_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&operate_user_id=' + this.operate_user_id + '&page_size=' + this.pagesize + '&status=' + this.statusSelect + '&name=' + this.filter_name
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.img_count = data.pictures.length + data.subject_pictures.length
+                            data.username = data.product.username
+                            data.name = data.product.name
+                            data.img_count = data.product.pictures.length + data.product.subject_pictures.length
+                            data.pictures = data.product.pictures
+                            data.subject_pictures = data.product.subject_pictures
                             data.pictures.some((data2, index) => {
                                 if (data2.is_main == true) {
                                     let main = data2
@@ -931,22 +766,13 @@
                             // data.size = data.length + '*' + data.width + '*' + data.height
                             // data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                             // data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
-                            // if(data.wish && data.ebay){
-                            //     data.platform = 'wish+ebay'
-                            // }else if(data.wish){
-                            //     data.platform = 'wish'
-                            // }else if(data.ebay){
-                            //     data.platform = 'ebay'
-                            // }else{
-                            //     data.platform = ''
-                            // }
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
                     }
                 }).catch((res) => {
-                	console.log(res)
+                	console.log('error')
                 }).finally(() => {
                     this.table_loading = false
                 })
@@ -965,11 +791,15 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&page_size=' + this.pagesize + '&status=' + this.statusSelect + '&name=' + this.filter_name
+                this.$axios.get( '/wish_products/check_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku + '&operate_user_id=' + this.operate_user_id + '&page_size=' + this.pagesize + '&status=' + this.statusSelect + '&name=' + this.filter_name
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.img_count = data.pictures.length + data.subject_pictures.length
+                            data.username = data.product.username
+                            data.name = data.product.name
+                            data.img_count = data.product.pictures.length + data.product.subject_pictures.length
+                            data.pictures = data.product.pictures
+                            data.subject_pictures = data.product.subject_pictures
                             data.pictures.some((data2, index) => {
                                 if (data2.is_main == true) {
                                     let main = data2
@@ -989,22 +819,13 @@
                             // data.size = data.length + '*' + data.width + '*' + data.height
                             // data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                             // data.box_size = data.box_length + '*' + data.box_width + '*' + data.box_height
-                            // if(data.wish && data.ebay){
-                            //     data.platform = 'wish+ebay'
-                            // }else if(data.wish){
-                            //     data.platform = 'wish'
-                            // }else if(data.ebay){
-                            //     data.platform = 'ebay'
-                            // }else{
-                            //     data.platform = ''
-                            // }
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
                         this.paginationShow = true
                     }
                 }).catch((res) => {
-                    console.log(res)
+                    console.log('error')
                 }).finally(() => {
                     this.table_loading = false
                 })
@@ -1016,6 +837,7 @@
                 this.category_id_filter = []
                 this.supplier_id_filter = ''
                 this.date_filter = []
+                this.operate_user_id = ''
                 this.filter_sku = ''
                 this.statusSelect = ''
                 this.filter_name = ''
@@ -1025,7 +847,6 @@
                 this.$axios.get('/suppliers?page=' + this.supplier_page
                 ).then((res) => {
                     if(res.data.code==200) {
-
                         this.supplier_options = this.supplier_options.concat(res.data.data)
                         this.supplier_total = res.data.count
                     }
@@ -1050,9 +871,9 @@
                 this.$axios.get( '/categories?page='+this.category_page
                 ).then((res) => {
                     if(res.data.code == 200) {
-                        // this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
                         this.options3 = res.data.data
                         this.getCatetoryLoop(1)
+                        // this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
                         // for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
                         //     this.getCatetoryLoop(i+1)
                         // }
@@ -1108,6 +929,22 @@
                 return row.tag === value;
             },
             handleEdit(index, row) {
+                // this.supplier_id = []
+                // this.$axios.get('/products/' + row.id, {
+                //     headers: {
+                //             'Authorization': localStorage.getItem('token')
+                //         },
+                // }).then((res) => {
+                //     if(res.data.code == 200) {
+                //         this.suppliers_temp = res.data.data.suppliers
+                //         res.data.data.suppliers.forEach((data2) => {
+                //             this.supplier_id.push(data2.id)
+                //             if(!this.supplier_options_edit.find((option) => option.id == data2.id)) {
+                //                 this.supplier_options_edit.push({id: data2.id, name: data2.name})
+                //             }
+                //         })
+                //     }
+                // })
                 this.subject = []
                 this.$axios.get('/products/' + row.id
                 ).then((res) => {
@@ -1182,18 +1019,6 @@
                 this.multipleSelection = [];
             },
             handleSelectionChange(val) {
-                // val.some((data) => {
-                //     if (this.purchaseData.length === 0) {
-                //         this.purchaseData.unshift(data)
-                //     }
-                //     this.purchaseData.some((data2, index) => {
-                //         if(data.id === data2.id) {
-                //             return true
-                //         } else {
-                //             this.purchaseData.unshift(data)
-                //         }
-                //     })
-                // })
                 this.multipleSelection = val;
             },
             // 保存编辑
@@ -1219,6 +1044,8 @@
                 let formData = new FormData()
                 formData.append('product[name]', this.subject)
                 formData.append('product[title]', this.form.title)
+                // formData.append('product[category_id]', this.category_id[this.category_id.length - 1])
+                // formData.append('product[supplier_id]', this.form.supplier_id)
                 formData.append('product[desc]', this.form.desc)
                 formData.append('product[desc_url]', this.form.desc_url)
                 formData.append('product[package_length]', this.form.package_length)
@@ -1247,10 +1074,16 @@
                 // this.supplier_id.forEach((data) => {
                 //     formData.append('product[supplier_id][]', data)
                 // })
+                // this.fileList2.forEach((item) => {
+                //     formData.append('package_pictures[]', item.raw)
+                // })
                 this.$axios.patch('/products/' + this.form.id, formData).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
-                        this.fileList = []
+                        // this.fileList = []
+                        // this.fileList2 = []
+                        // this.options = []
+                        this.category_id = []
                         this.getData()
                         this.editVisible = false
                     }
@@ -1261,16 +1094,24 @@
                     this.subject = this.subject.concat(this.subject_temp)
                     this.submitDisabled = false
                 })
+                // this.$axios.patch('/admin/users/' + this.form.id, params, {
+                //     headers: {
+                //         'Authorization': localStorage.getItem('token_admin')
+                //     },
+                // }).then((res) => {
+                //     if(res.data.code == 200) {
+                //         this.$message.success('更新成功')
+                //         this.editVisible = false
+                //         this.getData()
+                //         this.remark = ''
+                //     }
+                // }).catch((res) => {
+                //     console.log('error')
+                // })
             },
             closeEdit() {
                 this.category_id = []
                 this.fileList = []
-                // this.supplier_options_edit = []
-                // this.supplier_page_edit = 1
-                // this.$refs.infiniteLoading3.stateChanger.reset()
-                // if(this.$refs.infiniteLoading3.isComplete) {
-                //     this.$refs.infiniteLoading3.stateChanger.reset()
-                // }
                 this.editVisible = false
             },
             changeFile(file) {
@@ -1296,16 +1137,16 @@
             		id: item.id
             	}
             	this.$axios.delete('/products/'+this.form.id
-                ).then((res) => {
-                	if(res.data.code == 200){
-                		this.tableData.splice(this.idx, 1)
-                		this.getData()
-                		this.$message.success("删除成功")
-                        this.delVisible = false;
-                	}
-                }).catch((res) => {
-                	this.$message.error("删除失败")
-                })
+            ).then((res) => {
+            	if(res.data.code == 200){
+            		this.tableData.splice(this.idx, 1)
+            		this.getData()
+            		this.$message.success("删除成功")           		
+            	}
+            }).catch((res) => {
+            	this.$message.error("删除失败")
+            })
+                this.delVisible = false;
             },
             showPictures(index, row) {
                 this.picturesProductList = []
@@ -1313,9 +1154,6 @@
                 this.product_id = row.id
                 const item = this.tableData[index]
                 item.pictures.forEach((data) => {
-                    // if (data.is_main == true) {
-                    //     this.picturesProductList.unshift(data)
-                    // }
                     this.picturesProductList.push(data)
                 })
                 item.subject_pictures.forEach((data) => {
@@ -1331,6 +1169,10 @@
                     this.picturesSubjectsList.push(data)
                 })
                 this.subjectPicturesVisible = true;
+            },
+            closeProduct() {
+                this.productVisible = false
+                this.picturesProductList = []
             },
             deleteProductImg() {
                 let params = {
@@ -1371,6 +1213,11 @@
             },
             handleDeleteSubjectPic(id, index) {
                 this.picture_id = id
+                this.idx = index;
+                this.confirmDelSubjectPicVis = true;
+            },
+            handleDeleteSubjectPic(index, row) {
+                this.picture_id = row.id
                 this.idx = index;
                 this.confirmDelSubjectPicVis = true;
             },
@@ -1424,6 +1271,7 @@
                 this.exportVisible = true
             },
             exportProductDone() {
+                console.log(this.platform)
                 if(this.platform == undefined) {
                     this.$message.error('请选择平台')
                     return
@@ -1450,7 +1298,7 @@
             },
             handleDetails(index, row) {
                 this.product_id = row.id
-                this.$axios.get('/products/' + this.product_id
+                this.$axios.get('/products/' + row.id
                 ).then((res) => {
                     if(res.data.code == 200) {
                         this.products_details = [res.data.data]
@@ -1499,14 +1347,80 @@
 
                 })
             },
-            onInfinite_user(obj) {
-                if((this.user_page * 20) < this.user_total) {
-                    this.user_page += 1
-                    // this.getUsers(obj.loaded)
-                    this.remoteMethod(this.query,obj.loaded)
+            
+            confirmDistribute() {
+                if(this.multipleSelection.length == 0) {
+                    this.$message.error('请选择至少一个产品')
+                    return
+                }
+                this.distributeUser = ''
+                this.distributeVisible = true
+            },
+            distributenProduct() {
+                if(this.distributeUser == '') {
+                    this.$message.error('请选择分配人员')
+                    return
+                }
+                let id = []
+                this.multipleSelection.forEach((data) => {
+                    id.push(data.id)
+                })
+                let params = {
+                    id: id,
+                    user_id: this.distributeUser,
+                    platform: 'Wish'
+                }
+                this.$axios.post('/products/allocate_product', params
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('分配成功!')
+                        this.distributeVisible = false
+                        this.distributeUser = ''
+                        this.getData()
+                    }
+                }).catch((res) => {
+
+                })
+            },
+            remoteMethod(query, callback = undefined) {
+                if(query != "" || this.query != "" || callback) {
+                    let reload = false
+                    if(this.query != query) {
+                        this.loading = true
+                        this.dis_user_page = 1
+                        this.query = query
+                        reload = true
+                        if(this.$refs.infiniteLoading4.isComplete) {
+                            this.$refs.infiniteLoading4.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/users/?page=" + this.dis_user_page + '&name=' + query.trim()
+                    ).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                this.distributeUserOptions = this.distributeUserOptions2.concat(res.data.data)
+                            } else {
+                                this.distributeUserOptions = this.distributeUserOptions.concat(res.data.data)
+                            }
+                            this.dis_user_total = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
+            },
+            onInfinite_dis_user(obj) {
+                if((this.dis_user_page * 20) < this.dis_user_total) {
+                    this.dis_user_page += 1
+                    this.remoteMethod(this.query, obj.loaded)
+                    //                  this.getUser(obj.loaded)
                 } else {
                     obj.complete()
-                    console.log(obj.complete())
                 }
             },
             selectVisble(visible) {
@@ -1515,13 +1429,28 @@
                     this.remoteMethod("")
                 }
             },
-            remoteMethod(query, callback = undefined) {
-                if(query != "" || this.query != "" || callback) {
+            onInfinite_user(obj) {
+                if((this.user_page * 20) < this.user_total) {
+                    this.user_page += 1
+                    // this.getUsers(obj.loaded)
+                    this.remoteMethod2(this.query2,obj.loaded)
+                } else {
+                    obj.complete()
+                }
+            },
+            selectVisble2(visible) {
+                if(visible) {
+                    this.query2 = undefined
+                    this.remoteMethod2("")
+                }
+            },
+            remoteMethod2(query, callback = undefined) {
+                if(query != "" || this.query2 != "" || callback) {
                     let reload = false
-                    if(this.query != query) {
-                        this.loading = true
+                    if(this.query2 != query) {
+                        this.loading2 = true
                         this.user_page = 1
-                        this.query = query
+                        this.query2 = query
                         reload = true
                         if(this.$refs.infiniteLoading.isComplete) {
                             this.$refs.infiniteLoading.stateChanger.reset()
@@ -1530,7 +1459,7 @@
                     this.$axios.get("/users/?page=" + this.user_page + '&name=' + query.trim()
                     ).then((res) => {
                         if(res.data.code == 200) {
-                            this.loading = false
+                            this.loading2 = false
                             //                          this.options = res.data.data
                             if(reload) {
                                 this.user_options = this.user_options2.concat(res.data.data)
@@ -1572,7 +1501,6 @@
                         this.$message.success('删除成功')
                         this.confirmDelChangePro = false
                         this.detailVisible = false
-                        this.multipleSelection2 = []
                         this.getData()
                     }
                 }).catch((res) => {
@@ -1650,16 +1578,6 @@
                     this.$message.error('请添加图片')
                     return
                 }
-                let temp = 0
-                this.fileList.forEach((item) => {
-                    if(!(item.raw.type.match(/image/))){
-                        temp = 1
-                    }
-                })
-                if(temp) {
-                    this.$message.error('请上传正确的图片格式!')
-                    return
-                }
                 let formData = new FormData()
                 this.fileList.forEach((item) => {
                     formData.append('pictures[]', item.raw)
@@ -1685,64 +1603,54 @@
                     this.getSuppliers()
                 }
             },
-            closeEditSuppliers() {
-                this.supplier_options_edit = []
-                this.supplier_page_edit = 1
-                this.$refs.infiniteLoading3.stateChanger.reset()
-                this.editVisibleSuppliers = false
-            },
-            handleEditSuppliers(index, row) {
-                this.getSuppliersEdit()
-                this.supplier_ids = []
-                this.$axios.get('/products/' + row.id
-                ).then((res) => {
-                    if(res.data.code == 200) {
-                        this.suppliers_temp = res.data.data.suppliers
-                        res.data.data.suppliers.forEach((data2) => {
-                            this.supplier_ids.push(data2.id)
-                            if(!this.supplier_options_edit.find((option) => option.id == data2.id)) {
-                                this.supplier_options_edit.unshift({id: data2.id, name: data2.name})
+            remoteMethod3(query, callback = undefined) {
+                if(query != "" || this.query3 != "" || callback) {
+                    let reload = false
+                    if(this.query3 != query) {
+                        this.loading3 = true
+                        this.dis_user_page2 = 1
+                        this.query3 = query
+                        reload = true
+                        if(this.$refs.infiniteLoading6.isComplete) {
+                            this.$refs.infiniteLoading6.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/users/?page=" + this.dis_user_page2 + '&name=' + query.trim()
+                    ).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loading3 = false
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                let tempOptions = []
+                                // this.distributeUserOptions = res.data.data
+                                this.user_options3 = tempOptions.concat(res.data.data)
+                            } else {
+                                this.user_options3 = this.user_options3.concat(res.data.data)
                             }
-                        })
-                    }
-                })
-
-                // this.getSuppliersEdit()
-                // this.supplier_ids = []
-                // this.$axios.get('/product_subjects/' + row.id + '/get_suppliers', {
-                //     headers: {
-                //             'Authorization': localStorage.getItem('token')
-                //         },
-                // }).then((res) => {
-                //     if(res.data.code == 200) {
-                //         this.suppliers_temp = res.data.data
-                //         res.data.data.forEach((data2) => {
-                //             this.supplier_ids.push(data2.id)
-                //             if(!this.supplier_options_edit.find((option) => option.id == data2.id)) {
-                //                 this.supplier_options_edit.unshift({id: data2.id, name: data2.name})
-                //             }
-                //         })
-                //     }
-                // })
-                this.subject_id = row.id
-                this.editVisibleSuppliers = true
+                            this.dis_user_total2 = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
             },
-            saveEditSuppliers() {
-                let formData = new FormData()
-                this.supplier_ids.forEach((data) => {
-                    formData.append('supplier_id[]', data)
-                })
-                this.$axios.post('/products/' + this.subject_id + '/update_supplier', formData
-                ).then((res) => {
-                    if(res.data.code==200) {
-                        this.$message.success('更新成功')
-                        this.editVisibleSuppliers = false
-                    }
-                }).catch((res) => {
-
-                })
+            onInfinite_dis_user2(obj) {
+                if((this.dis_user_page2 * 20) < this.dis_user_total2) {
+                    this.dis_user_page2 += 1
+                    this.remoteMethod3(this.query3, obj.loaded)
+                    //                  this.getUser(obj.loaded)
+                } else {
+                    obj.complete()
+                }
             },
-            imageLoaded() {
+            selectVisble3(visible) {
+                if(visible) {
+                    this.query3 = undefined
+                    this.remoteMethod3("")
+                }
             },
             showSearch() {
                 this.search_selects.forEach((data) => {
@@ -1759,102 +1667,6 @@
                     }
                 })
             },
-            handleAddDesign(index, row) {
-                this.designForm.product_subject_id = row.product_subject_id
-                this.designForm.demand = ''
-                this.designForm.sampleInfo = ''
-                this.designForm.sampleSelect = []
-                this.designForm.referUrl = ''
-                this.designForm.remark = ''
-                this.fileList2 = []
-                this.designVisible = true
-            },
-            saveDesign() {
-                let temp = 0
-                this.fileList2.forEach((item) => {
-                    if(!(item.raw.type.match(/image/))){
-                        temp = 1
-                    }
-                })
-                if(temp) {
-                    this.$message.error('请上传正确的图片格式!')
-                    return
-                }
-                this.submitDisabled = true
-                let params = {
-                    remark: this.form.remark,
-                }
-                let formData = new FormData()
-                formData.append('product_subject_id', this.designForm.product_subject_id)
-                formData.append('remark', this.designForm.demand)
-                formData.append('sample_remark', this.designForm.sampleInfo)
-                formData.append('ref_url', this.designForm.referUrl)
-                this.designForm.sampleSelect.forEach((data) => {
-                    formData.append('sample_ids[]', data)
-                })
-                formData.append('plan_date', this.designForm.plan_date)
-                this.fileList2.forEach((item) => {
-                    formData.append('pictures[]', item.raw)
-                })
-                this.$axios.post('/picture_tasks', formData).then((res) => {
-                    if(res.data.code == 200) {
-                        this.$message.success('添加成功！')
-                        this.getData()
-                        this.designVisible = false
-                    }
-                }).catch((res) => {
-                    console.log(res)
-                }).finally((res) => {
-                    this.submitDisabled = false
-                })
-            },
-            onInfinite_sample(obj) {
-                if((this.sample_page * 20) < this.sample_total) {
-                    this.sample_page += 1
-                    // this.getUsers(obj.loaded)
-                    this.remoteMethod2(this.query2,obj.loaded)
-                } else {
-                    obj.complete()
-                }
-            },
-            selectVisble2(visible) {
-                if(visible) {
-                    this.query2 = undefined
-                    this.remoteMethod2("")
-                }
-            },
-            remoteMethod2(query, callback = undefined) {
-                if(query != "" || this.query2 != "" || callback) {
-                    let reload = false
-                    if(this.query2 != query) {
-                        this.loading2 = true
-                        this.sample_page = 1
-                        this.query2 = query
-                        reload = true
-                        if(this.$refs.infiniteLoading3.isComplete) {
-                            this.$refs.infiniteLoading3.stateChanger.reset()
-                        }
-                    }
-                    this.$axios.get("/samples/?page=" + this.sample_page + '&name=' + query.trim()
-                    ).then((res) => {
-                        if(res.data.code == 200) {
-                            this.loading2 = false
-                            let temp_options = []
-                            if(reload) {
-                                this.sample_Options = temp_options.concat(res.data.data)
-                            } else {
-                                this.sample_Options = this.sample_Options.concat(res.data.data)
-                            }
-                            this.sample_total = res.data.count
-                            if(callback) {
-                                callback()
-                            }
-                        }
-                    }).catch((res) => {
-                        console.log('失败')
-                    })
-                }
-            },
             subject_Add(index) {
                 this.subject_attrs.push('')
             },
@@ -1865,116 +1677,28 @@
                 }
                 this.subject_attrs.splice(index, 1)
             },
-            setMainPicture(id) {
-                this.$confirm('将下图设置为主图, 是否继续?', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'info'
-                }).then(() => {
-                    let params = {
-                        img_id: id
-                    }
-                    this.$axios.post('/products/' + this.product_id + '/set_main_picture', params
-                    ).then((res) => {
-                        if(res.data.code == 200) {
-                            this.getData()
-                            this.$message.success("设置成功")
-                        }
-                    }).catch(() => {
-                        
-                    })
-                }).catch(() => {
-                    // this.$message.info('已取消设置')
-                })
-            },
-            // closeImg() {
-            //     this.setActiveItem()
-            // },
-            handlePurQueChange(val) {
-                this.multiplePurchaseSelection = val
-            },
-            addPurchaseQueue() {
-                // this.purchaseForm = []
-                if(this.multipleSelection.length == 0){
-                    this.$message.error('请至少选择一个产品')
-                    return
+            handleCheck() {
+                if (this.multipleSelection.length === 0) {
+                    this.$message.info('请至少选择一条数据！')
+                    return 
                 }
-                this.multipleSelection.some((data) => {
-                    if (this.purchaseData.length === 0) {
-                        this.purchaseData.unshift(data)
-                    }
-                    if (!(this.purchaseData.find(data2 => data2.id === data.id))) {
-                        this.purchaseData.unshift(data)
-                    }
-                    // let tempIndex = this.purchaseData.findIndex(data2 => (data2.id === data.id))
-                    // if (tempIndex === -1) {
-                    //     this.purchaseData.unshift(data)
-                    // }
-                })
+                this.checkVisible = true
             },
-            addPurchase() {
-                this.remark = ''
-                this.purchaseForm = []
-                if(this.multiplePurchaseSelection.length == 0){
-                    this.$message.error('请选择队列里面的数据')
-                    return
+            saveCheck(pass) {
+                this.submitDisabled = true
+                let ids = []
+                this.multipleSelection.forEach((data) => {
+                    ids.push(data.id)
+                })
+                let params = {
+                    pass: pass,
+                    ids: ids
                 }
-                this.multiplePurchaseSelection.forEach((data) => {
-                    this.purchaseForm.push({sku: data.sku, name: data.name, product_id: data.id, dist_type: '', put_card_sum: '', is_need_invoice: '', sum: 0, address: '', remark: '' , pictures: []})
-                })
-                this.purchaseVisible = true
-            },
-            clearQueue() {
-                this.purchaseData = []
-                this.$refs.multiplePurchaseTable.clearSelection()
-            },
-            handleRemovePurchase(res, file, index) {
-                this.purchaseForm[index].pictures = file
-            },
-            changeFilePurchase(res, file, index) {
-                this.purchaseForm[index].pictures.push(res)
-            },
-            savePurchase() {
-                // let temp = 0
-                // this.fileList.forEach((item) => {
-                //     if(!(item.raw.type.match(/image/))){
-                //         temp = 1
-                //     }
-                // })
-                // if(temp) {
-                //     this.$message.error('请上传正确的图片格式!')
-                //     return
-                // }
-                // this.subject = this.subject.concat(this.subject_attrs).join('-')
-                // this.submitDisabled = true
-                // let params = {
-                //     remark: this.form.remark,
-                // }
-                let formData = new FormData()
-                this.purchaseForm.forEach((data) => {
-                    formData.append('purchase_plan[][product_id]', data.product_id)
-                    formData.append('purchase_plan[][dist_type]', data.dist_type)
-                    formData.append('purchase_plan[][remark]', data.remark)
-                    formData.append('purchase_plan[][put_card_sum]', data.put_card_sum)
-                    if (data.is_need_invoice === true) {
-                        formData.append('purchase_plan[][is_need_invoice]', 1)
-                    }else {
-                        formData.append('purchase_plan[][is_need_invoice]', 0)
-                    }
-                    formData.append('purchase_plan[][sum]', data.sum)
-                    formData.append('purchase_plan[][address]', data.address)
-                    data.pictures.forEach((data2) => {
-                        formData.append('purchase_plan[][pictures][]', data2.raw)
-                    })
-                })
-                formData.append('remark', this.remark)
-                this.$axios.post('/purchase_plans', formData).then((res) => {
+                this.$axios.post('/wish_products/check', params).then((res) => {
                     if(res.data.code == 200) {
-                        this.$message.success('成功添加计划，待审核！')
+                        this.$message.success('审核')
                         this.getData()
-                        this.purchaseData = []
-                        this.$refs.multiplePurchaseTable.clearSelection()
-                        this.purchaseVisible = false
+                        this.checkVisible = false
                     }
                 }).catch((res) => {
                     console.log(res)
@@ -1982,23 +1706,28 @@
                     this.submitDisabled = false
                 })
             },
-            addPurchasePlan(index) {
-                let tempArr = JSON.parse(JSON.stringify(this.purchaseForm[index]))
-                tempArr.pictures = []
-                this.purchaseForm[index].pictures.forEach((data) => {
-                    tempArr.pictures.push(data)
-                })
-                this.purchaseForm.splice(index+1, 0, tempArr)
-            },
-            deletePurchasePlan(index) {
-                this.purchaseForm.splice(index, 1)
-            },
             getStatusName(status) {
                 if(status == 1) {
                     return "未审核"
                 } else if(status == 2) {
-                    return "正常"
-                }else {
+                    return "未上架"
+                } else if(status == 3) {
+                    return "删除"
+                }else if(status == 4) {
+                    return "wish上架"
+                }else if(status == 5) {
+                    return "ebay上架"
+                }else if(status == 6) {
+                    return "W+E上架"
+                }else if(status == 7) {
+                    return "amazon上架"
+                }else if(status == 8) {
+                    return "W+A上架"
+                }else if(status == 9) {
+                    return "E+A上架"
+                }else if(status == 10) {
+                    return "W+E+A上架"
+                } else {
                     return '其他'
                 }
             },
@@ -2023,7 +1752,7 @@
 
 </script>
 
-<style>
+<style scoped>
     .handle-box {
         margin-bottom: 20px;
     }
@@ -2051,6 +1780,7 @@
         width:40rem;
         height:40rem;
     }
+
     .img {
         width:3rem;
         height:3rem;
@@ -2076,20 +1806,6 @@
         align-items: center;
     }
     .img_carousel {
-        max-width: 35rem;
-    }
-
-    #upload-pur .el-upload--text{
-        background-color: #fff;
-        border: 0px;
-        border-radius: 6px;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-        width: 120px;
-        height: 32px;
-        text-align: center;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
+        max-width: 40rem;
     }
 </style>

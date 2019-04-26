@@ -9,7 +9,7 @@
         <div class="container">
             <div class="handle-box">
                 <el-button type="primary" @click="handleApply">申请查看详情</el-button>
-                <el-button type="primary" @click="confirmDistribute">分配</el-button>
+                <!-- <el-button type="primary" @click="confirmDistribute">分配</el-button> -->
                 <el-button type="default" @click="exportProduct">导出</el-button>
                 <div style="float: right;">
                     <template v-if="search_show[2].classifyDis">
@@ -51,10 +51,10 @@
                     </template>
                     SKU:
                     <el-input style="width:150px" v-model="filter_sku" placeholder="请输入SKU"></el-input>
-                    状态:
+                    <!-- 状态:
                     <el-select v-model="statusSelect" placeholder="请选择" class="handle-select mr10">
                         <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                    </el-select>
+                    </el-select> -->
                 </div>
             </div>
             
@@ -74,7 +74,7 @@
                         <span v-else>无</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="ebay_operate_username" label="分配" width="80" show-overflow-tooltip>
+                <el-table-column prop="operate_username" label="分配" width="80" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="username" label="开发人员" width="80" show-overflow-tooltip>
                 </el-table-column>
@@ -676,7 +676,7 @@
               picturesSubjectsList: [],
               subjectPicturesVisible: false,
               confirmDelSubjectPicVis: false,
-              statusOptions: [{value: 2, label: '未上架'}, {value: 4, label: 'wish上架'}, {value: 5, label: 'ebay上架'}, {value: 6, label: 'W+E上架'}, {value: 7, label: 'amazon上架'}, {value: 8, label: 'W+A上架'}, {value: 9, label: 'E+A上架'}, {value: 10, label: 'W+E+A上架'}],
+              statusOptions: [{value: 2, label: '已审核'}, {value: 3, label: '已上架'}, {value: 4, label: '已拒绝'}],
               statusSelect: '',
               loading3: false,
               query3: undefined,
@@ -763,11 +763,15 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/products/ebay_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku  + '&operate_user_id=' + this.operate_user_id + '&page_size=' + this.pagesize + '&status=' + this.statusSelect + '&name=' + this.filter_name
+                this.$axios.get( '/ebay_products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku  + '&operate_user_id=' + this.operate_user_id + '&page_size=' + this.pagesize + '&status=' + this.statusSelect + '&name=' + this.filter_name
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.img_count = data.pictures.length + data.subject_pictures.length
+                            data.username = data.product.username
+                            data.name = data.product.name
+                            data.img_count = data.product.pictures.length + data.product.subject_pictures.length
+                            data.pictures = data.product.pictures
+                            data.subject_pictures = data.product.subject_pictures
                             data.pictures.some((data2, index) => {
                                 if (data2.is_main == true) {
                                     let main = data2
@@ -812,11 +816,15 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/products/ebay_index?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku  + '&operate_user_id=' + this.operate_user_id + '&page_size=' + this.pagesize + '&status=' + this.statusSelect + '&name=' + this.filter_name
+                this.$axios.get( '/ebay_products?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&sku=' + this.filter_sku  + '&operate_user_id=' + this.operate_user_id + '&page_size=' + this.pagesize + '&status=' + this.statusSelect + '&name=' + this.filter_name
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.img_count = data.pictures.length + data.subject_pictures.length
+                            data.username = data.product.username
+                            data.name = data.product.name
+                            data.img_count = data.product.pictures.length + data.product.subject_pictures.length
+                            data.pictures = data.product.pictures
+                            data.subject_pictures = data.product.subject_pictures
                             data.pictures.some((data2, index) => {
                                 if (data2.is_main == true) {
                                     let main = data2
@@ -1696,24 +1704,12 @@
                 if(status == 1) {
                     return "未审核"
                 } else if(status == 2) {
-                    return "未上架"
+                    return "已审核"
                 } else if(status == 3) {
-                    return "删除"
+                    return "已上架"
                 }else if(status == 4) {
-                    return "wish上架"
-                }else if(status == 5) {
-                    return "ebay上架"
-                }else if(status == 6) {
-                    return "W+E上架"
-                }else if(status == 7) {
-                    return "amazon上架"
-                }else if(status == 8) {
-                    return "W+A上架"
-                }else if(status == 9) {
-                    return "E+A上架"
-                }else if(status == 10) {
-                    return "W+E+A上架"
-                } else {
+                    return "已拒绝"
+                }else {
                     return '其他'
                 }
             },

@@ -153,12 +153,10 @@
 									<infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading"></infinite-loading>
 								</el-select>
 							</el-form-item> -->
-							<el-form-item label="平台">
-								<!-- <el-checkbox-group v-model="form.platform"> -->
+							<!-- <el-form-item label="平台">
 								<el-checkbox label="wish" v-model="subject_form.isWish" border></el-checkbox>
 								<el-checkbox label="eBay" v-model="subject_form.iseBay" border></el-checkbox>
-								<!-- </el-checkbox-group> -->
-							</el-form-item>
+							</el-form-item> -->
 							<!-- <span>{{attrs}}</span> -->
 							<el-form-item label="属性">
 								<table class="table text-center">
@@ -170,7 +168,7 @@
 										<div v-if="index == 0">
 											<i class="el-icon-circle-plus" @click="subject_orderAdd(index)" :disabled="false"></i>
 											<span>&nbsp</span>
-											<i class="el-icon-remove" @click="subject_orderDel(index)"></i>
+											<i class="el-icon-remove" v-if="subject_attrs.length > 1" @click="subject_orderDel(index)"></i>
 										</div>
 									</tbody>
 								</table>
@@ -635,8 +633,8 @@
 						formData.append('product[origin_url]', this.form.origin_url)
 						formData.append('product[picture_url]', this.form.picture_url)
 						formData.append('product[remark]', this.form.remark)
-						formData.append('product[wish]', this.isWish)
-						formData.append('product[ebay]', this.iseBay)
+						// formData.append('product[wish]', this.isWish)
+						// formData.append('product[ebay]', this.iseBay)
 						this.fileList.forEach((item) => {
 							formData.append('product[pictures][]', item.raw)
 						})

@@ -324,6 +324,31 @@
                 <el-table-column prop="supplier_term.term_remark" label="备注">
                 </el-table-column>
             </el-table>
+            <br>
+            <el-form label-width="100px" :label-position="labelPosition">
+                <el-form-item label="币种">
+                    <el-input v-model="remark" placeholder="请输入币种" style="width:14%;"></el-input>
+                </el-form-item>
+                <el-form-item label="付款金额">
+                    <el-input-number v-model="remark" :min="0" :step="1000"></el-input-number>
+                </el-form-item>
+                <el-form-item label="申请支付日期">
+                    <el-date-picker v-model.trim="remark" placeholder="选择日期" type="date"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="收款账号银行">
+                    <el-input v-model="remark" placeholder="收款账号银行" style="width:14%;"></el-input>
+                </el-form-item>
+                <el-form-item label="收款账号姓名">
+                    <el-input v-model="remark" placeholder="收款账号姓名" style="width:14%;"></el-input>
+                </el-form-item>
+                <el-form-item label="收款账号">
+                    <el-input v-model="remark" placeholder="收款账号" style="width:50%;"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="detailVisible = false">取 消</el-button>
+                <el-button type="primary" @click="submitApplyPurchase">创建付款申请单</el-button>
+            </span>
         </el-dialog>
         <!-- 查看产品图片 -->
         <el-dialog title="图片" :visible.sync="productVisible" width="70%">
@@ -584,7 +609,11 @@
               clearing_form_options: [{value: 1, label: '先定金后尾款'}, {value: 2, label: '全款'}, {value: 3, label: '月结'}, {value: 4, label: '日结'}],
               supplier_account_detail: [],
               supplier_term_detail: [],
-              account_id: ''
+              account_id: '',
+              labelPosition: 'left',
+              ApplyPurchase: {
+                
+              }
             }
         },
         created() {
@@ -1419,6 +1448,9 @@
             },
             changePurchaseOrder(res, file, index) {
                 this.purchaseOrders[index].pictures.push(res)
+            },
+            submitApplyPurchase() {
+
             },
             getStatusName(status, done_direct) {
                 if(status == 1) {

@@ -49,6 +49,11 @@ export default new Router({
                     meta: { title: 'eBay产品' }
                 },
                 {
+                    path: '/checkebaymanage',
+                    component: resolve => require(['../components/page/operationaler/ProductCheckEBAY.vue'], resolve),
+                    meta: { title: 'eBay待审核' }
+                },
+                {
                     path: '/productmanageeBayOper',
                     component: resolve => require(['../components/page/developer/ProductManageEBAY.vue'], resolve),
                     meta: { title: 'eBay产品(运营)' }
@@ -57,6 +62,11 @@ export default new Router({
                     path: '/productmanagewish',
                     component: resolve => require(['../components/page/developer/ProductManageWISH.vue'], resolve),
                     meta: { title: 'wish产品' }
+                },
+                {
+                    path: '/checkwishmanage',
+                    component: resolve => require(['../components/page/operationaler/ProductCheckWISH.vue'], resolve),
+                    meta: { title: 'wish待审核' }
                 },
                 {
                     path: '/productmanagewishOper',
@@ -499,6 +509,28 @@ export default new Router({
                             leaf: true,
                         },
                         {
+                            path: '/checkebaymanage',
+                            index: 'checkebaymanage',
+                            name: '待审核产品',
+                            menuShow: true,
+                            children: [
+                                {
+                                    path: '/checkebaymanage',
+                                    index: 'checkebaymanage',
+                                    name: 'ebay待审核',
+                                    menuShow: true,
+                                    leaf: true,
+                                },
+                                {
+                                    path: '/checkwishmanage',
+                                    index: 'checkwishmanage',
+                                    name: 'wish待审核',
+                                    menuShow: true,
+                                    leaf: true,
+                                },
+                            ]
+                        },
+                        {
                             path: '/productmanageeBayOper',
                             // component: Design,
                             index: 'productmanageeBayOper',
@@ -521,7 +553,7 @@ export default new Router({
                     index: 'purchaseManageOp',
                     name: '采购计划管理',
                     menuShow: true,
-                    icon: 'el-icon-lx-goods',
+                    icon: 'el-icon-lx-cart',
                     children: [
                         {
                             path: '/purchaseManageOp',
@@ -622,7 +654,7 @@ export default new Router({
                     index: 'addPurchase',
                     name: '采购管理',
                     menuShow: true,
-                    icon: 'el-icon-date',
+                    icon: 'el-icon-lx-cart',
                     children: [
                         // {
                         //     path: '/addPurchase',
@@ -662,7 +694,7 @@ export default new Router({
                     index: 'reviewersinfomanagefina',
                     name: '财务管理',
                     menuShow: true,
-                    icon: 'el-icon-lx-goods',
+                    icon: 'el-icon-lx-recharge',
                     children: [
                         {
                             path: '/reviewersinfomanagefina',
@@ -740,7 +772,7 @@ export default new Router({
                     index: 'inboundManage',
                     name: '仓储管理',
                     menuShow: true,
-                    icon: 'el-icon-lx-goods',
+                    icon: 'el-icon-lx-sort',
                     children: [
                         {
                             path: '/inboundManage',
