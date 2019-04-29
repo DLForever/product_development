@@ -109,6 +109,9 @@
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp编&nbsp&nbsp辑</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
+                                    <el-button @click="updateSupplier(scope.$index, scope.row)" type="text">更新供应商</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
                                     <el-button @click="handleDelete(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp删&nbsp&nbsp除</el-button>
                                 </el-dropdown-item>
                             </el-dropdown-menu>
@@ -134,12 +137,6 @@
                 </el-form-item>
                 <el-form-item label="样品分类">
                     <el-cascader :options="options" v-model="category_id" @change="getCatetory2" expand-trigger="hover" change-on-select></el-cascader>
-                </el-form-item>
-                <el-form-item label="供应商">
-                    <el-select v-model="form.supplier_id" placeholder="请选择">
-                        <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
-                    </el-select>
                 </el-form-item>
                 <el-form-item label="采购价">
                     <el-input v-model="form.price"></el-input>
@@ -324,7 +321,21 @@
             <el-button type="danger" @click="deleteProductImg">确 定</el-button>
         </span>
         </el-dialog>
-        
+        <!-- 更新供应商 -->
+        <el-dialog title="更新供应商" :visible.sync="updateSupplierVisible" width="50%" center>
+            <el-form label-width="100px">
+                <el-form-item label="供应商">
+                    <el-select v-model="updatesupplier_id" multiple placeholder="请选择">
+                        <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="updateSupplierVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveUpdateSupplier" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -441,7 +452,9 @@
               out_type: 0,
               returnVisible: false,
               return_remark: '',
-              table_loading: true
+              table_loading: true,
+              updateSupplierVisible: false,
+              updatesupplier_id: []
             }
         },
         created() {
@@ -449,6 +462,7 @@
             // this.getUsers()
             // this.getSuppliers()
             this.getCategories()
+
             // this.getSuppliersEdit()
         },
         watch: {
@@ -640,8 +654,6 @@
             },
             handleEdit(index, row) {
                 this.supplier_page_edit = 1
-                this.supplier_options_edit = []
-                this.getSuppliersEdit()
                 this.idx = index;
                 const item = this.tableData[index];
                 this.form = {
@@ -862,6 +874,14 @@
                 })
             },
             handleDetails(index, row) {
+                // this.$axios.get('/suppliers/' + row.id
+                // ).then((res) => {
+                //     if(res.data.code==200) {
+                        
+                //     }
+                // }).catch((res) => {
+
+                // })
                 this.products_details = [row]
                 this.detailVisible = true
             },
@@ -896,7 +916,12 @@
                 this.$axios.get('/suppliers?page=' + this.supplier_page_edit
                 ).then((res) => {
                     if(res.data.code==200) {
-                        this.supplier_options_edit = this.supplier_options_edit.concat(res.data.data)
+                        res.data.data.forEach((data) => {
+                            if(!(this.supplier_options_edit.find(data2 =>data2.id === data.id))) {
+                                this.supplier_options_edit.push(data)
+                            }
+                        })
+                        // this.supplier_options_edit = this.supplier_options_edit.concat(res.data.data)
                         this.supplier_total_edit = res.data.count
                     }
                 }).catch((res) => {
@@ -1041,7 +1066,40 @@
                     this.getSuppliers()
                 }
             },
-            
+            updateSupplier(index, row) {
+                this.form.id = row.id
+                this.supplier_options_edit = []
+                this.updatesupplier_id = []
+                this.$axios.get('/samples/' + row.id
+                ).then((res) => {
+                    if(res.data.code==200) {
+                        res.data.data.suppliers.forEach((data) => {
+                            this.updatesupplier_id.push(data.id)
+                            this.supplier_options_edit.push({name: data.name, id: data.id})
+                        })
+                        this.getSuppliersEdit()
+                        this.updateSupplierVisible = true
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                })
+            },
+            saveUpdateSupplier() {
+                let formData = new FormData()
+                this.updatesupplier_id.forEach((data) => {
+                    formData.append('supplier_id[]', data)
+                })
+                this.$axios.post('/samples/' + this.form.id + '/update_supplier', formData
+                ).then((res) => {
+                    if(res.data.code === 200) {
+                        this.getData()
+                        this.$message.success("更新成功！")
+                        this.updateSupplierVisible = false
+                    }
+                }).catch((res) => {
+
+                })
+            },
         },
         components: {
             "infinite-loading": VueInfiniteLoading

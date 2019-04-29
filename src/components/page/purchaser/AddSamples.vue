@@ -21,7 +21,7 @@
 								<el-input v-model.trim="form.title"></el-input>
 							</el-form-item>
                     		<el-form-item label="供应商">
-								<el-select v-model="form.supplier_id" placeholder="请选择">
+								<el-select v-model="form.supplier_id" multiple placeholder="请选择">
 									<el-option v-for="item in supplierOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
 									<infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading"></infinite-loading>
 								</el-select>
@@ -160,7 +160,7 @@
 					origin_url: '',
 					picture_url: '',
 					remark: '',
-					supplier_id: ''
+					supplier_id: []
 				},
 				rules: {
 					sourceurl: [{
@@ -320,7 +320,6 @@
 				// }
 				
 				let formData = new FormData()
-				console.log(this.$refs[formName].validate())
 				this.$refs[formName].validate((valid) => {
 					if(valid) {
 						this.submitDisabled = true
@@ -347,8 +346,10 @@
 						formData.append('sample[price]', this.form.price)
 						formData.append('sample[origin_url]', this.form.origin_url)
 						formData.append('sample[picture_url]', this.form.picture_url)
-						formData.append('sample[supplier_id]', this.form.supplier_id)
 						formData.append('sample[remark]', this.form.remark)
+						this.form.supplier_id.forEach((data) => {
+							formData.append('supplier_id[]', data)
+						})
 						// formData.append('name', this.form.name)
 						// formData.append('title', this.form.title)
 						// formData.append('category_id', this.category_id.pop())
