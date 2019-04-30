@@ -2,8 +2,15 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-tickets"></i> 采购管理</el-breadcrumb-item>
-                <el-breadcrumb-item>采购付款管理</el-breadcrumb-item>
+                <template v-if="$store.getters.leftNavState === 'purchase'">
+                    <el-breadcrumb-item><i class="el-icon-tickets"></i> 采购管理</el-breadcrumb-item>
+                    <el-breadcrumb-item>采购付款管理</el-breadcrumb-item>
+                </template>
+                <template v-if="$store.getters.leftNavState === 'finacial'">
+                   <el-breadcrumb-item><i class="el-icon-tickets"></i> 财务管理</el-breadcrumb-item>
+                    <el-breadcrumb-item>采购付款单管理</el-breadcrumb-item>
+                </template>
+                    
             </el-breadcrumb>
         </div>
         <div class="container">
@@ -60,9 +67,11 @@
                                 <el-dropdown-item>
                                     <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp&nbsp情</el-button>
                                 </el-dropdown-item>
-                                <el-dropdown-item>
-                                    <el-button @click="handleDonePay(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp支&nbsp&nbsp付</el-button>
-                                </el-dropdown-item>
+                                <template v-if="$store.getters.leftNavState === 'finacial'">
+                                    <el-dropdown-item>
+                                        <el-button @click="handleDonePay(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp支&nbsp&nbsp付</el-button>
+                                    </el-dropdown-item>
+                                </template>
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp编&nbsp&nbsp辑</el-button>
                                 </el-dropdown-item>
@@ -107,15 +116,6 @@
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editVisible = false">取 消</el-button>
                 <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
-            </span>
-        </el-dialog>
-
-        <!-- 删除提示框 -->
-        <el-dialog title="提示" :visible.sync="delVisible" width="300px" center>
-            <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="delVisible = false">取 消</el-button>
-                <el-button type="primary" @click="deleteRow">确 定</el-button>
             </span>
         </el-dialog>
 
@@ -421,8 +421,23 @@
                 this.editVisible = true;
             },
             handleDelete(index, row) {
-                this.idx = index;
-                this.delVisible = true;
+                this.$confirm('此操作将永久删除该付款单, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'danger'
+                }).then(() => {
+                    this.$axios.delete('/purchase_pays/' + row.id
+                    ).then((res) => {
+                        if(res.data.code == 200) {
+                            this.getData()
+                            this.$message.success("删除成功")
+                        }
+                    }).catch(() => {
+                        
+                    })
+                }).catch(() => {
+                    this.$message.info('已取消删除')
+                })
             },
             delAll() {
                 const length = this.multipleSelection.length;

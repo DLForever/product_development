@@ -231,6 +231,11 @@ export default new Router({
                     meta: { title: '采购付款管理' }
                 },
                 {
+                    path: '/purchasePayManageFina',
+                    component: resolve => require(['../components/page/purchaser/PurchasePayManage.vue'], resolve),
+                    meta: { title: '采购单付款管理' }
+                },
+                {
                     path: '/addStoreIns',
                     component: resolve => require(['../components/page/storehouser/AddStoresIns.vue'], resolve),
                     meta: { title: '新建入库单' }
@@ -726,13 +731,13 @@ export default new Router({
                             menuShow: true,
                             leaf: true,
                         },
-                        // {
-                        //     path: '/purchasePayManage',
-                        //     index: 'purchasePayManage',
-                        //     name: '采购单付款管理',
-                        //     menuShow: true,
-                        //     leaf: true,
-                        // },
+                        {
+                            path: '/purchasePayManageFina',
+                            index: 'purchasePayManageFina',
+                            name: '采购单付款管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
                     ]
                 }
             ]

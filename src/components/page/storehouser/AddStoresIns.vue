@@ -24,16 +24,19 @@
 		                        </el-select>
 			                </el-form-item>
 			                <el-form-item label="数量">
-								<el-input v-model.trim="sum"></el-input>
+								<el-input-number v-model="sum" :min="0" :step="1000"></el-input-number>
 							</el-form-item>
 							<el-form-item label="损坏的数量">
-								<el-input v-model.trim="block_sum"></el-input>
+								<el-input-number v-model="block_sum" :min="0" :step="2"></el-input-number>
 							</el-form-item>
+							<el-form-item label="到达时间">
+			                    <el-date-picker v-model="delivery_date" type="datetime" placeholder="选择日期时间"></el-date-picker>
+			                </el-form-item>
 							<!-- <el-form-item label="备注">
 								<el-input v-model.trim="form.remark"></el-input>
 							</el-form-item> -->
 							<el-form-item>
-								<el-button type="primary" @click="onSubmit('form')" :disabled="submitDisabled">新建</el-button>
+								<el-button type="primary" @click="onSubmit('form')" :disabled="submitDisabled || purchase_order_product_id === ''">新建</el-button>
 							</el-form-item>
 						</el-form>
 					</div>
@@ -81,7 +84,8 @@
 				products_options: [],
 				purchase_order_product_id: '',
 				sum: 0,
-				block_sum: 0
+				block_sum: 0,
+				delivery_date: ''
 			}
 		},
 		beforeRouteEnter: (to, from, next) => {
@@ -100,7 +104,8 @@
                 let params = {
                     purchase_order_product_id: this.purchase_order_product_id,
                     sum: this.sum,
-                    block_sum: this.block_sum
+                    block_sum: this.block_sum,
+                    delivery_date: this.delivery_date
                 }
                 // let formData = new FormData()
                 // formData.append('sample[name]', this.form.name)
@@ -111,6 +116,7 @@
                 this.$axios.post('/store_ins/', params).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('创建成功！')
+                        this.$router.push('/inboundManage');
                     }
                 }).catch((res) => {
                     console.log(res)
@@ -215,7 +221,8 @@
                 })
             },
             evalOrder(id,index) {
-            	console.log(111)
+            	this.products_options = []
+            	this.purchase_order_product_id = ''
                 let temp_data = ''
                 this.order_number_options.some((data) => {
                     if (data.id === id) {
@@ -224,9 +231,10 @@
                     }
                 })
                 temp_data.purchase_order_products.forEach((data) => {
-                	this.products_options.push({label: data.product_name, value: data.id})
+                	if (data.dist_type === 1) {
+                		this.products_options.push({label: data.product_name, value: data.id})
+                	}
                 })
-                console.log(this.products_options)
             },
 		},
 		components: {

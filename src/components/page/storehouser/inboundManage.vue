@@ -8,6 +8,7 @@
         </div>
         <div class="container">
             <div class="handle-box">
+                <el-button type="primary" @click="handleCheck">审核</el-button>
                 <div class="fnsku_filter">
                     <!-- 日期:
                     <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
@@ -34,26 +35,25 @@
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column fixed prop="sku" label="SKU" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column  prop="name" label="产品名称" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column label="图片" width="120">
-                    <template slot-scope="scope">
-                        <el-badge :value="scope.row.img_count" class="item" v-if="scope.row.img_count != 0">
-                            <span v-if="scope.row.pictures.length === 0">无</span>
-                            <img style="cursor: pointer;" class="img" v-else-if="scope.row.pictures[0] != undefined && !(scope.row.pictures[0].url.url.match(/.pdf/))" :src="$axios.defaults.baseURL+scope.row.pictures[0].url.thumb.url"@click="showProduct(scope.$index, scope.row)"/>
-                            <a v-else :href="$axios.defaults.baseURL+scope.row.pictures[0].url.url" target="_blank">{{scope.row.pictures[0].url.url.split('/').pop()}}</a>
-                        </el-badge>
-                        <span v-else>无</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="title" label="产品标题" show-overflow-tooltip>
+                <el-table-column  prop="product_name" label="产品名称" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="username" label="采购人" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="sum" label="数量" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="block_sum" label="损坏的数量" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="delivery_date" label="到达时间" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="status" label="状态">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.status | statusFilter">{{getStatusName(scope.row.status)}}</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable width="140">
                 </el-table-column>
-                <!-- <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable width="140">
-                </el-table-column> -->
                 <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
@@ -67,17 +67,11 @@
                                     <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp详&nbsp情</el-button>
                                 </el-dropdown-item>
                                 <!-- <el-dropdown-item>
-                                    <el-button @click="showProduct(scope.$index, scope.row)" type="text">&nbsp样品图片</el-button>
-                                </el-dropdown-item> -->
-                                <el-dropdown-item>
                                     <el-button @click="handleStock(scope.$index, scope.row)" type="text">添加库存</el-button>
                                 </el-dropdown-item>
-                               <!--  <el-dropdown-item>
-                                    <el-button @click="handleApply(scope.$index, scope.row)" type="text">借出样品</el-button>
-                                </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="handleApply(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp借&nbsp出</el-button>
-                                </el-dropdown-item>
+                                </el-dropdown-item> -->
                                 <el-dropdown-item>
                                     <el-button @click="handleEdit(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp编&nbsp&nbsp辑</el-button>
                                 </el-dropdown-item>
@@ -97,111 +91,21 @@
         </div>
 
         <!-- 编辑弹出框 -->
-        <el-dialog title="编辑" :visible.sync="editVisible" width="50%" @close="closeEdit">
+        <el-dialog title="编辑" :visible.sync="editVisible" width="50%">
             <el-form ref="form" :model="form" label-width="100px">
-                <el-form-item label="样品名称">
-                    <el-input v-model="form.name"></el-input>
+                <el-form-item label="数量">
+                    <el-input-number v-model="form.sum" :min="0" :step="1000"></el-input-number>
                 </el-form-item>
-                <el-form-item label="样品标题">
-                    <el-input v-model="form.title"></el-input>
+                <el-form-item label="损坏的数量">
+                    <el-input-number v-model="form.block_sum" :min="0" :step="2"></el-input-number>
                 </el-form-item>
-                <el-form-item label="供应商">
-                    <el-select v-model="form.supplier_id" placeholder="请选择">
-                        <el-option v-for="item in supplier_options_edit" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_suppliers_edit" ref="infiniteLoading3"></infinite-loading>
-                    </el-select>
+                <el-form-item label="到达时间">
+                    <el-date-picker v-model="form.delivery_date" type="datetime" placeholder="选择日期时间"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="采购价">
-                    <el-input v-model="form.price"></el-input>
-                </el-form-item>
-                <el-form-item label="产品尺寸">
-                    <template slot-scope="scope">
-                        <el-col :span="7">
-                            <el-form-item prop="length">
-                                <el-input v-model.trim="form.length" placeholder="长(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="width">
-                                <el-input v-model.trim="form.width" placeholder="宽(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="height">
-                                <el-input v-model.trim="form.height" placeholder="高(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                    </template>
-                </el-form-item>
-                <el-form-item label="产品重量(g)">
-                    <el-input v-model="form.weight"></el-input>
-                </el-form-item>
-                <el-form-item label="包装尺寸">
-                    <template slot-scope="scope">
-                        <el-col :span="7">
-                            <el-form-item prop="length">
-                                <el-input v-model.trim="form.package_length" placeholder="长(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="width">
-                                <el-input v-model.trim="form.package_width" placeholder="宽(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col class="line" :span="1">-</el-col>
-                        <el-col :span="7">
-                            <el-form-item prop="height">
-                                <el-input v-model.trim="form.package_height" placeholder="高(cm)"></el-input>
-                            </el-form-item>
-                        </el-col>
-                    </template>
-                </el-form-item>
-                <el-form-item label="包装重量(g)">
-                    <el-input v-model="form.package_weight"></el-input>
-                </el-form-item>
-                <el-form-item label="产品描述">
-                    <el-input v-model="form.desc"></el-input>
-                </el-form-item>
-                <el-form-item label="产品描述URL">
-                    <el-input v-model="form.desc_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                <el-form-item label="来源URL">
-                    <el-input v-model="form.origin_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                <el-form-item label="图片URL">
-                    <el-input v-model="form.picture_url" placeholder="需加入https://或http://前缀"></el-input>
-                </el-form-item>
-                 <el-form-item label="备注">
-                    <el-input v-model="form.remark"></el-input>
-                </el-form-item>
-                <el-form-item label="产品图片">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
-                </el-form-item>
-                <!-- <el-form-item label="外包装图片">
-                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    </el-upload>
-                </el-form-item> -->
             </el-form>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editVisible = false">取 消</el-button>
                 <el-button type="primary" @click="saveEdit" :disabled="submitDisabled">确 定</el-button>
-            </span>
-        </el-dialog>
-
-        <!-- 删除提示框 -->
-        <el-dialog title="提示" :visible.sync="delVisible" width="300px" center>
-            <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="delVisible = false">取 消</el-button>
-                <el-button type="primary" @click="deleteRow">确 定</el-button>
             </span>
         </el-dialog>
 
@@ -252,7 +156,14 @@
             <el-button type="danger" @click="deleteProductImg">确 定</el-button>
         </span>
         </el-dialog>
-        
+        <!-- 审核提示框 -->
+        <el-dialog title="提示" :visible.sync="checkVisible" width="300px" center>
+            <div class="del-dialog-cnt">审核通过？</div>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="checkVisible = false">取 消</el-button>
+                <el-button type="primary" @click="checkdone">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -282,9 +193,10 @@
                 search_shopname: '',
                 totals: 0,
                 form: {
-                    name: '',
-                    date: '',
-                    address: '',
+                    sum: '',
+                    block_sum: '',
+                    delivery_date: '',
+                    id: ''
                 },
                 idx: -1,
                 productVisible: false,
@@ -363,7 +275,8 @@
               out_type: 0,
               returnVisible: false,
               return_remark: '',
-              table_loading: true
+              table_loading: true,
+              checkVisible: false
             }
         },
         created() {
@@ -376,17 +289,24 @@
         watch: {
         	"$route": "getData"
         },
+        filters: {
+            //类型转换
+            statusFilter(status) {
+                const statusMap = {
+                    1: 'warning',
+                    2: 'success',
+                    3: 'danger',
+                    4: 'default',
+                    5: 'default'
+                }
+                return statusMap[status]
+            },
+        },
         computed: {
             data() {
                 return this.tableData.filter((d) => {
                     let is_del = false;
-                    if (!is_del) {
-                        if ((d.name.indexOf(this.select_word) > -1 ||
-                                d.fnsku.indexOf(this.select_word) > -1)
-                        ) {
-                            return d;
-                        }
-                    }
+                    return d;
                 })
             }
         },
@@ -420,9 +340,6 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.img_count = data.pictures.length
-                            data.size = data.length + '*' + data.width + '*' + data.height
-                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -453,9 +370,6 @@
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
-                            data.img_count = data.pictures.length
-                            data.size = data.length + '*' + data.width + '*' + data.height
-                            data.package_size = data.package_length + '*' + data.package_width + '*' + data.package_height
                         })
                         this.tableData = res.data.data
                         this.totals = res.data.count
@@ -563,37 +477,14 @@
                 return row.tag === value;
             },
             handleEdit(index, row) {
-                this.supplier_page_edit = 1
-                this.supplier_options_edit = []
-                this.getSuppliersEdit()
                 this.idx = index;
-                const item = this.tableData[index];
+                // const item = this.tableData[index];
                 this.form = {
-                    id: item.id,
-                    name: item.name,
-                    title: item.title,
-                    price: item.price,
-                    length: item.length,
-                    width: item.width,
-                    height: item.height,
-                    weight: item.weight,
-                    package_length: item.package_length,
-                    package_width: item.package_width,
-                    package_height: item.package_height,
-                    package_weight: item.package_weight,
-                    desc: item.desc,
-                    desc_url: item.desc_url,
-                    origin_url: item.origin_url,
-                    picture_url: item.picture_url,
-                    remark: item.remark,
-                    supplier_id: item.supplier_id
+                    id: row.id,
+                    sum: row.sum,
+                    block_sum: row.block_sum,
+                    delivery_date: row.delivery_date
                 }
-                let temp = item.category_name.split('>')
-                this.options.unshift({value: row.category_id, label: temp[temp.length-1]})
-                // this.options5.unshift({value: row.category_id, label: temp[temp.length-1]})
-                this.category_id = this.category_id.concat(item.category_id)
-                // this.getCategories()
-                this.categories_loop(item.category_id)
                 this.editVisible = true;
             },
             categories_loop(c) {
@@ -607,8 +498,23 @@
                 })
             },
             handleDelete(index, row) {
-                this.idx = index;
-                this.delVisible = true;
+                this.$confirm('此操作将永久删除该入库单, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'danger'
+                }).then(() => {
+                    this.$axios.delete('/store_ins/' + row.id
+                    ).then((res) => {
+                        if(res.data.code == 200) {
+                            this.getData()
+                            this.$message.success("删除成功")
+                        }
+                    }).catch(() => {
+                        
+                    })
+                }).catch(() => {
+                    this.$message.info('已取消删除')
+                })
             },
             delAll() {
                 const length = this.multipleSelection.length;
@@ -625,56 +531,22 @@
             },
             // 保存编辑
             saveEdit() {
-                let temp = 0
-                this.fileList.forEach((item) => {
-                    if(!(item.raw.type.match(/image/))){
-                        temp = 1
-                    }
-                })
-                if(temp) {
-                    this.$message.error('请上传正确的图片格式!')
-                    return
-                }
                 this.submitDisabled = true
                 let params = {
-                    remark: this.form.remark,
+                    sum: this.form.sum,
+                    block_sum: this.form.block_sum,
+                    delivery_date: this.form.delivery_date
                 }
-                let formData = new FormData()
-                formData.append('sample[name]', this.form.name)
-                formData.append('sample[title]', this.form.title)
-                formData.append('sample[category_id]', this.category_id[this.category_id.length - 1])
-                formData.append('sample[supplier_id]', this.form.supplier_id)
-                formData.append('sample[desc]', this.form.desc)
-                formData.append('sample[desc_url]', this.form.desc_url)
-                formData.append('sample[package_length]', this.form.package_length)
-                formData.append('sample[package_width]', this.form.package_width)
-                formData.append('sample[package_height]', this.form.package_height)
-                formData.append('sample[package_weight]', this.form.package_weight)
-                formData.append('sample[length]', this.form.length)
-                formData.append('sample[width]', this.form.width)
-                formData.append('sample[height]', this.form.height)
-                formData.append('sample[weight]', this.form.weight)
-                formData.append('sample[price]', this.form.price)
-                formData.append('sample[origin_url]', this.form.origin_url)
-                formData.append('sample[picture_url]', this.form.picture_url)
-                formData.append('sample[remark]', this.form.remark)
-                this.fileList.forEach((item) => {
-                    formData.append('sample[pictures][]', item.raw)
-                })
-                // this.fileList2.forEach((item) => {
-                //     formData.append('package_pictures[]', item.raw)
-                // })
-                this.$axios.patch('/samples/' + this.form.id, formData).then((res) => {
+                // let formData = new FormData()
+                // formData.append('sample[name]', this.form.name)
+                this.$axios.patch('/store_ins/' + this.form.id, params).then((res) => {
                     if(res.data.code == 200) {
                         this.$message.success('更新成功！')
-                        // this.options = []
-                        this.fileList = []
-                        this.category_id = []
                         this.getData()
                         this.editVisible = false
                     }
                 }).catch((res) => {
-                    console.log('err')
+                    console.log(res)
                 }).finally((res) => {
                     this.submitDisabled = false
                 })
@@ -754,8 +626,17 @@
                 })
             },
             handleDetails(index, row) {
-                this.products_details = [row]
-                this.detailVisible = true
+                this.$axios.get('/store_ins/' + row.id
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        if (res.data.data.length != 0) {
+                            // this.products_details = res.data.data.purchase_order.purchase_order_products
+                        }
+                        this.detailVisible = true
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                })
             },
             onInfinite_suppliers(obj) {
                 if((this.supplier_page * 20) < this.supplier_total) {
@@ -902,7 +783,55 @@
                     this.getSuppliers()
                 }
             },
-            
+            handleCheck() {
+                if(this.multipleSelection.length == 0){
+                    this.$message.info('请至少选择一个入库单')
+                    return
+                }
+                this.checkVisible = true
+            },
+            checkdone() {
+                // let temp_ids = ''
+                // let temp_id = 0
+                // this.multipleSelection.forEach((data) => {
+                //     if(temp_id == 0) {
+                //         temp_ids = 'ids[]=' + data.id
+                //     }else{
+                //         temp_ids += '&ids[]=' + data.id
+                //     }
+                //     temp_id++
+                // })
+                this.submitDisabled = true
+                let formData = new FormData()
+                this.multipleSelection.forEach((data) => {
+                    formData.append('ids[]', data.id)
+                })
+                
+                this.$axios.post('/store_ins/check', formData
+                ).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('审核成功')
+                        this.getData()
+                        this.submitDisabled = false
+                        this.checkVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally(() => {
+                    this.submitDisabled = false
+                })
+            },
+            getStatusName(status) {
+                if(status == 1) {
+                    return "待审核"
+                }else if (status == 2) {
+                    return "已审核"
+                }else if (status == 3) {
+                    return "已删除"
+                } else{
+                    return "其他"
+                }
+            },
         },
         components: {
             "infinite-loading": VueInfiniteLoading
