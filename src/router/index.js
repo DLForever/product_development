@@ -226,6 +226,16 @@ export default new Router({
                     meta: { title: '采购订单管理' }
                 },
                 {
+                    path: '/purchasePayManage',
+                    component: resolve => require(['../components/page/purchaser/PurchasePayManage.vue'], resolve),
+                    meta: { title: '采购付款管理' }
+                },
+                {
+                    path: '/addStoreIns',
+                    component: resolve => require(['../components/page/storehouser/AddStoresIns.vue'], resolve),
+                    meta: { title: '新建入库单' }
+                },
+                {
                     path: '/inboundManage',
                     component: resolve => require(['../components/page/storehouser/inboundManage.vue'], resolve),
                     meta: { title: '入库订单管理' }
@@ -683,6 +693,13 @@ export default new Router({
                             menuShow: true,
                             leaf: true,
                         },
+                        {
+                            path: '/purchasePayManage',
+                            index: 'purchasePayManage',
+                            name: '采购付款管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
                     ]
                 }
             ],
@@ -704,12 +721,18 @@ export default new Router({
                     children: [
                         {
                             path: '/reviewersinfomanagefina',
-                            // component: Design,
                             index: 'reviewersinfomanagefina',
                             name: '测评报表管理',
                             menuShow: true,
                             leaf: true,
                         },
+                        // {
+                        //     path: '/purchasePayManage',
+                        //     index: 'purchasePayManage',
+                        //     name: '采购单付款管理',
+                        //     menuShow: true,
+                        //     leaf: true,
+                        // },
                     ]
                 }
             ]
@@ -780,6 +803,14 @@ export default new Router({
                     menuShow: true,
                     icon: 'el-icon-lx-sort',
                     children: [
+                        {
+                            path: '/addStoreIns',
+                            // component: Design,
+                            index: 'addStoreIns',
+                            name: '新建入库单',
+                            menuShow: true,
+                            leaf: true,
+                        },
                         {
                             path: '/inboundManage',
                             // component: Design,

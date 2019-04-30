@@ -50,27 +50,6 @@
                 </el-table-column>
                 <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="category_name" label="分类" width="120" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="price" label="申报价值">
-                </el-table-column>
-                <el-table-column prop="desc" label="描述" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="desc_url" label="描述URL" width="80">
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.desc_url != null && scope.row.desc_url != '' && scope.row.desc_url != 'null'" :href="scope.row.desc_url" target="_blank">查看描述</a>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="origin_url" label="来源URL" width="80">
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.origin_url != null && scope.row.origin_url != '' && scope.row.origin_url != 'null'" :href="scope.row.origin_url" target="_blank">查看来源</a>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="picture_url" label="图片URL" width="80">
-                    <template slot-scope="scope">
-                        <a v-if="scope.row.picture_url != null && scope.row.picture_url != '' && scope.row.picture_url != 'null'" :href="scope.row.picture_url" target="_blank">查看图片</a>
-                    </template>
-                </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable width="140">
                 </el-table-column>
                 <!-- <el-table-column prop="updated_at" label="更新时间" :formatter="formatter_updated_at" sortable width="140">
@@ -436,7 +415,8 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
+                this.$axios.get( '/store_ins?page='+this.cur_page
+                // this.$axios.get( '/store_ins?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -468,7 +448,8 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
+                this.$axios.get( '/store_ins?page='+this.cur_page
+                // this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {

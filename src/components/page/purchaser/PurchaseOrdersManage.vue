@@ -251,6 +251,13 @@
             <el-table :data="products_details" border style="width: 100%">
                 <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="dist_type" label="入库方式"  show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <el-tag type="success" v-if="scope.row.dist_type === 1">入国内仓</el-tag>
+                        <el-tag type="primary" v-else-if="scope.row.dist_type === 2">不入仓</el-tag>
+                        <el-tag type="warning" v-else-if="scope.row.dist_type === 3">中转</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="sum" label="数量"  show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="put_card_sum" label="好评卡数量" show-overflow-tooltip>
@@ -325,30 +332,7 @@
                 </el-table-column>
             </el-table>
             <br>
-            <el-form label-width="100px" :label-position="labelPosition">
-                <el-form-item label="币种">
-                    <el-input v-model="remark" placeholder="请输入币种" style="width:14%;"></el-input>
-                </el-form-item>
-                <el-form-item label="付款金额">
-                    <el-input-number v-model="remark" :min="0" :step="1000"></el-input-number>
-                </el-form-item>
-                <el-form-item label="申请支付日期">
-                    <el-date-picker v-model.trim="remark" placeholder="选择日期" type="date"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="收款账号银行">
-                    <el-input v-model="remark" placeholder="收款账号银行" style="width:14%;"></el-input>
-                </el-form-item>
-                <el-form-item label="收款账号姓名">
-                    <el-input v-model="remark" placeholder="收款账号姓名" style="width:14%;"></el-input>
-                </el-form-item>
-                <el-form-item label="收款账号">
-                    <el-input v-model="remark" placeholder="收款账号" style="width:50%;"></el-input>
-                </el-form-item>
-            </el-form>
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="detailVisible = false">取 消</el-button>
-                <el-button type="primary" @click="submitApplyPurchase">创建付款申请单</el-button>
-            </span>
+            <el-button type="primary" @click="showApplyPurchase">创建付款申请单</el-button>
         </el-dialog>
         <!-- 查看产品图片 -->
         <el-dialog title="图片" :visible.sync="productVisible" width="70%">
@@ -459,6 +443,29 @@
             <span slot="footer" class="dialog-footer">
                 <el-button @click="updateTermVisible = false">取 消</el-button>
                 <el-button type="primary" @click="saveupdateTerm" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 编辑供应商账户 -->
+        <el-dialog title="付款申请" :visible.sync="applyPayVisible" width="50%">
+            <el-form ref="applyPurchase" label-width="100px" :label-position="labelPosition">
+                <el-form-item label="价格">
+                    <el-input-number v-model="applyPurchase.price" :min="0" :step="1000"></el-input-number>
+                </el-form-item>
+                <el-form-item label="支付类型">
+                    <template slot-scope="scope">
+                        <el-select v-model="applyPurchase.p_type">
+                            <el-option v-for="item in pay_type_options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                        </el-select>
+                    </template>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-input v-model="applyPurchase.remark" placeholder="请输入备注"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="applyPayVisible = false">取 消</el-button>
+                <el-button type="primary" @click="submitApplyPurchase">创建付款申请单</el-button>
             </span>
         </el-dialog>
     </div>
@@ -611,9 +618,14 @@
               supplier_term_detail: [],
               account_id: '',
               labelPosition: 'left',
-              ApplyPurchase: {
-                
-              }
+              applyPurchase: {
+                price: 0,
+                p_type: '',
+                remark: ''
+              },
+              pay_type_options: [{value: 1, label: '定金'}, {value: 2, label: '全款'}, {value: 3, label: '尾款'}, {value: 4, label: '月结'}, {value: 5, label: '尾款'}],
+              applyPayVisible: false,
+              order_id: '',
             }
         },
         created() {
@@ -981,11 +993,11 @@
                 })
             },
             handleDetails(index, row) {
+                this.order_id = row.id
                 this.$axios.get('/purchase_orders/' + row.id
                 ).then((res) => {
                     if(res.data.code==200) {
                         // this.purchase_details = res.data.data[0].purchase_order_products
-                            
                         if (res.data.data.length != 0) {
                             this.supplier_account_detail = [res.data.data[0].supplier_account]
                             this.supplier_term_detail = res.data.data[0].purchase_order_products
@@ -1449,8 +1461,28 @@
             changePurchaseOrder(res, file, index) {
                 this.purchaseOrders[index].pictures.push(res)
             },
+            showApplyPurchase() {
+                this.applyPurchase.price = 0, this.applyPurchase.p_type = '', this.applyPurchase.remark = ''
+                this.applyPayVisible = true
+            },
             submitApplyPurchase() {
-
+                this.submitDisabled = true
+                let params = {
+                    price: this.applyPurchase.price,
+                    p_type: this.applyPurchase.p_type,
+                    remark: this.applyPurchase.remark,
+                }
+                this.$axios.post('/purchase_orders/' + this.order_id + '/apply_pay', params).then((res) => {
+                    if(res.data.code == 200) {
+                        this.$message.success('申请成功')
+                        this.getData()
+                        this.applyPayVisible = false
+                    }
+                }).catch((res) => {
+                    console.log(res)
+                }).finally((res) => {
+                    this.submitDisabled = false
+                })
             },
             getStatusName(status, done_direct) {
                 if(status == 1) {
