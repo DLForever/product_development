@@ -246,6 +246,16 @@ export default new Router({
                     meta: { title: '入库订单管理' }
                 },
                 {
+                    path: '/addDelivery',
+                    component: resolve => require(['../components/page/operationaler/addDelivery.vue'], resolve),
+                    meta: { title: '新建发货计划' }
+                },
+                {
+                    path: '/outboundManage',
+                    component: resolve => require(['../components/page/storehouser/outboundManage.vue'], resolve),
+                    meta: { title: '发货计划管理' }
+                },
+                {
                     path: '/notifications',
                     component: resolve => require(['../components/page/Tabs.vue'], resolve),
                     meta: { title: '未读消息' }
@@ -593,7 +603,32 @@ export default new Router({
                         //     leaf: true,
                         // },
                     ]
-                }
+                },
+                {
+                    path: '/addDelivery',
+                    index: 'addDelivery',
+                    name: '发货计划管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-forward',
+                    children: [
+                        {
+                            path: '/addDelivery',
+                            // component: Design,
+                            index: 'addDelivery',
+                            name: '新建发货计划',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        // {
+                        //     path: '/outboundManage',
+                        //     // component: Design,
+                        //     index: 'outboundManage',
+                        //     name: '发货计划管理',
+                        //     menuShow: true,
+                        //     leaf: true,
+                        // },
+                    ]
+                },
             ]
         },
         {
@@ -804,9 +839,9 @@ export default new Router({
                 {
                     path: '/inboundManage',
                     index: 'inboundManage',
-                    name: '仓储管理',
+                    name: '入库管理',
                     menuShow: true,
-                    icon: 'el-icon-lx-sort',
+                    icon: 'el-icon-lx-down',
                     children: [
                         {
                             path: '/addStoreIns',
@@ -833,7 +868,31 @@ export default new Router({
                         //     leaf: true,
                         // },
                     ]
-                }
+                },
+                {
+                    path: '/outboundManage',
+                    index: 'outboundManage',
+                    name: '出库管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-forward',
+                    children: [
+                        {
+                            path: '/outboundManage',
+                            index: 'outboundManage',
+                            name: '出库计划管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                        // {
+                        //     path: '/inboundManage',
+                        //     // component: Design,
+                        //     index: 'inboundManage',
+                        //     name: '库存管理',
+                        //     menuShow: true,
+                        //     leaf: true,
+                        // },
+                    ]
+                },
             ]
         },
         // {

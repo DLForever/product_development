@@ -124,6 +124,13 @@
             <el-table :data="products_details" border style="width: 100%">
                 <el-table-column prop="sku" label="SKU" show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="dist_type" label="入库方式"  show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <el-tag type="success" v-if="scope.row.dist_type === 1">入国内仓</el-tag>
+                        <el-tag type="primary" v-else-if="scope.row.dist_type === 2">不入仓</el-tag>
+                        <el-tag type="warning" v-else-if="scope.row.dist_type === 3">中转</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="sum" label="数量"  show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="put_card_sum" label="好评卡数量" show-overflow-tooltip>

@@ -2,12 +2,11 @@
 	<div>
 		<div class="crumbs">
 			<el-breadcrumb separator="/">
-				<el-breadcrumb-item><i class="el-icon-lx-friendadd"></i> 仓储管理</el-breadcrumb-item>
+				<el-breadcrumb-item><i class="el-icon-lx-down"></i> 仓储管理</el-breadcrumb-item>
 				<el-breadcrumb-item>新建入库单</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
 		<div class="container">
-
 			<el-tabs v-model="message">
 				<el-tab-pane label="新建入库单" name="first">
 					<div class="form-box">
@@ -40,7 +39,6 @@
 							</el-form-item>
 						</el-form>
 					</div>
-
 				</el-tab-pane>
 				<!-- <el-tab-pane label="批量上传" name="second">
 					<template v-if="message === 'second'">
