@@ -2,7 +2,7 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-lx-down"></i> 仓储管理</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-lx-down"></i> 入库管理</el-breadcrumb-item>
                 <el-breadcrumb-item>采购订单管理</el-breadcrumb-item>
             </el-breadcrumb>
         </div>

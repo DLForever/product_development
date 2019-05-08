@@ -7,7 +7,7 @@
                     <el-breadcrumb-item>采购付款管理</el-breadcrumb-item>
                 </template>
                 <template v-if="$store.getters.leftNavState === 'finacial'">
-                   <el-breadcrumb-item><i class="el-icon-tickets"></i> 财务管理</el-breadcrumb-item>
+                   <el-breadcrumb-item><i class="el-icon-lx-recharge"></i> 财务管理</el-breadcrumb-item>
                     <el-breadcrumb-item>采购付款单管理</el-breadcrumb-item>
                 </template>
                     

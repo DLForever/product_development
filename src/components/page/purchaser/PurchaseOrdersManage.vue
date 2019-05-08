@@ -208,8 +208,8 @@
                 </el-table-column> -->
                 <el-table-column prop="sum" label="供应商条款" width="90">
                     <template slot-scope="scope">
-                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.term_id, scope.$index)" :disabled="scope.row.sku === '' || supplier_id === ''">未选择</el-button>
-                        <el-button v-if="scope.row.term_id != ''" type="success" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.term_id, scope.$index)">已选择</el-button>
+                        <el-button v-if="scope.row.term_id === ''" type="warning" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.term_id, scope.row.product_id, scope.$index)" :disabled="scope.row.sku === '' || supplier_id === ''">未选择</el-button>
+                        <el-button v-if="scope.row.term_id != ''" type="success" v-model.trim="scope.row.term_id" @click="update_term(supplier_id, scope.row.term_id, scope.row.product_id, scope.$index)">已选择</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="sum" label="备注">
@@ -1353,10 +1353,10 @@
                     console.log(res)
                 })
             },
-            update_term(supplier_id, term_id, index) {
+            update_term(supplier_id, term_id, product_id, index) {
                 this.update_index = index
                 this.supplier_id = supplier_id
-                // this.product_id = product_id
+                this.product_id = product_id
                 let params = {
                     term_id: term_id
                 }

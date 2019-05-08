@@ -246,6 +246,11 @@ export default new Router({
                     meta: { title: '入库订单管理' }
                 },
                 {
+                    path: '/cargosManage',
+                    component: resolve => require(['../components/page/storehouser/cargosManage.vue'], resolve),
+                    meta: { title: '库存管理' }
+                },
+                {
                     path: '/addDelivery',
                     component: resolve => require(['../components/page/operationaler/addDelivery.vue'], resolve),
                     meta: { title: '新建发货计划' }
@@ -870,6 +875,23 @@ export default new Router({
                     ]
                 },
                 {
+                    path: '/cargosManage',
+                    index: 'cargosManage',
+                    name: '库存管理',
+                    menuShow: true,
+                    icon: 'el-icon-lx-apps',
+                    children: [
+                        {
+                            path: '/cargosManage',
+                            // component: Design,
+                            index: 'cargosManage',
+                            name: '库存管理',
+                            menuShow: true,
+                            leaf: true,
+                        },
+                    ]
+                },
+                {
                     path: '/outboundManage',
                     index: 'outboundManage',
                     name: '出库管理',
@@ -900,7 +922,6 @@ export default new Router({
         //     index: 'reviewersinfomanagefina',
         //     type: 'logistics',
         //     name: 'logistics',
-        //     // component: Home,
         //     redirect: 'reviewersinfomanagefina',
         //     children: [
         //         {
@@ -908,13 +929,12 @@ export default new Router({
         //             index: 'reviewersinfomanagefina',
         //             name: '物流管理',
         //             menuShow: true,
-        //             icon: 'el-icon-lx-goods',
+        //             icon: 'el-icon-lx-forward',
         //             children: [
         //                 {
         //                     path: '/reviewersinfomanagefina',
-        //                     // component: Design,
         //                     index: 'reviewersinfomanagefina',
-        //                     name: '物流管理',
+        //                     name: '发货计划管理',
         //                     menuShow: true,
         //                     leaf: true,
         //                 },

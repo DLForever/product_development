@@ -1238,7 +1238,7 @@
             update_term(supplier_id, term_id, product_id, index) {
                 this.update_index = index
                 this.supplier_id = supplier_id
-                // this.product_id = product_id
+                this.product_id = product_id
                 let params = {}
                 if (term_id != '') {
                     params = {

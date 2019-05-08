@@ -2,13 +2,13 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-lx-forward"></i> 出库管理</el-breadcrumb-item>
-                <el-breadcrumb-item>出库计划管理</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-lx-apps"></i> 库存管理</el-breadcrumb-item>
+                <el-breadcrumb-item>库存管理</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="container">
             <div class="handle-box">
-                <el-button type="primary" @click="handleCheck">审核</el-button>
+                <!-- <el-button type="primary" @click="handleCheck">审核</el-button> -->
                 <div class="fnsku_filter">
                     <!-- 日期:
                     <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
@@ -35,17 +35,11 @@
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column fixed prop="sku" label="SKU" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column  prop="product_name" label="产品名称" show-overflow-tooltip>
+                <el-table-column prop="stock_sum" label="库存" show-overflow-tooltip>
                 </el-table-column>
-                <el-table-column prop="supplier_name" label="供应商" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="username" label="采购人" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="sum" label="数量" show-overflow-tooltip>
+                <el-table-column prop="virtual_sum" label="virtual_sum" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="block_sum" label="损坏的数量" show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column prop="delivery_date" label="到达时间" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="status" label="状态">
                     <template slot-scope="scope">
@@ -53,8 +47,6 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" :formatter="formatter_created_at" sortable width="140">
-                </el-table-column>
-                <el-table-column prop="remark" label="备注" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                     <template slot-scope="scope">
@@ -335,7 +327,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/store_ins?page='+this.cur_page
+                this.$axios.get( '/cargos?page='+this.cur_page
                 // this.$axios.get( '/store_ins?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
                 ).then((res) => {
                     if(res.data.code == 200) {
@@ -365,7 +357,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/store_ins?page='+this.cur_page
+                this.$axios.get( '/cargos?page='+this.cur_page
                 // this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
                 ).then((res) => {
                     if(res.data.code == 200) {
