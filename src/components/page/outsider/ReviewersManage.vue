@@ -640,7 +640,7 @@
                 isaddPlan: false,
                 site_options: ['US', 'UK', 'DE', 'JP','FR'],
                 paytype_options: ['PayPal', '微信'],
-                currency_options: ['美金', '英镑', '欧元', '日元'],
+                currency_options: ['美金', '英镑', '欧元', '日元','加币'],
                 keyword_options: [],
                 table_loading: true,
                 filter_name: '',

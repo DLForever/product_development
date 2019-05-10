@@ -670,7 +670,7 @@
               exportIds: [],
               exportVisible: false,
               paytype_options: ['PayPal', '微信'],
-              currency_options: ['美金', '英镑', '欧元', '日元'],
+              currency_options: ['美金', '英镑', '欧元', '日元', '加币'],
               keyword_options: [],
               search_options: [{value: 'fanDis', label: '粉丝号'}, {value: 'shopDis', label: '店铺名'}, {value: 'userDis', label: '送测人'}, {value: 'dateDis', label: '日期'}],
               search_selects: [],
