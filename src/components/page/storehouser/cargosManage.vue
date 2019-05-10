@@ -12,20 +12,18 @@
                 <div class="fnsku_filter">
                     <!-- 日期:
                     <el-date-picker v-model="date_filter" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2" unlink-panels value-format="yyyy-MM-dd"></el-date-picker>
-                     分类:
-                    <el-cascader :options="options" v-model="category_id_filter" expand-trigger="hover" @change="getCatetory" change-on-select class="handle-select mr10"></el-cascader>
                     开发人员:
                     <el-select v-model="user_id_filter" filterable remote :loading="loading" @visible-change="selectVisble" :remote-method="remoteMethod" placeholder="选择用户" class="handle-select mr10">
                         <el-option v-for="item in user_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_user" ref="infiniteLoading"></infinite-loading>
-                    </el-select>
-                    供应商:
-                    <el-select v-model="supplier_id_filter" placeholder="选择供应商" @visible-change="supplierselectVisble" class="handle-select mr10">
-                        <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                        <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
+                    </el-select> -->
+                    产品名称:
+                    <el-select v-model="product_id_filter" filterable remote clearable placeholder="选择产品" :loading="loadingProducts" :remote-method="remoteMethodProducts" @visible-change="productselectVisble" class="handle-select mr10">
+                        <el-option v-for="item in product_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <infinite-loading :on-infinite="onInfinite_products" ref="infiniteLoading2"></infinite-loading>
                     </el-select>
                     SKU:
-                    <el-input style="width:150px" placeholder="请输入SKU"></el-input> -->
+                    <el-input style="width:150px" v-model="search_sku" placeholder="请输入SKU"></el-input>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
                 </div>
@@ -212,13 +210,13 @@
                 detailVisible: false,
                 user_id_filter: '',
                 category_id_filter: [],
-                supplier_id_filter: '',
+                product_id_filter: '',
                 user_options: [],
                 user_options2: [],
                 category_options: [],
-                supplier_options: [],
-                supplier_page: 1,
-                supplier_total: 0,
+                product_options: [],
+                product_page: 1,
+                product_total: 0,
                 user_page: 1,
                 user_total: 0,
                 category_page: 1,
@@ -268,14 +266,16 @@
               returnVisible: false,
               return_remark: '',
               table_loading: true,
-              checkVisible: false
+              checkVisible: false,
+              search_sku: '',
+              queryProducts: false,
+              loadingProducts: false
             }
         },
         created() {
             this.getData();
             // this.getUsers()
             // this.getSuppliers()
-            this.getCategories()
             // this.getSuppliersEdit()
         },
         watch: {
@@ -327,7 +327,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/cargos?page='+this.cur_page
+                this.$axios.get( '/cargos?page='+this.cur_page + '&sku=' + this.search_sku + '&product_id=' + this.product_id_filter
                 // this.$axios.get( '/store_ins?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
                 ).then((res) => {
                     if(res.data.code == 200) {
@@ -357,7 +357,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/cargos?page='+this.cur_page
+                this.$axios.get( '/cargos?page='+this.cur_page + '&sku=' + this.search_sku + '&product_id=' + this.product_id_filter
                 // this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
                 ).then((res) => {
                     if(res.data.code == 200) {
@@ -377,21 +377,10 @@
                 this.paginationShow = false
                 this.cur_page = 1
                 this.user_id_filter = ''
-                this.category_id_filter = []
-                this.supplier_id_filter = ''
+                this.product_id_filter = ''
                 this.date_filter = []
+                this.search_sku = ''
                 this.getData()
-            },
-            getSuppliers() {
-                this.$axios.get('/suppliers?page=' + this.supplier_page
-                ).then((res) => {
-                    if(res.data.code==200) {
-                        this.supplier_options = this.supplier_options.concat(res.data.data)
-                        this.supplier_total = res.data.count
-                    }
-                }).catch((res) => {
-
-                })
             },
             getUsers() {
                 this.$axios.get('/users?page=' + this.user_page
@@ -403,55 +392,6 @@
                 }).catch((res) => {
 
                 })
-            },
-            getCategories() {
-                if (process.env.NODE_ENV === 'development') {
-                };
-                this.$axios.get( '/categories?page='+this.category_page
-                ).then((res) => {
-                    if(res.data.code == 200) {
-                        this.options3 = res.data.data
-                        this.options5 = this.options3
-                        this.getCatetoryLoop(1)
-                        // this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
-                        // for(let i=0; i < Math.ceil(res.data.count / 20); i++) {
-                        //     this.getCatetoryLoop(i+1)
-                        // }
-                        // this.total = res.data.count
-                    }
-                }).catch((res) => {
-                    console.log('error')
-                })
-            },
-            getCatetoryLoop(page) {
-                this.$axios.get( '/categories?page='+page
-                ).then((res) => {
-                    if(res.data.code == 200) {
-                        this.options = this.options.concat(this.getCategoryTree(res.data.data,0))
-                        this.options4 = this.options
-                        this.categories_options = this.categories_options.concat(res.data.data)
-                        // this.total = res.data.count
-                    }
-                }).catch((res) => {
-                    console.log('error')
-                })
-            },
-            getCategoryTree(categories,id){
-                let result = []
-                for (var i = 0; i < categories.length; i++){
-                    if(categories[i].parent_id == id || categories[i].parent_id == null){
-                        result.push({value:categories[i].id,label:categories[i].name,children:this.getTree(categories,categories[i].id)})
-                    }
-                }
-                return result
-            },
-            getTree(categories,id){
-                let tmp =  categories.filter((s) => {
-                    return s.parent_id == id
-                    })
-                return tmp.map((s) => {
-                    return {value:s.id,label:s.name,children:this.getTree(categories,s.id)}
-               })
             },
             formatter_created_at(row, column) {
 				return row.created_at.substr(0, 19);
@@ -630,24 +570,6 @@
                     console.log(res)
                 })
             },
-            onInfinite_suppliers(obj) {
-                if((this.supplier_page * 20) < this.supplier_total) {
-                    this.supplier_page += 1
-                    this.getSuppliers(obj.loaded)
-                } else {
-                    obj.complete()
-                    console.log(obj.complete())
-                }
-            },
-            onInfinite_user(obj) {
-                if((this.user_page * 20) < this.user_total) {
-                    this.user_page += 1
-                    // this.getUsers(obj.loaded)
-                    this.remoteMethod(this.query,obj.loaded)
-                } else {
-                    obj.complete()
-                }
-            },
             onInfinite_suppliers_edit(obj) {
                 if((this.supplier_page_edit * 20) < this.supplier_total_edit) {
                     this.supplier_page_edit += 1
@@ -674,6 +596,15 @@
                     this.remoteMethod("")
                 }
             },
+            onInfinite_user(obj) {
+                if((this.user_page * 20) < this.user_total) {
+                    this.user_page += 1
+                    // this.getUsers(obj.loaded)
+                    this.remoteMethod(this.query,obj.loaded)
+                } else {
+                    obj.complete()
+                }
+            },
             remoteMethod(query, callback = undefined) {
                 if(query != "" || this.query != "" || callback) {
                     let reload = false
@@ -697,6 +628,72 @@
                                 this.user_options = this.user_options.concat(res.data.data)
                             }
                             this.user_total = res.data.count
+                            if(callback) {
+                                callback()
+                            }
+                        }
+                    }).catch((res) => {
+                        console.log('失败')
+                    })
+                }
+            },
+            productselectVisble(visible) {
+                // this.product_options = []
+                // this.product_page = 1
+                // this.$refs.infiniteLoading2.stateChanger.reset()
+                // if(visible) {
+                //     this.getProducts()
+                // }
+                if(visible) {
+                    this.queryProducts = undefined
+                    this.remoteMethodProducts("")
+                }
+            },
+            onInfinite_products(obj) {
+                if((this.product_page * 20) < this.product_total) {
+                    this.product_page += 1
+                    // this.getProducts(obj.loaded)
+                    this.remoteMethodProducts(this.queryProducts,obj.loaded)
+                } else {
+                    obj.complete()
+                    console.log(obj.complete())
+                }
+            },
+            getProducts() {
+                this.$axios.get('/products?page=' + this.product_page
+                ).then((res) => {
+                    if(res.data.code==200) {
+                        this.product_options = this.product_options.concat(res.data.data)
+                        this.product_total = res.data.count
+                    }
+                }).catch((res) => {
+
+                })
+            },
+            remoteMethodProducts(query, callback = undefined) {
+                if(query != "" || this.queryProducts != "" || callback) {
+                    let reload = false
+                    if(this.queryProducts != query) {
+                        this.loadingProducts = true
+                        this.product_page = 1
+                        this.queryProducts = query
+                        reload = true
+                        if(this.$refs.infiniteLoading2.isComplete) {
+                            this.$refs.infiniteLoading2.stateChanger.reset()
+                        }
+                    }
+                    this.$axios.get("/products/?page=" + this.product_page + '&name=' + query.trim()
+                    ).then((res) => {
+                        if(res.data.code == 200) {
+                            this.loadingProducts = false
+                            let tempoptions = []
+                            //                          this.options = res.data.data
+                            if(reload) {
+                                this.product_options = tempoptions.concat(res.data.data)
+                            } else {
+                                this.product_options = this.product_options.concat(res.data.data)
+                            }
+                            this.product_total = res.data.count
                             if(callback) {
                                 callback()
                             }
@@ -738,43 +735,7 @@
 
                 })
             },
-            getCatetory() {
-                this.$axios.get( '/categories?parent_id=' + this.category_id_filter[this.category_id_filter.length -1]
-                ).then((res) => {
-                    if(res.data.code == 200) {
-                        this.options = []
-                        let temp_options = []
-                        if(this.category_id_filter.length == 1) {
-                            this.options_len1 = this.options3
-                            this.options_len1 = this.options_len1.concat(res.data.data)
-                            temp_options = this.options_len1
-                        }else if(this.category_id_filter.length == 2) {
-                            this.options_len2 = this.options_len1
-                            this.options_len2 = this.options_len2.concat(res.data.data)
-                            temp_options = this.options_len2
-                        }else if(this.category_id_filter.length == 3) {
-                            this.options_len3 = this.options_len2
-                            this.options_len3 = this.options_len3.concat(res.data.data)
-                            temp_options = this.options_len3
-                        }else if(this.category_id_filter.length == 4) {
-                            this.options_len4 = this.options_len3
-                            this.options_len4 = this.options_len4.concat(res.data.data)
-                            temp_options = this.options_len4
-                        }
-                        this.options = this.options.concat(this.getCategoryTree(temp_options,0))
-                    }
-                }).catch((res) => {
-                    console.log('error')
-                })
-            },
-            supplierselectVisble(visible) {
-                this.supplier_options = []
-                this.supplier_page = 1
-                this.$refs.infiniteLoading2.stateChanger.reset()
-                if(visible) {
-                    this.getSuppliers()
-                }
-            },
+            
             handleCheck() {
                 if(this.multipleSelection.length == 0){
                     this.$message.info('请至少选择一个入库单')
