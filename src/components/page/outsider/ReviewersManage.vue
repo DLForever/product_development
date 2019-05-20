@@ -39,6 +39,8 @@
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column prop="asin" label="ASIN" width="150" fixed show-overflow-tooltip>
                 </el-table-column>
+                <el-table-column prop="sku" label="SKU" width="150" fixed show-overflow-tooltip>
+                </el-table-column>
                 <el-table-column prop="country" label="站点" width="50">
                 </el-table-column>
                 <el-table-column prop="username" label="送测人" width="70">

@@ -14,6 +14,9 @@
 							<el-form-item label="Asin" prop="asin">
 								<el-input v-model.trim="form.asin"></el-input>
 							</el-form-item>
+							<el-form-item label="Sku" prop="sku">
+								<el-input v-model.trim="form.sku"></el-input>
+							</el-form-item>
 							<el-form-item label="站点" prop="site">
 								<el-select v-model="form.site">
 									<el-option v-for="item in site_options" :key="item" :label="item" :value="item"></el-option>
@@ -131,6 +134,7 @@
 				batchImg: [],
 				form: {
 					asin: '',
+					sku: '',
 					name: '',
 					site: '',
 					adposition: '',
@@ -153,6 +157,11 @@
 					asin: [{
 						required: true,
 						message: '请输入asin',
+						trigger: 'blur'
+					}],
+					sku: [{
+						required: true,
+						message: '请输入Sku',
 						trigger: 'blur'
 					}],
 					site: [{
@@ -255,6 +264,7 @@
 					if(valid) {
 						this.submitDisabled = true
 						formData.append('task[asin]', this.form.asin)
+						formData.append('task[sku]', this.form.sku)
 						formData.append('task[country]', this.form.site)
 						formData.append('task[name]', this.form.name)
 						formData.append('task[url]', this.form.website)

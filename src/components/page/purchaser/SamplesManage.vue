@@ -23,8 +23,8 @@
                         <el-option v-for="item in supplier_options" :key="item.id" :label="item.name" :value="item.id"></el-option>
                         <infinite-loading :on-infinite="onInfinite_suppliers" ref="infiniteLoading2"></infinite-loading>
                     </el-select>
-                    SKU:
-                    <el-input style="width:150px" placeholder="请输入SKU"></el-input>
+                    样品名称:
+                    <el-input style="width:150px" v-model="sample_name_filter" placeholder="请输入样品名称"></el-input>
                     <el-button @click="clear_filter" type="default">重置</el-button>
                     <el-button @click="filter_product" type="primary">查询</el-button>
                 </div>
@@ -441,7 +441,8 @@
               out_type: 0,
               returnVisible: false,
               return_remark: '',
-              table_loading: true
+              table_loading: true,
+              sample_name_filter: ''
             }
         },
         created() {
@@ -493,7 +494,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
+                this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&name=' + this.sample_name_filter
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -525,7 +526,7 @@
                     date_begin_temp = ''
                     date_end_temp = ''
                 }
-                this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp
+                this.$axios.get( '/samples?page='+this.cur_page + '&user_id=' +this.user_id_filter + '&category_id=' + category_id_temp + '&supplier_id=' + this.supplier_id_filter + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&name=' + this.sample_name_filter
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -549,6 +550,7 @@
                 this.user_id_filter = ''
                 this.category_id_filter = []
                 this.supplier_id_filter = ''
+                this.sample_name_filter = ''
                 this.date_filter = []
                 this.getData()
             },
