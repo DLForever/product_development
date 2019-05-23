@@ -305,10 +305,10 @@
             </el-table>
         </el-dialog>
         <!-- 查看产品图片 -->
-        <el-dialog title="样品图片" :visible.sync="productVisible" width="70%">
-            <el-carousel height="600px" type="card" v-if="picturesProductList.length != 0">
+        <el-dialog title="样品图片" :visible.sync="productVisible" width="70%" @close="setActiveItem()">
+            <el-carousel height="600px" v-if="picturesProductList.length != 0">
                 <el-carousel-item v-for="(item, index) in picturesProductList" :key="index">
-                    <img @click="handleDeletePro(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
+                    <img class="img_carousel" @click="handleDeletePro(item.id, index)" :src="$axios.defaults.baseURL+item.url.url" />
                 </el-carousel-item>
             </el-carousel>
         </span>
@@ -1108,7 +1108,7 @@
 
 </script>
 
-<style scoped>
+<style>
     .handle-box {
         margin-bottom: 20px;
     }
@@ -1143,5 +1143,15 @@
     .item {
       margin-top: 10px;
       margin-right: 40px;
+    }
+
+    .el-carousel__item.is-animating{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+    .img_carousel {
+        max-width: 35rem;
     }
 </style>
