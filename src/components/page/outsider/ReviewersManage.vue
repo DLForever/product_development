@@ -124,6 +124,9 @@
                 <el-form-item label="ASIN">
                     <span>{{form.asin}}</span>
                 </el-form-item>
+                <el-form-item label="SKU">
+                    <el-input v-model="form.sku"></el-input>
+                </el-form-item>
                 <el-form-item label="站点">
                     <el-select v-model="form.country">
                         <el-option v-for="item in site_options" :key="item" :label="item" :value="item"></el-option>
@@ -785,6 +788,7 @@
                 this.form = {
                     id: item.id,
                     asin: item.asin,
+                    sku: item.sku,
                     country: item.country,
                     name: item.name,
                     url: item.url,
@@ -840,6 +844,7 @@
                 this.submitDisabled = true
                 let formData = new FormData()
                 formData.append('task[asin]', this.form.asin)
+                formData.append('task[sku]', this.form.sku)
                 formData.append('task[country]', this.form.country)
                 formData.append('task[name]', this.form.name)
                 formData.append('task[url]', this.form.url)
