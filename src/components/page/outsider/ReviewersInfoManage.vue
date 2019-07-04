@@ -15,6 +15,9 @@
         <div class="container">
             <div class="handle-box">
                 <el-button type="primary" @click="exportReviewers">导出记录</el-button>
+                <template v-if="$route.params.task_id != ''">
+                    <el-button type="primary"><a style="color:#fff;" :href="$axios.defaults.baseURL + '/task_records/export_url?' + 'task_id=' + $route.params.task_id + '&token=' + export_token">全部导出</a></el-button>
+                </template>
                 <span style="margin-left: 20px;" v-if="multipleSelection.length != 0">共选择了{{multipleSelection.length}} 条数据</span>
                 <div style="float: right;">
                     <template v-if="search_show[0].dateDis">
