@@ -15,9 +15,9 @@
         <div class="container">
             <div class="handle-box">
                 <el-button type="primary" @click="exportReviewers">导出记录</el-button>
-                <template v-if="$route.params.task_id != ''">
-                    <el-button type="primary"><a style="color:#fff;" :href="$axios.defaults.baseURL + '/task_records/export_url?' + 'task_id=' + $route.params.task_id + '&token=' + export_token">全部导出</a></el-button>
-                </template>
+                <!-- <template v-if="$route.params.task_id != ''"> -->
+                <el-button type="primary"><a style="color:#fff;" :href="$axios.defaults.baseURL + '/task_records/export_url?' + '&status=' + statusSelect + '&fan_id=' + fan_id + '&user_id=' + user_id_filter + '&task_id=' + $route.params.task_id + '&asin=' + search_asin + '&number=' + search_number + '&p_account=' + search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&country=' + site_filter + '&shopname=' + filter_shopname + '&product_name=' + filter_name + '&token=' + export_token">全部导出</a></el-button>
+                <!-- </template> -->
                 <span style="margin-left: 20px;" v-if="multipleSelection.length != 0">共选择了{{multipleSelection.length}} 条数据</span>
                 <div style="float: right;">
                     <template v-if="search_show[0].dateDis">
@@ -685,7 +685,9 @@
               filter_shopname: '',
               filter_refund: false,
               filter_commission: false,
-              table_loading: true
+              table_loading: true,
+              date_begin_temp: '',
+              date_end_temp: ''
             }
         },
         created() {
@@ -737,13 +739,13 @@
                 if (!this.$route.params.task_id) {
                     this.$route.params.task_id = ''
                 }
-                let date_begin_temp = this.date_filter[0]
-                let date_end_temp = this.date_filter[1]
+                this.date_begin_temp = this.date_filter[0]
+                this.date_end_temp = this.date_filter[1]
                 if(this.date_filter.length == 0) {
-                    date_begin_temp = ''
-                    date_end_temp = ''
+                    this.date_begin_temp = ''
+                    this.date_end_temp = ''
                 }
-                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&country=' + this.site_filter + '&shopname=' + this.filter_shopname + '&product_name=' + this.filter_name
+                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + this.date_begin_temp +'&date_end=' + this.date_end_temp + '&country=' + this.site_filter + '&shopname=' + this.filter_shopname + '&product_name=' + this.filter_name
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
@@ -777,13 +779,13 @@
                 if (!this.$route.params.task_id) {
                     this.$route.params.task_id = ''
                 }
-                let date_begin_temp = this.date_filter[0]
-                let date_end_temp = this.date_filter[1]
+                this.date_begin_temp = this.date_filter[0]
+                this.date_end_temp = this.date_filter[1]
                 if(this.date_filter.length == 0) {
-                    date_begin_temp = ''
-                    date_end_temp = ''
+                    this.date_begin_temp = ''
+                    this.date_end_temp = ''
                 }
-                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + date_begin_temp +'&date_end=' + date_end_temp + '&country=' + this.site_filter + '&shopname=' + this.filter_shopname + '&product_name=' + this.filter_name
+                this.$axios.get( '/task_records?page='+this.cur_page + '&status=' + this.statusSelect + '&fan_id=' + this.fan_id + '&user_id=' + this.user_id_filter + '&task_id=' + this.$route.params.task_id + '&asin=' + this.search_asin + '&number=' + this.search_number + '&p_account=' + this.search_fan + '&date_begin=' + this.date_begin_temp +'&date_end=' + this.date_end_temp + '&country=' + this.site_filter + '&shopname=' + this.filter_shopname + '&product_name=' + this.filter_name
                 ).then((res) => {
                     if(res.data.code == 200) {
                         res.data.data.forEach((data) => {
