@@ -90,6 +90,9 @@
                                     <el-button @click="handleDetails(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp详情</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
+                                    <el-button @click="handleCopy(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp复制</el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
                                     <el-button @click="handleCheck(scope.$index, scope.row)" type="text">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp审核</el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
@@ -461,6 +464,94 @@
                 <el-button type="primary" @click="saveaddplan" :disabled="submitDisabled">确 定</el-button>
             </span>
         </el-dialog>
+
+        <!-- 复制弹出框 -->
+        <el-dialog title="复制" :visible.sync="copyVisible" width="50%">
+            <el-form ref="form_copy" :model="form" label-width="110px">
+                <el-form-item label="ASIN">
+                    <el-input v-model="form_copy.asin"></el-input>
+                    <!-- <span>{{form_copy.asin}}</span> -->
+                </el-form-item>
+                <el-form-item label="SKU">
+                    <el-input v-model="form_copy.sku"></el-input>
+                </el-form-item>
+                <el-form-item label="站点">
+                    <el-select v-model="form_copy.country">
+                        <el-option v-for="item in site_options" :key="item" :label="item" :value="item"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="名称">
+                    <el-input v-model="form_copy.name"></el-input>
+                </el-form-item>
+                <el-form-item label="价格">
+                    <el-input v-model="form_copy.price"></el-input>
+                </el-form-item>
+                <el-form-item label="url">
+                    <el-input v-model="form_copy.url"></el-input>
+                </el-form-item>
+                <el-form-item label="店铺">
+                    <el-input v-model="form_copy.shopname"></el-input>
+                </el-form-item>
+                <el-form-item label="关键词/位置">
+                    <table >
+                        <tbody v-for="(p,index) in keywordsArr">
+                            <td>
+                                <el-input style="margin-bottom: 5px;" v-model.trim="p.keywords" placeholder="请输入关键词"></el-input>
+                            </td>
+                            &nbsp&nbsp
+                            <td>
+                                <el-input style="margin-bottom: 5px;" v-model.trim="p.keyword_index" placeholder="请输入关键词位置"></el-input>
+                            </td>
+                            <div v-if="index ==  0" style="margin-left: 10px; margin-top: 10px; font-size: 0px">
+                                <i style="margin-right: 5px;  font-size: 15px" class="el-icon-circle-plus" @click="keywordsAdd(index)"></i>
+                                <i style="font-size: 15px" class="el-icon-remove" @click="keywordsDel(index)" v-if="keywordsArr.length >1"></i>
+                            </div>
+                        </tbody>
+                    </table>
+                </el-form-item>
+                <!-- <el-form-item label="关键词">
+                    <el-input v-model="form.keywords"></el-input>
+                </el-form-item>
+                <el-form-item label="关键词位置">
+                    <el-input v-model="form.keyword_index"></el-input>
+                </el-form-item> -->
+                <el-form-item label="日期/每日次数">
+                    <table >
+                        <tbody v-for="(p,index) in date_time">
+                            <td>
+                                <el-date-picker style="margin-right: 10px; margin-bottom: 5px;" v-model="p.plan_date" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"></el-date-picker>
+                            </td>
+                            <td>
+                                <el-input-number style="margin-bottom: 5px;" v-model="p.plan_sum" :min="0" label="描述文字"></el-input-number>
+                            </td>
+                            <div v-if="index ==  0" style="margin-left: 10px; margin-top: 10px; font-size: 0px">
+                                <i style="margin-right: 5px;  font-size: 15px" class="el-icon-circle-plus" @click="orderAdd(index)"></i>
+                                <i style="font-size: 15px" class="el-icon-remove" @click="orderDel(index)" v-if="date_time.length >1"></i>
+                            </div>
+                        </tbody>
+                    </table>
+                </el-form-item>
+                 <el-form-item label="备注">
+                    <el-input v-model="form_copy.remark"></el-input>
+                </el-form-item>
+                <el-form-item label="产品广告位图片">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList" :on-remove="handleRemove" :auto-upload="false" :on-change="changeFile" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="产品无logo非产品主图图片">
+                    <el-upload class="upload-demo" drag action="" :file-list="fileList2" :on-remove="handleRemove2" :auto-upload="false" :on-change="changeFile2" :limit="5" multiple>
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    </el-upload>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="copyVisible = false">取 消</el-button>
+                <el-button type="primary" @click="saveCopy('form_copy')" :disabled="submitDisabled">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -650,6 +741,10 @@
                 table_loading: true,
                 filter_name: '',
                 search_asin: '',
+                copyVisible: false,
+                form_copy: {
+
+                }
             }
         },
         created() {
@@ -661,6 +756,9 @@
             }
             this.$store.dispatch('setIsSkip', false)
             this.getData();
+        },
+        props:{
+            getMessageCount:Function
         },
         watch: {
         	"$route": "getData"
@@ -1350,6 +1448,98 @@
                         
                     })
                 }).catch(() => {
+                })
+            },
+            handleCopy(index, row) {
+                this.keywordsArr = []
+                this.date_time = [{
+                    plan_date: '',
+                    plan_sum: 0
+                }]
+                this.idx = index;
+                const item = this.tableData[index];
+                this.form_copy = {
+                    id: item.id,
+                    asin: item.asin,
+                    sku: item.sku,
+                    country: item.country,
+                    name: item.name,
+                    url: item.url,
+                    shopname: item.shopname,
+                    price: item.price,
+                    keywords: item.keywords,
+                    keyword_index: item.keyword_index,
+                    remark: item.remark
+                }
+                let tempkeywords = item.keywords.split(',')
+                let tempkeywordindex = item.keyword_index.split(',')
+                if(tempkeywords.length != 0) {
+                    tempkeywords.forEach((data, index) => {
+                        this.keywordsArr.push({keywords: data, keyword_index: tempkeywordindex[index]})
+                    })
+                }else {
+                    this.keywordsArr = [{
+                        keywords: '',
+                        keyword_index: ''
+                    }]
+                }
+                this.fileList = []
+                this.fileList2 = []
+                this.copyVisible = true
+            },
+            saveCopy(formName) {
+                let tempkeywords = []
+                let tempkeyword_index = []
+                this.keywordsArr.forEach((data) => {
+                    if (data.keywords.trim() != '' && data.keyword_index.trim() != '') {
+                        tempkeywords.push(data.keywords)
+                        tempkeyword_index.push(data.keyword_index)
+                    }
+                })
+                console.log(this.date_time)
+                // console.log(this.form_copy.url)
+                let formData = new FormData()
+                this.$refs[formName].validate((valid) => {
+                    if(valid) {
+                        this.submitDisabled = true
+                        formData.append('task[asin]', this.form_copy.asin)
+                        formData.append('task[sku]', this.form_copy.sku)
+                        formData.append('task[country]', this.form_copy.country)
+                        formData.append('task[name]', this.form_copy.name)
+                        formData.append('task[url]', this.form_copy.url)
+                        formData.append('task[shopname]', this.form_copy.shopname)
+                        formData.append('task[price]', this.form_copy.price)
+                        formData.append('task[keywords]', String(tempkeywords))
+                        formData.append('task[keyword_index]', String(tempkeyword_index))
+                        formData.append('task[remark]', this.form_copy.remark)
+                        this.date_time.forEach((data) => {
+                            formData.append('task[plan_date][]', data.plan_date)
+                            formData.append('task[plan_sum][]', data.plan_sum)
+                        })
+                        this.fileList.forEach((item) => {
+                            formData.append('picture_adv[]', item.raw)
+                        })
+                        this.fileList2.forEach((item) => {
+                            formData.append('picture_fb[]', item.raw)
+                        })
+                        this.$axios.post('/tasks', formData).then((res) => {
+                            if(res.data.code == 200) {
+                                this.$message.success('提交成功！')
+                                this.$refs['form_copy'].resetFields()
+                                // this.$router.push('/reviewersmanage')
+                                this.getMessageCount()
+                                this.getData()
+                                this.copyVisible = false
+                            }
+                        }).catch((res) => {
+                            console.log(res)
+                        }).finally((res) => {
+                            this.submitDisabled = false
+                        })
+                    } else {
+                        this.$message.error("请填写完整信息")
+                        return false
+                    }
                 })
             },
             getStatusName(status) {
