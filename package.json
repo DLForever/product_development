@@ -12,7 +12,7 @@
     "axios": "^0.15.3",
     "babel-polyfill": "^6.23.0",
     "element-ui": "^2.4.5",
-    "mavon-editor": "^2.6.17",
+    "mavon-editor": "^2.8.2",
     "print-js": "^1.0.52",
     "vue": "^2.5.16",
     "vue-infinite-loading": "^2.3.1",
